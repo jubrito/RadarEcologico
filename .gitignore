@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Database local (SQLite)
+*.db
+
+# Environment (todas as variantes)
+.env
+.env.*
+!.env.example
+
+# Python virtualenv
+.venv/
+venv/
+
+# Node / Next.js
+node_modules/
+.next/
+
+# Build output
+dist/
+build/
+.turbo/
+
+# Logs
+*.log
+logs/
+
+# Test coverage
+coverage/
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+
