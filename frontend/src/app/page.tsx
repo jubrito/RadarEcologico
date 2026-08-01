@@ -23,9 +23,7 @@ export default function DashboardPage() {
         setStats(statsData);
         setRecentBills(billsData.items);
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Erro ao carregar dados"
-        );
+        setError(err instanceof Error ? err.message : "Erro ao carregar dados");
       }
     }
     load();
@@ -35,12 +33,14 @@ export default function DashboardPage() {
     return (
       <div className="max-w-6xl mx-auto px-4 py-12">
         <section className="text-center">
-          <h1 className="text-3xl font-bold mb-4">
+          <h1 className="text-3xl font-bold mb-4 font-boring-time">
             Radar Legislativo Ecológico
           </h1>
           <p className="text-muted-foreground mb-4">
             Backend não disponível. Inicie o servidor com{" "}
-            <code className="bg-muted px-1 rounded">uvicorn backend.main:app --reload</code>
+            <code className="bg-muted px-1 rounded">
+              uvicorn backend.main:app --reload
+            </code>
           </p>
           <p className="text-sm text-muted-foreground">{error}</p>
         </section>
@@ -51,7 +51,7 @@ export default function DashboardPage() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       <section className="mb-10">
-        <h1 className="text-3xl font-bold mb-2">
+        <h1 className="text-5xl font-bold mb-2 font-boring-time">
           Radar Legislativo Ecológico
         </h1>
         <p className="text-muted-foreground max-w-2xl">
@@ -97,7 +97,9 @@ export default function DashboardPage() {
 
       <section aria-label="Projetos recentes">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold">Projetos de Lei Recentes</h2>
+          <h2 className="text-3xl font-semibold font-boring-time">
+            Projetos de Lei Recentes
+          </h2>
           <Button
             variant="outline"
             render={<Link href="/bills">Ver todos</Link>}
@@ -112,8 +114,8 @@ export default function DashboardPage() {
           </div>
         ) : stats ? (
           <p className="text-muted-foreground text-sm">
-            Nenhum projeto de lei classificado ainda. Execute o pipeline
-            diário para popular o banco.
+            Nenhum projeto de lei classificado ainda. Execute o pipeline diário
+            para popular o banco.
           </p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

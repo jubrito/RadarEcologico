@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import Link from "next/link";
 import "./globals.css";
 
@@ -11,6 +12,12 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+const boringTime = localFont({
+  src: "../../public/fonts/Boring Time.otf",
+  variable: "--font-boring-time",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -28,7 +35,7 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={`${geistSans.variable} ${geistMono.variable} dark h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${boringTime.variable} dark h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <a
@@ -48,7 +55,7 @@ export default function RootLayout({
                 href="/"
                 className="font-semibold text-lg hover:text-primary transition-colors"
               >
-                Radar Ecológico
+                Radar Legislativo Ecológico
               </Link>
               <Link
                 href="/bills"
@@ -69,9 +76,11 @@ export default function RootLayout({
           className="border-t border-border py-6 text-center text-sm text-muted-foreground"
         >
           <p>
-            Radar Legislativo Ecológico — Monitoramento de PLs climáticos no
-            Brasil. Dados das APIs públicas da Câmara dos Deputados e Senado
-            Federal.
+            <span className="font-boring-time">
+              Radar Legislativo Ecológico
+            </span>{" "}
+            — Monitoramento de PLs climáticos no Brasil. Dados das APIs públicas
+            da Câmara dos Deputados e Senado Federal.
           </p>
         </footer>
       </body>
