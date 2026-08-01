@@ -11,14 +11,14 @@ from backend.classifiers.keywords import ClassificationResult, classify_keywords
 # --- Keyword classifier tests ---
 
 
-def test_strong_transforming_bill():
-    """Bill with multiple positive keywords + patterns should be transforming."""
+def test_strong_favorable_bill():
+    """Bill with multiple positive keywords + patterns should be favorable."""
     result = classify_keywords(
         "Institui a Política Nacional de Mudanças Climáticas e cria "
         "o Fundo Nacional de Combate ao Desmatamento e proteção da Amazônia, "
         "promovendo a redução de emissões de gases de efeito estufa."
     )
-    assert result.classification == "transforming"
+    assert result.classification == "favorable"
     assert result.score < 0.30
     assert result.positive_hits >= 1
 
@@ -103,12 +103,12 @@ def test_score_bounds():
         (
             "Institui a Política Nacional de Mudanças Climáticas e cria "
             "fundo de combate ao desmatamento.",
-            "transforming",
+            "favorable",
         ),
         (
             "Cria programa de pagamento por serviços ambientais para "
             "proteção dos biomas e recuperação florestal.",
-            "transforming",
+            "favorable",
         ),
         (
             "Autoriza mineração em terra indígena e regularização fundiária "

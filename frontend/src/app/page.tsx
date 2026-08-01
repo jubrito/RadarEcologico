@@ -69,9 +69,9 @@ export default function DashboardPage() {
           <>
             <StatCard
               title="Combate à crise"
-              value={stats.by_classification.transforming || 0}
+              value={stats.by_classification.favorable || 0}
               description="PLs que ajudam o clima"
-              variant="transforming"
+              variant="favorable"
             />
             <StatCard
               title="Requer revisão"

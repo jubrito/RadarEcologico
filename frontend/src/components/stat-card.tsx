@@ -9,17 +9,17 @@ interface StatCardProps {
   title: string;
   value: number;
   description: string;
-  variant: "transforming" | "needs_review" | "unfavorable";
+  variant: "favorable" | "needs_review" | "unfavorable";
 }
 
 const variantClasses: Record<StatCardProps["variant"], string> = {
-  transforming: "border-emerald-600/30 bg-emerald-950/30",
+  favorable: "border-emerald-600/30 bg-emerald-950/30",
   needs_review: "border-amber-500/30 bg-amber-950/30",
   unfavorable: "border-red-600/30 bg-red-950/30",
 };
 
 const variantTextClasses: Record<StatCardProps["variant"], string> = {
-  transforming: "text-emerald-400",
+  favorable: "text-emerald-400",
   needs_review: "text-amber-400",
   unfavorable: "text-red-400",
 };

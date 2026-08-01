@@ -21,7 +21,7 @@ from backend.keywords.taxonomy import (
 @dataclass
 class ClassificationResult:
     score: float
-    classification: str  # 'transforming' | 'unfavorable' | 'needs_review'
+    classification: str  # 'favorable' | 'unfavorable' | 'needs_review'
     evidence: list[str] = field(default_factory=list)
     positive_hits: int = 0
     negative_hits: int = 0
@@ -70,7 +70,7 @@ def classify_keywords(ementa: str) -> ClassificationResult:
     if score >= 0.60:
         classification = "unfavorable"
     elif score < 0.30:
-        classification = "transforming"
+        classification = "favorable"
     else:
         classification = "needs_review"
 

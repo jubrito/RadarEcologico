@@ -7,7 +7,7 @@ export function cn(...inputs: ClassValue[]) {
 
 export function getClassificationLabel(label: string): string {
   const labels: Record<string, string> = {
-    transforming: "Combate à crise climática",
+    favorable: "Combate à crise climática",
     needs_review: "Requer revisão humana",
     unfavorable: "Agravamento da crise climática",
   };
@@ -16,7 +16,7 @@ export function getClassificationLabel(label: string): string {
 
 export function getClassificationColor(label: string): string {
   const colors: Record<string, string> = {
-    transforming: "bg-emerald-600 text-white",
+    favorable: "bg-emerald-600 text-white",
     needs_review: "bg-amber-500 text-black",
     unfavorable: "bg-red-600 text-white",
   };

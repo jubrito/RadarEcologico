@@ -13,7 +13,7 @@ from backend.classifiers.keywords import ClassificationResult, classify_keywords
 @dataclass
 class EnsembleResult:
     final_score: float
-    classification: str  # 'transforming' | 'unfavorable' | 'needs_review'
+    classification: str  # 'favorable' | 'unfavorable' | 'needs_review'
     confidence: str  # 'high' | 'medium' | 'low'
     components: dict[str, float] = field(default_factory=dict)
     evidence: list[str] = field(default_factory=list)
@@ -63,7 +63,7 @@ def classify_ensemble_with_bert(
     if final_score >= 0.60:
         classification = "unfavorable"
     elif final_score < 0.30:
-        classification = "transforming"
+        classification = "favorable"
     else:
         classification = "needs_review"
 

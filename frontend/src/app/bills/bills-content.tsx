@@ -17,7 +17,7 @@ import { getBills, type BillsResponse } from "@/lib/api";
 
 const CLASSIFICATION_OPTIONS = [
   { value: "all", label: "Todas as classificações" },
-  { value: "transforming", label: "Combate à crise" },
+  { value: "favorable", label: "Combate à crise" },
   { value: "needs_review", label: "Requer revisão" },
   { value: "unfavorable", label: "Agravamento" },
 ];
