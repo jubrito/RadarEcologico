@@ -87,9 +87,7 @@ export default function DashboardPage() {
 
       <section aria-label="Projetos recentes">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-3xl font-semibold font-boring-time">
-            Projetos de Lei Recentes
-          </h2>
+          <h2 className="text-3xl font-semibold">Projetos de Lei Recentes</h2>
           <Button
             variant="outline"
             render={<Link href="/bills">Ver todos</Link>}

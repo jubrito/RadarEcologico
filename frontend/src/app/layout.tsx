@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import localFont from "next/font/local";
+import { Lexend, Geist_Mono, DM_Serif_Display } from "next/font/google";
 import Link from "next/link";
 import {
   SITE_TITLE,
@@ -10,20 +9,22 @@ import {
 } from "@/lib/content";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const lexend = Lexend({
+  variable: "--font-lexend",
   subsets: ["latin"],
+  display: "swap",
+});
+
+const dmSerifDisplay = DM_Serif_Display({
+  variable: "--font-dm-serif",
+  subsets: ["latin"],
+  weight: "400",
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
-});
-
-const boringTime = localFont({
-  src: "../../public/fonts/Boring Time.otf",
-  variable: "--font-boring-time",
-  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -39,7 +40,7 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={`${geistSans.variable} ${geistMono.variable} ${boringTime.variable} dark h-full antialiased`}
+      className={`${lexend.variable} ${dmSerifDisplay.variable} ${geistMono.variable} dark h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <a
@@ -80,8 +81,7 @@ export default function RootLayout({
           className="border-t border-border py-6 text-center text-sm text-muted-foreground"
         >
           <p>
-            <span className="font-boring-time">{SITE_TITLE}</span> —{" "}
-            {SITE_TAGLINE}
+            <span className="font-semibold">{SITE_TITLE}</span> {SITE_TAGLINE}
           </p>
         </footer>
       </body>

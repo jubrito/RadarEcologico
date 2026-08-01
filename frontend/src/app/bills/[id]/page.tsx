@@ -89,9 +89,7 @@ export default function BillDetailPage({
           <CardTitle className="text-base">Ementa</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground leading-relaxed">
-            {bill.ementa}
-          </p>
+          <p className="text-muted-foreground leading-relaxed">{bill.ementa}</p>
         </CardContent>
       </Card>
 
@@ -169,9 +167,9 @@ export default function BillDetailPage({
               >
                 <div
                   className={`h-full rounded-full transition-all ${
-                    bill.final_score < 0.30
+                    bill.final_score < 0.3
                       ? "bg-emerald-500"
-                      : bill.final_score >= 0.60
+                      : bill.final_score >= 0.6
                         ? "bg-red-500"
                         : "bg-amber-500"
                   }`}
@@ -183,8 +181,7 @@ export default function BillDetailPage({
               </span>
             </div>
             <p className="text-xs text-muted-foreground">
-              Classificado em{" "}
-              {formatDate(bill.classified_at)}
+              Classificado em {formatDate(bill.classified_at)}
               {bill.keyword_score != null &&
                 ` • Keyword score: ${(bill.keyword_score * 100).toFixed(0)}%`}
             </p>
@@ -196,11 +193,7 @@ export default function BillDetailPage({
         variant="outline"
         className="w-full sm:w-auto"
         render={
-          <a
-            href={bill.link}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <a href={bill.link} target="_blank" rel="noopener noreferrer">
             Ver fonte original
             <span aria-hidden="true" className="ml-1">
               ↗

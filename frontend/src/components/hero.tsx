@@ -11,21 +11,17 @@ export function Hero({ size = "lg", className = "" }: HeroProps) {
 
   return (
     <section className={className}>
-      <h1
-        className={`font-bold mb-3 font-boring-time ${
-          isLg ? "text-5xl" : "text-3xl"
-        }`}
-      >
+      <h1 className={`font-bold mb-3 ${isLg ? "text-5xl" : "text-3xl"}`}>
         {SITE_TITLE}
       </h1>
       <p
         className={`text-foreground/80 mb-2 ${
-          isLg ? "text-xl max-w-3xl" : "text-lg"
+          isLg ? "text-xl max-w-4xl" : "text-lg"
         }`}
       >
         {SITE_SUBTITLE}
       </p>
-      <p className="text-muted-foreground max-w-2xl">{SITE_DESCRIPTION}</p>
+      <p className="text-muted-foreground max-w-3xl">{SITE_DESCRIPTION}</p>
     </section>
   );
 }
