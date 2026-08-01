@@ -2,6 +2,12 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import localFont from "next/font/local";
 import Link from "next/link";
+import {
+  SITE_TITLE,
+  SITE_SUBTITLE,
+  SITE_DESCRIPTION,
+  SITE_TAGLINE,
+} from "@/lib/content";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -21,10 +27,8 @@ const boringTime = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Radar Legislativo Ecológico",
-  description:
-    "Monitoramento de projetos de lei brasileiros relacionados à crise climática. " +
-    "Classificação automática de PLs como favoráveis, desfavoráveis ou que requerem revisão humana.",
+  title: SITE_TITLE,
+  description: `${SITE_SUBTITLE} ${SITE_DESCRIPTION}`,
 };
 
 export default function RootLayout({
@@ -55,7 +59,7 @@ export default function RootLayout({
                 href="/"
                 className="font-semibold text-lg hover:text-primary transition-colors"
               >
-                Radar Legislativo Ecológico
+                {SITE_TITLE}
               </Link>
               <Link
                 href="/bills"
@@ -76,11 +80,8 @@ export default function RootLayout({
           className="border-t border-border py-6 text-center text-sm text-muted-foreground"
         >
           <p>
-            <span className="font-boring-time">
-              Radar Legislativo Ecológico
-            </span>{" "}
-            — Monitoramento de PLs climáticos no Brasil. Dados das APIs públicas
-            da Câmara dos Deputados e Senado Federal.
+            <span className="font-boring-time">{SITE_TITLE}</span> —{" "}
+            {SITE_TAGLINE}
           </p>
         </footer>
       </body>

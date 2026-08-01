@@ -6,6 +6,7 @@ import { BillCard } from "@/components/bill-card";
 import { StatCard } from "@/components/stat-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { Hero } from "@/components/hero";
 import { getBills, getStats, type Bill, type StatsResponse } from "@/lib/api";
 
 export default function DashboardPage() {
@@ -33,10 +34,8 @@ export default function DashboardPage() {
     return (
       <div className="max-w-6xl mx-auto px-4 py-12">
         <section className="text-center">
-          <h1 className="text-3xl font-bold mb-4 font-boring-time">
-            Radar Legislativo Ecológico
-          </h1>
-          <p className="text-muted-foreground mb-4">
+          <Hero size="sm" />
+          <p className="text-muted-foreground mb-4 mt-6">
             Backend não disponível. Inicie o servidor com{" "}
             <code className="bg-muted px-1 rounded">
               uvicorn backend.main:app --reload
@@ -50,16 +49,7 @@ export default function DashboardPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
-      <section className="mb-10">
-        <h1 className="text-5xl font-bold mb-2 font-boring-time">
-          Radar Legislativo Ecológico
-        </h1>
-        <p className="text-muted-foreground max-w-2xl">
-          Monitoramento de projetos de lei brasileiros relacionados à crise
-          climática. Classificação automática de PLs como favoráveis,
-          desfavoráveis ou que requerem revisão humana.
-        </p>
-      </section>
+      <Hero size="lg" className="mb-10" />
 
       <section
         aria-label="Estatísticas"
