@@ -4,7 +4,7 @@ Monitora automaticamente projetos de lei brasileiros relacionados à crise clim�
 
 | Label          | Significado                                       |
 | -------------- | ------------------------------------------------- |
-| `transforming` | Potencialmente ajuda a combater a crise climática |
+| `favorable`    | Potencialmente ajuda a combater a crise climática |
 | `needs_review` | Requer análise humana detalhada                   |
 | `unfavorable`  | Potencialmente intensifica a crise climática      |
 
@@ -14,69 +14,71 @@ Fontes atuais: Câmara dos Deputados e Senado Federal (APIs públicas). Expansã
 
 ## Stack
 
-**Backend:** Python 3.12, FastAPI, SQLAlchemy, PostgreSQL (Supabase free tier)  
+**Backend:** Python 3.12+, FastAPI, SQLAlchemy, PostgreSQL (Supabase free tier)  
 **Classificação:** Ensemble (keywords + BERTimbau na fase 2), Hugging Face  
-**Frontend:** Next.js 14 (App Router), Tailwind, shadcn/ui  
+**Frontend:** Next.js 16 (App Router), Tailwind v4, shadcn/ui v4  
 **Pipeline:** GitHub Actions (cron diário 2h BRT)  
 **Hospedagem:** Vercel (frontend), Fly.io (backend) — free tiers
 
 ---
 
-## Rodar localmente
+## Primeira vez — setup único
 
-### 1. Backend
-
-> Requer **Python 3.12+**. Nesta máquina: `/opt/homebrew/bin/python3.14`.
-> O backend é um pacote (`backend.*`) — rode os comandos de execução a partir da **raiz do projeto**.
+> Requer **Python 3.12+**. O backend é um pacote (`backend.*`) — rode os comandos a partir da **raiz do projeto**.
 
 ```bash
-# Instalar dependências
+# 1. Criar venv e instalar dependências
 cd backend
-python3.14 -m venv .venv         # ou outro Python 3.12+
+python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 
-# Banco de dados local (SQLite — zero setup, zero energia)
-echo "DATABASE_URL=sqlite:///./radar.db" > .env
+# 2. Configurar banco local (SQLite — zero setup)
+echo 'DATABASE_URL=sqlite:///./radar.db' > .env
+cd ..
 
-# Subir o servidor
-cd ..                               # Va para a raiz do projeto
-uvicorn backend.main:app --reload   # API em http://localhost:8000
-python -m backend.pipeline          # Pipeline manual (classifica e popula)
-pytest backend/tests -v             # Testes (20 passando)
-```
-
-> **Para produção** (PostgreSQL/Supabase): use `DATABASE_URL=postgresql://...` no `.env` em vez de SQLite.
-> As tabelas são criadas automaticamente no startup (`Base.metadata.create_all`).
-
-### 2. Frontend
-
-```bash
+# 3. Instalar dependências do frontend
 cd frontend
 npm install
-npm run dev                       # http://localhost:3000
-npm run build                     # Build de produção
+cd ..
 ```
 
-### 3. Pipeline (CI)
-
-```bash
-# Roda diariamente via GitHub Actions (.github/workflows/daily-pipeline.yml)
-# Para testar localmente (da raiz do projeto):
-python -m backend.pipeline
-```
-
-### 4. Ordem recomendada no primeiro setup
-
-1. `cd backend && python3.14 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt`
-2. `echo 'DATABASE_URL=sqlite:///./radar.db' > backend/.env`
-3. `uvicorn backend.main:app --reload` (da raiz — tabelas criadas automaticamente)
-4. `python -m backend.pipeline` para popular dados iniciais
-5. `cd frontend && npm install && npm run dev`
+> Pronto. Tabelas são criadas automaticamente no primeiro startup do backend.
+> Para produção (PostgreSQL/Supabase): use `DATABASE_URL=postgresql://...` no `backend/.env`.
 
 ---
 
-## Principios do projeto
+## No dia a dia — rode sempre que desenvolver
+
+```bash
+# Ativar venv (uma vez por terminal, a partir da raiz)
+source backend/.venv/bin/activate
+
+# Backend
+uvicorn backend.main:app --reload       # API em http://localhost:8000
+python -m backend.pipeline              # Pipeline manual (classifica + popula)
+pytest backend/tests -v                 # Testes (20 passando)
+
+# Frontend (outro terminal)
+cd frontend
+npm run dev                             # http://localhost:3000
+npm run build && npm start              # Produção
+npm run lint                            # ESLint
+
+# CI: rodar pipeline manualmente via GitHub
+# gh workflow run "Daily Climate Radar Pipeline"
+```
+
+---
+
+## Pipeline (CI)
+
+O pipeline roda diariamente às 2h BRT via GitHub Actions (`.github/workflows/daily-pipeline.yml`).
+Para testar manualmente: `python -m backend.pipeline` (da raiz, com venv ativa).
+
+---
+
+## Princípios do projeto
 
 - **Green software**: dark mode padrão, batch processing (não real-time), single process, modelos quantizados
 - **Acessibilidade WCAG 2.1 AA**: semântica HTML, navegação por teclado, contraste, labels, screen readers
@@ -99,7 +101,7 @@ radar-ecologico/
 │   ├── classifiers/            # keywords + ensemble (BERT na fase 2)
 │   ├── scrapers/               # Câmara + Senado
 │   ├── keywords/taxonomy.py    # Taxonomia de termos climáticos
-│   ├── database.py             # SQLAlchemy + PostgreSQL
+│   ├── database.py             # SQLAlchemy + SQLite/PostgreSQL
 │   ├── models.py               # ORM: Bill, BillSnapshot
 │   ├── pipeline.py             # Orquestrador diário
 │   └── tests/
