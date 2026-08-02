@@ -153,17 +153,21 @@ export default function BillDetailPage({
       {bill.final_score != null && (
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-base">Classificação</CardTitle>
+            <CardTitle className="text-base">Classificação de Risco Climático</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-4 mb-2">
+            <div className="flex justify-between text-xs text-muted-foreground mb-1.5">
+              <span className="text-emerald-500">Favorável ao clima</span>
+              <span className="text-red-500">Prejudicial ao clima</span>
+            </div>
+            <div className="flex items-center gap-4 mb-3">
               <div
-                className="flex-1 h-2 rounded-full bg-muted overflow-hidden"
+                className="flex-1 h-3 rounded-full bg-muted overflow-hidden"
                 role="progressbar"
                 aria-valuenow={Math.round(bill.final_score * 100)}
                 aria-valuemin={0}
                 aria-valuemax={100}
-                aria-label={`Score: ${Math.round(bill.final_score * 100)}%`}
+                aria-label={`Risco climático: ${Math.round(bill.final_score * 100)}%`}
               >
                 <div
                   className={`h-full rounded-full transition-all ${
@@ -176,14 +180,23 @@ export default function BillDetailPage({
                   style={{ width: `${bill.final_score * 100}%` }}
                 />
               </div>
-              <span className="text-sm font-mono tabular-nums w-12 text-right">
+              <span className="text-sm font-mono font-bold tabular-nums w-12 text-right">
                 {Math.round(bill.final_score * 100)}%
               </span>
             </div>
             <p className="text-xs text-muted-foreground">
+              {bill.classification === "favorable" &&
+                "Baixo potencial de dano climático — a proposta tende a contribuir para o combate à crise do clima."}
+              {bill.classification === "unfavorable" &&
+                "Alto potencial de dano climático — a proposta tende a intensificar a crise do clima."}
+              {bill.classification === "needs_review" &&
+                "Impacto climático incerto — requer análise humana para determinar o efeito da proposta."}
+              {" "}Quanto maior o percentual, maior o risco.
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
               Classificado em {formatDate(bill.classified_at)}
               {bill.keyword_score != null &&
-                ` • Keyword score: ${(bill.keyword_score * 100).toFixed(0)}%`}
+                ` • Análise por palavras-chave: ${(bill.keyword_score * 100).toFixed(0)}%`}
             </p>
           </CardContent>
         </Card>

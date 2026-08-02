@@ -29,7 +29,7 @@ export function ClassificationBadge({
       {score != null && (
         <span
           className={`text-sm font-mono tabular-nums ${getScoreColor(score)}`}
-          aria-label={`Score: ${(score * 100).toFixed(0)}%`}
+          aria-label={`Score de risco climático: ${(score * 100).toFixed(0)}%`}
         >
           {(score * 100).toFixed(0)}%
         </span>
