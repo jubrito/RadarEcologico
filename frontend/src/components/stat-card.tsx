@@ -32,23 +32,18 @@ export function StatCard({
           style.bgSolid,
         )}
       />
-      <div className="flex justify-start gap-4">
-        <p
-          className={mergeStyles(
-            "text-2xl font-bold tabular-nums shrink-0",
-            style.textAccent,
-          )}
+      <div className="flex-1 flex-row justify-start gap-4">
+        <span
+          className={`float-left text-2xl font-bold ${style.bgSolid} px-2.5 py-0.5 mr-5 mt-1 border rounded-lg text-black`}
         >
           {value}
-        </p>
-        <div className="min-w-0 space-y-0.5">
+        </span>
+        <div className="min-w-0">
           <p className="text-lg font-bold leading-snug">
             {prefix}
             <span className={style.textAccent}>{tema}</span>
           </p>
-          <p className="text-sm mt-2 text-muted-foreground leading-snug">
-            {desc}
-          </p>
+          <p className="text-sm mt-2 text-muted-foreground">{desc}</p>
         </div>
       </div>
     </div>
