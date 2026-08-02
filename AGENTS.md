@@ -67,7 +67,7 @@ Classificar automaticamente Projetos de Lei brasileiros relacionados à crise cl
 - **Paginação em toda lista**: nunca retorne mais de 100 itens sem paginação.
 - **Índices no PostgreSQL**: crie índices para colunas usadas em filtros e ordenação (`classification`, `year`, `source`, `final_score`).
 - **Idempotência nos scrapers**: rodar o pipeline 2x seguidas não deve duplicar dados. Use `ON CONFLICT (source, external_id) DO UPDATE`.
-- **Connection pooling**: use o pool do SQLAlchemy (padrão 5 conexões, suficiente).
+- **Connection pooling**: use o pool do SQLAlchemy (padrão 5 conexões, suficiente)
 
 ### 6. Manutenibilidade
 
