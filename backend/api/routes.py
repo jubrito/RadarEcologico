@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_serializer
 from sqlalchemy import desc, func, select
 from sqlalchemy.orm import Session
 
@@ -32,7 +32,7 @@ class BillOut(BaseModel):
     author: Optional[str] = None
     author_party: Optional[str] = None
     author_state: Optional[str] = None
-    presentation_date: Optional[str] = None
+    presentation_date: Optional[datetime] = None
     status: Optional[str] = None
     link: str
     theme_ids: Optional[str] = None
@@ -41,10 +41,16 @@ class BillOut(BaseModel):
     bert_score: Optional[float] = None
     final_score: Optional[float] = None
     classification: Optional[str] = None
-    classified_at: Optional[str] = None
-    created_at: Optional[str] = None
+    classified_at: Optional[datetime] = None
+    created_at: Optional[datetime] = None
 
     model_config = {"from_attributes": True}
+
+    @field_serializer("presentation_date", "classified_at", "created_at")
+    def serialize_dt(self, value: datetime | None) -> str | None:
+        if value is None:
+            return None
+        return value.isoformat()
 
 
 class BillsResponse(BaseModel):

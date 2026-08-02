@@ -24,6 +24,15 @@ from backend.scrapers.senado import fetch_senado_bills, fetch_senado_bill_detail
 load_dotenv()
 
 
+def _parse_date(value: str | None) -> datetime | None:
+    if not value or not isinstance(value, str) or not value.strip():
+        return None
+    try:
+        return datetime.fromisoformat(value.strip())
+    except (ValueError, TypeError):
+        return None
+
+
 def run_pipeline() -> dict:
     """
     Execute the full daily pipeline.
@@ -81,7 +90,7 @@ def run_pipeline() -> dict:
                 year=bill_data["year"],
                 ementa=bill_data["ementa"],
                 author=bill_data.get("author"),
-                presentation_date=bill_data.get("presentation_date"),
+                presentation_date=_parse_date(bill_data.get("presentation_date")),
                 status=bill_data.get("status"),
                 link=bill_data["link"],
                 theme_ids=bill_data.get("theme_ids"),
