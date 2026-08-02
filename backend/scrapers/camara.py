@@ -80,7 +80,7 @@ def fetch_camara_bills(
                 "itens": 100,
                 "pagina": page,
                 "ordem": "ASC",
-                "temas": list(CLIMATE_THEME_MAP.keys()),
+                "codTema": ",".join(str(k) for k in CLIMATE_THEME_MAP),
             }
 
             try:
