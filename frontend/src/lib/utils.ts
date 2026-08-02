@@ -1,13 +1,13 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
-export function cn(...inputs: ClassValue[]) {
+export function mergeStyles(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
 export function getScoreColor(score: number): string {
-  if (score < 0.30) return "text-emerald-500";
-  if (score >= 0.60) return "text-red-500";
+  if (score < 0.3) return "text-emerald-500";
+  if (score >= 0.6) return "text-red-500";
   return "text-amber-500";
 }
 

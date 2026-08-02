@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Bill } from "@/lib/api";
-import { cn, formatSource, formatDate } from "@/lib/utils";
+import { mergeStyles, formatSource, formatDate } from "@/lib/utils";
 import { STYLE_MAP } from "@/lib/style";
 
 export function BillCard({ bill }: { bill: Bill }) {
@@ -9,7 +9,7 @@ export function BillCard({ bill }: { bill: Bill }) {
   return (
     <Link href={`/bills/${bill.id}`}>
       <article
-        className={cn(
+        className={mergeStyles(
           "group rounded-xl border overflow-hidden h-full",
           "bg-card transition-all cursor-pointer",
           "hover:shadow-lg hover:-translate-y-0.5",
@@ -21,7 +21,7 @@ export function BillCard({ bill }: { bill: Bill }) {
           <div className="flex items-start justify-between gap-2">
             <div className="flex items-center gap-3">
               <span
-                className={cn(
+                className={mergeStyles(
                   "w-2 h-2 rounded-full shrink-0",
                   style.bgSolid,
                   "group-hover:bg-black",
@@ -32,7 +32,7 @@ export function BillCard({ bill }: { bill: Bill }) {
               </h3>
             </div>
             <span
-              className={cn(
+              className={mergeStyles(
                 "shrink-0 rounded-full px-2 py-0.5 text-[13px] font-medium",
                 "group-hover:bg-black group-hover:text-white",
                 style.badge,
@@ -45,7 +45,7 @@ export function BillCard({ bill }: { bill: Bill }) {
             {bill.ementa}
           </p>
           <div
-            className={cn(
+            className={mergeStyles(
               "flex items-center gap-2 text-xs text-muted-foreground pt-2 border-t",
               "group-hover:text-black group-hover:border-black",
             )}

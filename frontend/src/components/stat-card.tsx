@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { mergeStyles } from "@/lib/utils";
 import { STYLE_MAP } from "@/lib/style";
 import type { Classification } from "@/lib/api";
 
@@ -17,16 +17,26 @@ export function StatCard({
   desc,
   variant,
 }: StatCardProps) {
-  const s = STYLE_MAP[variant];
+  const style = STYLE_MAP[variant];
 
   return (
-    <div className={cn("relative rounded-xl overflow-hidden p-4", s.fadedBg)}>
-      <div className={cn("absolute top-0 left-0 right-0 h-1", s.bgSolid)} />
+    <div
+      className={mergeStyles(
+        "relative rounded-xl overflow-hidden p-4",
+        style.fadedBg,
+      )}
+    >
+      <div
+        className={mergeStyles(
+          "absolute top-0 left-0 right-0 h-1",
+          style.bgSolid,
+        )}
+      />
       <div className="flex justify-start gap-4">
         <p
-          className={cn(
+          className={mergeStyles(
             "text-2xl font-bold tabular-nums shrink-0",
-            s.textAccent,
+            style.textAccent,
           )}
         >
           {value}
@@ -34,7 +44,7 @@ export function StatCard({
         <div className="min-w-0 space-y-0.5">
           <p className="text-lg font-bold leading-snug">
             {prefix}
-            <span className={s.textAccent}>{tema}</span>
+            <span className={style.textAccent}>{tema}</span>
           </p>
           <p className="text-sm mt-2 text-muted-foreground leading-snug">
             {desc}
