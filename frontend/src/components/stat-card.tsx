@@ -5,7 +5,6 @@ import type { Classification } from "@/lib/api";
 interface StatCardProps {
   prefix: string;
   tema: string;
-  suffix?: string;
   value: number;
   desc: string;
   variant: Classification;
@@ -14,7 +13,6 @@ interface StatCardProps {
 export function StatCard({
   prefix,
   tema,
-  suffix = "",
   value,
   desc,
   variant,
@@ -37,7 +35,6 @@ export function StatCard({
           <p className="text-lg font-bold leading-snug">
             {prefix}
             <span className={s.textAccent}>{tema}</span>
-            {suffix}
           </p>
           <p className="text-sm mt-2 text-muted-foreground leading-snug">
             {desc}
