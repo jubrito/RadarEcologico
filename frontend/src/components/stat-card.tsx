@@ -1,6 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
-import { COLORS, shade } from "@/lib/style";
+import { STYLE_MAP } from "@/lib/style";
 import type { Classification } from "@/lib/api";
 
 interface StatCardProps {
@@ -16,12 +15,10 @@ export function StatCard({
   description,
   variant,
 }: StatCardProps) {
-  const c = COLORS[variant];
+  const style = STYLE_MAP[variant];
 
   return (
-    <Card
-      className={cn(`border-${shade(c, 600)}/30`, `bg-${shade(c, 950)}/30`)}
-    >
+    <Card className={style.cardBg}>
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">
           {title}
@@ -29,7 +26,7 @@ export function StatCard({
       </CardHeader>
       <CardContent>
         <span
-          className={`text-3xl font-bold tabular-nums text-${shade(c, 400)}`}
+          className={`text-3xl font-bold tabular-nums ${style.textAccent}`}
           aria-label={`${value} ${description}`}
         >
           {value}

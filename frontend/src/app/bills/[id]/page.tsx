@@ -9,7 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ClassificationBadge } from "@/components/classification-badge";
 import { getBill, type Bill } from "@/lib/api";
 import { formatDate, formatSource } from "@/lib/utils";
-import { COLORS, shade } from "@/lib/style";
+import { STYLE_MAP } from "@/lib/style";
 
 function scoreToClassification(
   score: number,
@@ -168,10 +168,10 @@ export default function BillDetailPage({
           </CardHeader>
           <CardContent>
             <div className="flex justify-between text-xs text-muted-foreground mb-1.5">
-              <span className={`text-${shade(COLORS.favorable, 400)}`}>
+              <span className={STYLE_MAP.favorable.textAccent}>
                 Favorável ao clima
               </span>
-              <span className={`text-${shade(COLORS.unfavorable, 400)}`}>
+              <span className={STYLE_MAP.unfavorable.textAccent}>
                 Prejudicial ao clima
               </span>
             </div>
@@ -185,7 +185,7 @@ export default function BillDetailPage({
                 aria-label={`Risco climático: ${Math.round(bill.final_score * 100)}%`}
               >
                 <div
-                  className={`h-full rounded-full transition-all bg-${COLORS[scoreToClassification(bill.final_score)]}`}
+                  className={`h-full rounded-full transition-all ${STYLE_MAP[scoreToClassification(bill.final_score)].bgSolid}`}
                   style={{ width: `${bill.final_score * 100}%` }}
                 />
               </div>

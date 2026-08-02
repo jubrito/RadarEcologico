@@ -1,7 +1,6 @@
 import { SITE_TITLE, SITE_SUBTITLE, SITE_DESCRIPTION } from "@/lib/content";
 
 type HeroProps = {
-  /** Tamanho do título — "lg" (dashboard) ou "sm" (erro). Default: "lg". */
   size?: "lg" | "sm";
   className?: string;
 };
