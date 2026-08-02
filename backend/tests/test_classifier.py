@@ -167,3 +167,84 @@ def test_ensemble_confidence_levels():
         "Institui o Dia do Brigadeiro de Panela."
     )
     assert neutral.confidence in ("low", "medium")
+
+
+# --- Edge case tests ---
+
+
+def test_empty_ementa_is_neutral():
+    result = classify_keywords("")
+    assert result.classification == "needs_review"
+    assert 0.30 <= result.score < 0.60
+    assert result.positive_hits == 0
+    assert result.negative_hits == 0
+
+
+def test_very_long_ementa():
+    long_text = (
+        "Institui a Política Nacional de Mudanças Climáticas e cria o "
+        "Fundo Nacional de Combate ao Desmatamento e proteção da Amazônia, "
+        "promovendo a redução de emissões de gases de efeito estufa e "
+        "estabelecendo metas de descarbonização para 2030 e 2050."
+    ) * 10
+    result = classify_keywords(long_text)
+    assert result.classification == "favorable"
+    assert result.score < 0.30
+
+
+def test_mixed_signals_resolves_to_needs_review():
+    result = classify_keywords(
+        "Institui programa de reflorestamento e recuperação florestal "
+        "mas também flexibiliza licenciamento ambiental para obras públicas."
+    )
+    assert result.classification in ("needs_review", "unfavorable")
+
+
+def test_critical_negative_patterns():
+    cases = [
+        "Revoga o Código Florestal e extingue áreas de preservação.",
+        "Autoriza mineração em terra indígena e territórios protegidos.",
+        "Anistia multa ambiental e extingue débito de infrações contra a flora.",
+    ]
+    for text in cases:
+        result = classify_keywords(text)
+        assert result.classification == "unfavorable", (
+            f"Expected unfavorable for '{text[:50]}...', got {result.classification}"
+        )
+
+
+def test_positive_patterns_recognized():
+    cases = [
+        "Institui a Política Estadual de Mudanças Climáticas e cria fundo de compensação.",
+        "Cria unidade de conservação de proteção integral no bioma cerrado.",
+        "Reconhece o estado de emergência climática no município.",
+    ]
+    for text in cases:
+        result = classify_keywords(text)
+        assert result.classification == "favorable", (
+            f"Expected favorable for '{text[:50]}...', got {result.classification}"
+        )
+
+
+def test_score_trend():
+    stronger_fav = classify_keywords(
+        "Institui política nacional de mudanças climáticas e cria "
+        "programa de reflorestamento e proteção dos biomas e combate ao desmatamento."
+    )
+    weaker_fav = classify_keywords("Cria programa de reciclagem municipal.")
+
+    assert stronger_fav.score < weaker_fav.score, (
+        "Stronger positive signal should get lower (more favorable) score"
+    )
+
+
+def test_classify_ensemble_with_bert():
+    from backend.classifiers.ensemble import classify_ensemble_with_bert
+
+    score, label = classify_ensemble_with_bert(0.2, 0.4)
+    assert 0.0 <= score <= 1.0
+    assert label in ("favorable", "needs_review", "unfavorable")
+
+    score, label = classify_ensemble_with_bert(0.8, 0.9)
+    assert score >= 0.60
+    assert label == "unfavorable"
