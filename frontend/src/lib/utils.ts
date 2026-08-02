@@ -5,24 +5,6 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function getClassificationLabel(label: string): string {
-  const labels: Record<string, string> = {
-    favorable: "Combate à crise climática",
-    needs_review: "Requer revisão humana",
-    unfavorable: "Agravamento da crise climática",
-  };
-  return labels[label] || label;
-}
-
-export function getClassificationColor(label: string): string {
-  const colors: Record<string, string> = {
-    favorable: "bg-emerald-600 text-white",
-    needs_review: "bg-amber-500 text-black",
-    unfavorable: "bg-red-600 text-white",
-  };
-  return colors[label] || "bg-gray-500 text-white";
-}
-
 export function getScoreColor(score: number): string {
   if (score < 0.30) return "text-emerald-500";
   if (score >= 0.60) return "text-red-500";

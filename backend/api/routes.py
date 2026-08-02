@@ -20,9 +20,6 @@ router = APIRouter(prefix="/api")
 _VALID_CLASSIFICATIONS = frozenset({"favorable", "needs_review", "unfavorable"})
 
 
-# --- Pydantic schemas ---
-
-
 class BillOut(BaseModel):
     id: str
     external_id: str

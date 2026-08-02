@@ -2,14 +2,12 @@
 
 import { type VariantProps } from "class-variance-authority";
 import { Badge, badgeVariants } from "@/components/ui/badge";
-import {
-  getClassificationLabel,
-  getClassificationColor,
-  getScoreColor,
-} from "@/lib/utils";
+import { getScoreColor } from "@/lib/utils";
+import { STYLE_MAP } from "@/lib/style";
+import type { Classification } from "@/lib/api";
 
 interface ClassificationBadgeProps extends VariantProps<typeof badgeVariants> {
-  classification: string;
+  classification: Classification;
   score?: number | null;
 }
 
@@ -18,13 +16,12 @@ export function ClassificationBadge({
   score,
   ...props
 }: ClassificationBadgeProps) {
+  const style = STYLE_MAP[classification];
+
   return (
     <span className="inline-flex items-center gap-2">
-      <Badge
-        className={getClassificationColor(classification)}
-        {...props}
-      >
-        {getClassificationLabel(classification)}
+      <Badge className={style.badge} {...props}>
+        {style.label}
       </Badge>
       {score != null && (
         <span
