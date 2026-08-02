@@ -13,10 +13,8 @@ export function BillCard({ bill }: { bill: Bill }) {
         className={cn(
           "rounded-xl bg-card overflow-hidden h-full",
           "hover:shadow-lg hover:-translate-y-0.5 transition-all cursor-pointer",
-          `border border-0 border-b-5 ${style.border}`,
         )}
       >
-        {/* <div className={cn("h-0.5 bg-gradient-to-r", style.gradient)} /> */}
         <div className="p-4 space-y-2">
           <div className="flex items-start justify-between gap-2">
             <h3 className="font-semibold text-sm leading-snug">

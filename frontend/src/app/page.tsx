@@ -6,8 +6,8 @@ import { BillCard } from "@/components/bill-card";
 import { StatCard } from "@/components/stat-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { Hero } from "@/components/hero";
 import { getBills, getStats, type Bill, type StatsResponse } from "@/lib/api";
+import { Header } from "@/components/header";
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<StatsResponse | null>(null);
@@ -37,7 +37,7 @@ export default function DashboardPage() {
     return (
       <div className="max-w-6xl mx-auto px-4 py-12">
         <section className="text-center">
-          <Hero size="sm" />
+          <Header size="sm" />
           <p className="text-muted-foreground mb-4 mt-6">
             Backend não disponível. Inicie o servidor com{" "}
             <code className="bg-muted px-1 rounded">
@@ -52,7 +52,7 @@ export default function DashboardPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
-      <Hero size="lg" className="mb-10" />
+      <Header size="lg" className="mb-10" />
 
       <section
         aria-label="Estatísticas"

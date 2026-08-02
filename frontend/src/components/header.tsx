@@ -1,11 +1,11 @@
 import { SITE_TITLE, SITE_SUBTITLE, SITE_DESCRIPTION } from "@/lib/content";
 
-type HeroProps = {
+type HeaderProps = {
   size?: "lg" | "sm";
   className?: string;
 };
 
-export function Hero({ size = "lg", className = "" }: HeroProps) {
+export function Header({ size = "lg", className = "" }: HeaderProps) {
   const isLg = size === "lg";
 
   return (
