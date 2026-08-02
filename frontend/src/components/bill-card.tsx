@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Bill } from "@/lib/api";
-import { mergeStyles, formatSource, formatDate } from "@/lib/utils";
+import { mergeStyles, formatSource, formatDate } from "@/lib/utils/utils";
 import { STYLE_MAP } from "@/lib/style";
 
 export function BillCard({ bill }: { bill: Bill }) {

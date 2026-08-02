@@ -4,7 +4,7 @@ import {
   CLASSIFICATION_THRESHOLDS,
   SOURCE_LABELS,
   type KnownClassification,
-} from "./types";
+} from "../types";
 
 export function mergeStyles(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));

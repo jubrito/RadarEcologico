@@ -1,4 +1,4 @@
-import { mergeStyles } from "@/lib/utils";
+import { mergeStyles } from "@/lib/utils/utils";
 
 function Skeleton({ className, ...props }: React.ComponentProps<"div">) {
   return (

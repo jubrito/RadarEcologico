@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { ChevronDownIcon, XIcon } from "lucide-react";
-import { mergeStyles } from "@/lib/utils";
+import { mergeStyles } from "@/lib/utils/utils";
 
 interface MultiSelectOption {
   value: string;
@@ -94,7 +94,7 @@ export function MultiSelect({
 
   useEffect(() => {
     if (focusIdx >= 0 && optionRefs.current[focusIdx]) {
-      optionRefs.current[focusIdx]?.scrollIntoView({ block: "nearest" });
+      optionRefs.current[focusIdx]?.scrollIntoView?.({ block: "nearest" });
     }
   }, [focusIdx]);
 

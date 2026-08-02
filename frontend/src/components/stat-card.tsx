@@ -1,4 +1,4 @@
-import { mergeStyles } from "@/lib/utils";
+import { mergeStyles } from "@/lib/utils/utils";
 import { STYLE_MAP } from "@/lib/style";
 import type { Classification } from "@/lib/api";
 

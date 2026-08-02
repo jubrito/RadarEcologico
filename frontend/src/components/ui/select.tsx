@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Select as SelectPrimitive } from "@base-ui/react/select";
 
-import { mergeStyles } from "@/lib/utils";
+import { mergeStyles } from "@/lib/utils/utils";
 import { ChevronDownIcon, CheckIcon, ChevronUpIcon } from "lucide-react";
 
 const Select = SelectPrimitive.Root;

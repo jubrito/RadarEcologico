@@ -1,4 +1,4 @@
-import type { CLASSIFICATION } from "./classifications";
+import type { CLASSIFICATION } from "./utils/classifications";
 
 export type Classification =
   (typeof CLASSIFICATION)[keyof typeof CLASSIFICATION];

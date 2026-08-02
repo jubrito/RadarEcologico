@@ -1,5 +1,9 @@
-import { CLASSIFICATION } from "./classifications";
-import type { Classification, BillQueryParams, ClassifyComponents } from "./types";
+import { CLASSIFICATION } from "./utils/classifications";
+import type {
+  Classification,
+  BillQueryParams,
+  ClassifyComponents,
+} from "./types";
 
 export type { Classification };
 
@@ -78,7 +82,9 @@ function normalizeBill(bill: Bill): Bill {
   return bill;
 }
 
-export async function getBills(params?: BillQueryParams): Promise<BillsResponse> {
+export async function getBills(
+  params?: BillQueryParams,
+): Promise<BillsResponse> {
   const searchParams = new URLSearchParams();
   if (params?.page) searchParams.set("page", String(params.page));
   if (params?.limit) searchParams.set("limit", String(params.limit));

@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { mergeStyles } from "@/lib/utils";
+import { mergeStyles } from "@/lib/utils/utils";
 
 function Card({
   className,

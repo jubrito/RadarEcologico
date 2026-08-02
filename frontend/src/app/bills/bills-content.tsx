@@ -19,6 +19,7 @@ import {
   type BillsResponse,
   type StatsResponse,
 } from "@/lib/api";
+import { isValidClassification } from "@/lib/utils/classifications";
 import { MultiSelect } from "@/components/ui/multiselect";
 
 export function withCounts(
@@ -102,7 +103,9 @@ export function BillsContent() {
 
       try {
         const params: Parameters<typeof getBills>[0] = { page, limit: 20 };
-        if (classification !== "all") params.classification = classification;
+        if (classification !== "all" && isValidClassification(classification)) {
+          params.classification = classification;
+        }
         if (source !== "all") params.source = source;
         if (themeParam) params.theme = themeParam;
         if (search) params.search = search;

@@ -8,7 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ClassificationBadge } from "@/components/classification-badge";
 import { getBill, type Bill } from "@/lib/api";
-import { formatDate, formatSource, scoreToClassification } from "@/lib/utils";
+import {
+  formatDate,
+  formatSource,
+  scoreToClassification,
+} from "@/lib/utils/utils";
 import { STYLE_MAP } from "@/lib/style";
 
 export default function BillDetailPage({

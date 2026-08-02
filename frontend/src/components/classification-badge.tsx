@@ -2,7 +2,7 @@
 
 import { type VariantProps } from "class-variance-authority";
 import { Badge, badgeVariants } from "@/components/ui/badge";
-import { getScoreColor } from "@/lib/utils";
+import { getScoreColor } from "@/lib/utils/utils";
 import { STYLE_MAP } from "@/lib/style";
 import type { Classification } from "@/lib/api";
 
