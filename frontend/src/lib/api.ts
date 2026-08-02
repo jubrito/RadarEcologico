@@ -17,6 +17,8 @@ export interface Bill {
   bert_score?: number | null;
   final_score?: number | null;
   classification?: string | null;
+  theme_ids?: string | null;
+  theme_names?: string | null;
   classified_at?: string | null;
   created_at?: string | null;
 }
@@ -63,6 +65,7 @@ export async function getBills(params?: {
   source?: string;
   year?: number;
   search?: string;
+  theme?: string;
 }): Promise<BillsResponse> {
   const searchParams = new URLSearchParams();
   if (params?.page) searchParams.set("page", String(params.page));
@@ -72,6 +75,7 @@ export async function getBills(params?: {
   if (params?.source) searchParams.set("source", params.source);
   if (params?.year) searchParams.set("year", String(params.year));
   if (params?.search) searchParams.set("search", params.search);
+  if (params?.theme) searchParams.set("theme", params.theme);
   return fetchAPI<BillsResponse>("/bills", searchParams);
 }
 

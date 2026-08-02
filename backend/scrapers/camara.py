@@ -101,6 +101,28 @@ def fetch_camara_bills(
                     continue
 
                 external_id = str(prop.get("id", ""))
+
+                themes_list = prop.get("temas") or prop.get("temasLista") or []
+                if isinstance(themes_list, list):
+                    theme_codes = [
+                        str(t.get("codTema", t.get("codigo", "")))
+                        for t in themes_list
+                        if isinstance(t, dict)
+                    ]
+                    theme_names_list = [
+                        CLIMATE_THEME_MAP.get(int(c), t.get("tema", ""))
+                        for c in theme_codes
+                        for t in themes_list
+                        if isinstance(t, dict)
+                        and str(t.get("codTema", t.get("codigo", ""))) == c
+                    ]
+                else:
+                    theme_codes = []
+                    theme_names_list = []
+
+                theme_ids_str = ",".join(theme_codes) if theme_codes else None
+                theme_names_str = ",".join(theme_names_list) if theme_names_list else None
+
                 if external_id in seen:
                     continue
                 seen.add(external_id)
@@ -120,6 +142,8 @@ def fetch_camara_bills(
                         ),
                         "presentation_date": prop.get("dataApresentacao"),
                         "link": f"https://www.camara.leg.br/proposicoesWeb/fichadetramitacao?idProposicao={external_id}",
+                        "theme_ids": theme_ids_str,
+                        "theme_names": theme_names_str,
                     }
                 )
 

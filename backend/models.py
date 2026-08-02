@@ -35,6 +35,8 @@ class Bill(Base):
     presentation_date: Mapped[datetime | None] = mapped_column(nullable=True)
     status: Mapped[str | None] = mapped_column(String(100), nullable=True)
     link: Mapped[str] = mapped_column(String(500), nullable=False)
+    theme_ids: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    theme_names: Mapped[str | None] = mapped_column(String(500), nullable=True)
 
     keyword_score: Mapped[float | None] = mapped_column(Float, nullable=True)
     bert_score: Mapped[float | None] = mapped_column(Float, nullable=True)

@@ -84,6 +84,8 @@ def run_pipeline() -> dict:
                 presentation_date=bill_data.get("presentation_date"),
                 status=bill_data.get("status"),
                 link=bill_data["link"],
+                theme_ids=bill_data.get("theme_ids"),
+                theme_names=bill_data.get("theme_names"),
                 keyword_score=result.components.get("keyword_score"),
                 final_score=result.final_score,
                 classification=result.classification,

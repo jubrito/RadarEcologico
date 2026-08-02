@@ -35,6 +35,8 @@ class BillOut(BaseModel):
     presentation_date: Optional[str] = None
     status: Optional[str] = None
     link: str
+    theme_ids: Optional[str] = None
+    theme_names: Optional[str] = None
     keyword_score: Optional[float] = None
     bert_score: Optional[float] = None
     final_score: Optional[float] = None
@@ -82,6 +84,7 @@ def list_bills(
     source: Optional[str] = None,
     year: Optional[int] = None,
     search: Optional[str] = None,
+    theme: Optional[str] = None,
     session: Session = Depends(get_session),
 ):
     """List classified bills with filters and pagination."""
@@ -95,6 +98,8 @@ def list_bills(
         query = query.where(Bill.year == year)
     if search:
         query = query.where(Bill.ementa.ilike(f"%{search}%"))
+    if theme:
+        query = query.where(Bill.theme_ids.ilike(f"%{theme}%"))
 
     count_query = select(func.count()).select_from(query.subquery())
     total = session.execute(count_query).scalar() or 0

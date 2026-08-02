@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { BillCard } from "@/components/bill-card";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,25 @@ const SOURCE_OPTIONS = [
   { value: "senado", label: "Senado Federal" },
 ];
 
+const THEME_OPTIONS = [
+  { value: "all", label: "Todos os temas" },
+  { value: "48", label: "Meio Ambiente" },
+  { value: "54", label: "Energia, Água e Mineração" },
+  { value: "64", label: "Agricultura e Pecuária" },
+  { value: "51", label: "Estrutura Fundiária" },
+  { value: "61", label: "Transporte e Mobilidade" },
+  { value: "44", label: "Direitos Humanos e Minorias" },
+  { value: "70", label: "Orçamento Público" },
+  { value: "41", label: "Cidades e Des. Urbano" },
+  { value: "40", label: "Economia" },
+  { value: "55", label: "Relações Internacionais" },
+  { value: "56", label: "Saúde" },
+  { value: "62", label: "Ciência e Tecnologia" },
+  { value: "66", label: "Indústria e Comércio" },
+  { value: "68", label: "Direito Constitucional" },
+  { value: "76", label: "Direito e Justiça" },
+];
+
 export function BillsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -39,28 +58,39 @@ export function BillsContent() {
   const page = Number(searchParams.get("page") || "1");
   const classification = searchParams.get("classification") || "all";
   const source = searchParams.get("source") || "all";
+  const theme = searchParams.get("theme") || "all";
   const search = searchParams.get("search") || "";
 
-  const fetchBills = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const params: Parameters<typeof getBills>[0] = { page, limit: 20 };
-      if (classification !== "all") params.classification = classification;
-      if (source !== "all") params.source = source;
-      if (search) params.search = search;
-      const result = await getBills(params);
-      setData(result);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao carregar");
-    } finally {
-      setLoading(false);
-    }
-  }, [page, classification, source, search]);
-
   useEffect(() => {
-    fetchBills();
-  }, [fetchBills]);
+    let cancelled = false;
+
+    async function load() {
+      setLoading(true);
+      setError(null);
+      try {
+        const params: Parameters<typeof getBills>[0] = { page, limit: 20 };
+        if (classification !== "all") params.classification = classification;
+        if (source !== "all") params.source = source;
+        if (theme !== "all") params.theme = theme;
+        if (search) params.search = search;
+        const result = await getBills(params);
+        if (!cancelled) {
+          setData(result);
+          setLoading(false);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "Erro ao carregar");
+          setLoading(false);
+        }
+      }
+    }
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [page, classification, source, theme, search]);
 
   const updateParam = (key: string, value: string | null) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -98,8 +128,14 @@ export function BillsContent() {
           value={classification}
           onValueChange={(v) => updateParam("classification", v)}
         >
-          <SelectTrigger className="w-full sm:w-56" aria-label="Filtrar por classificação">
-            <SelectValue />
+          <SelectTrigger
+            className="w-full sm:w-56"
+            aria-label="Filtrar por classificação"
+          >
+            <SelectValue>
+              {CLASSIFICATION_OPTIONS.find((o) => o.value === classification)
+                ?.label || "Todas as classificações"}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             {CLASSIFICATION_OPTIONS.map((opt) => (
@@ -110,15 +146,37 @@ export function BillsContent() {
           </SelectContent>
         </Select>
 
-        <Select
-          value={source}
-          onValueChange={(v) => updateParam("source", v)}
-        >
-          <SelectTrigger className="w-full sm:w-48" aria-label="Filtrar por fonte">
-            <SelectValue />
+        <Select value={source} onValueChange={(v) => updateParam("source", v)}>
+          <SelectTrigger
+            className="w-full sm:w-48"
+            aria-label="Filtrar por fonte"
+          >
+            <SelectValue>
+              {SOURCE_OPTIONS.find((o) => o.value === source)?.label ||
+                "Todas as fontes"}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             {SOURCE_OPTIONS.map((opt) => (
+              <SelectItem key={opt.value} value={opt.value}>
+                {opt.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={theme} onValueChange={(v) => updateParam("theme", v)}>
+          <SelectTrigger
+            className="w-full sm:w-44"
+            aria-label="Filtrar por tema"
+          >
+            <SelectValue>
+              {THEME_OPTIONS.find((o) => o.value === theme)?.label ||
+                "Todos os temas"}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {THEME_OPTIONS.map((opt) => (
               <SelectItem key={opt.value} value={opt.value}>
                 {opt.label}
               </SelectItem>
@@ -156,7 +214,10 @@ export function BillsContent() {
       )}
 
       {totalPages > 1 && (
-        <nav aria-label="Paginação" className="flex items-center justify-center gap-2">
+        <nav
+          aria-label="Paginação"
+          className="flex items-center justify-center gap-2"
+        >
           <Button
             variant="outline"
             disabled={page <= 1}
