@@ -13,7 +13,32 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getBills, type BillsResponse } from "@/lib/api";
+import {
+  getBills,
+  getStats,
+  type BillsResponse,
+  type StatsResponse,
+} from "@/lib/api";
+import { MultiSelect } from "@/components/ui/multiselect";
+
+export function withCounts(
+  options: { value: string; label: string }[],
+  counts: Record<string, number>,
+): { value: string; label: string }[] {
+  return options.map((opt) => {
+    if (opt.value === "all") return opt;
+    const count = counts[opt.value] ?? 0;
+    return { ...opt, label: `${opt.label} (${count})` };
+  });
+}
+
+export function renderLabel(
+  options: { value: string; label: string }[],
+  value: string,
+  fallback: string,
+) {
+  return options.find((o) => o.value === value)?.label || fallback;
+}
 
 const CLASSIFICATION_OPTIONS = [
   { value: "all", label: "Todas as classificações" },
@@ -52,13 +77,14 @@ export function BillsContent() {
   const searchParams = useSearchParams();
 
   const [data, setData] = useState<BillsResponse | null>(null);
+  const [stats, setStats] = useState<StatsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const page = Number(searchParams.get("page") || "1");
   const classification = searchParams.get("classification") || "all";
   const source = searchParams.get("source") || "all";
-  const theme = searchParams.get("theme") || "all";
+  const themeParam = searchParams.get("theme") || "";
   const search = searchParams.get("search") || "";
 
   useEffect(() => {
@@ -68,10 +94,17 @@ export function BillsContent() {
       setLoading(true);
       setError(null);
       try {
+        const [statsData] = await Promise.all([getStats()]);
+        if (!cancelled) setStats(statsData);
+      } catch {
+        // stats are optional — don't block the page
+      }
+
+      try {
         const params: Parameters<typeof getBills>[0] = { page, limit: 20 };
         if (classification !== "all") params.classification = classification;
         if (source !== "all") params.source = source;
-        if (theme !== "all") params.theme = theme;
+        if (themeParam) params.theme = themeParam;
         if (search) params.search = search;
         const result = await getBills(params);
         if (!cancelled) {
@@ -90,7 +123,7 @@ export function BillsContent() {
     return () => {
       cancelled = true;
     };
-  }, [page, classification, source, theme, search]);
+  }, [page, classification, source, themeParam, search]);
 
   const updateParam = (key: string, value: string | null) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -105,6 +138,16 @@ export function BillsContent() {
 
   const totalPages = data ? Math.ceil(data.total / data.limit) : 0;
 
+  const classOpts = stats
+    ? withCounts(CLASSIFICATION_OPTIONS, stats.by_classification)
+    : CLASSIFICATION_OPTIONS;
+  const sourceOpts = stats
+    ? withCounts(SOURCE_OPTIONS, stats.by_source)
+    : SOURCE_OPTIONS;
+  const themeOpts = stats
+    ? withCounts(THEME_OPTIONS, stats.by_theme)
+    : THEME_OPTIONS;
+
   return (
     <>
       <section className="flex flex-col sm:flex-row gap-3 mb-6">
@@ -116,6 +159,7 @@ export function BillsContent() {
             id="search-bills"
             placeholder="Buscar por ementa..."
             defaultValue={search}
+            className="w-full"
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 updateParam("search", (e.target as HTMLInputElement).value);
@@ -129,16 +173,19 @@ export function BillsContent() {
           onValueChange={(v) => updateParam("classification", v)}
         >
           <SelectTrigger
-            className="w-full sm:w-56"
+            className="w-full sm:w-52"
             aria-label="Filtrar por classificação"
           >
             <SelectValue>
-              {CLASSIFICATION_OPTIONS.find((o) => o.value === classification)
-                ?.label || "Todas as classificações"}
+              {renderLabel(
+                classOpts,
+                classification,
+                "Todas as classificações",
+              )}
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            {CLASSIFICATION_OPTIONS.map((opt) => (
+            {classOpts.map((opt) => (
               <SelectItem key={opt.value} value={opt.value}>
                 {opt.label}
               </SelectItem>
@@ -148,16 +195,15 @@ export function BillsContent() {
 
         <Select value={source} onValueChange={(v) => updateParam("source", v)}>
           <SelectTrigger
-            className="w-full sm:w-48"
+            className="w-full sm:w-58"
             aria-label="Filtrar por fonte"
           >
             <SelectValue>
-              {SOURCE_OPTIONS.find((o) => o.value === source)?.label ||
-                "Todas as fontes"}
+              {renderLabel(sourceOpts, source, "Todas as fontes")}
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            {SOURCE_OPTIONS.map((opt) => (
+            {sourceOpts.map((opt) => (
               <SelectItem key={opt.value} value={opt.value}>
                 {opt.label}
               </SelectItem>
@@ -165,24 +211,22 @@ export function BillsContent() {
           </SelectContent>
         </Select>
 
-        <Select value={theme} onValueChange={(v) => updateParam("theme", v)}>
-          <SelectTrigger
-            className="w-full sm:w-44"
-            aria-label="Filtrar por tema"
-          >
-            <SelectValue>
-              {THEME_OPTIONS.find((o) => o.value === theme)?.label ||
-                "Todos os temas"}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {THEME_OPTIONS.map((opt) => (
-              <SelectItem key={opt.value} value={opt.value}>
-                {opt.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <MultiSelect
+          options={themeOpts}
+          selected={themeParam ? themeParam.split(",").filter(Boolean) : []}
+          onChange={(vals) => {
+            const params = new URLSearchParams(searchParams.toString());
+            if (vals.length > 0) {
+              params.set("theme", vals.join(","));
+            } else {
+              params.delete("theme");
+            }
+            params.delete("page");
+            router.push(`/bills?${params.toString()}`);
+          }}
+          placeholder="Todos os temas"
+          className="w-full sm:w-70"
+        />
       </section>
 
       {error && (

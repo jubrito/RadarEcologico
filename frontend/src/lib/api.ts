@@ -40,6 +40,7 @@ export interface StatsResponse {
   by_classification: Record<string, number>;
   by_source: Record<string, number>;
   by_year: Record<string, number>;
+  by_theme: Record<string, number>;
 }
 
 export interface ClassifyResponse {

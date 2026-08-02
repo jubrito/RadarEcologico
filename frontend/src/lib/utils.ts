@@ -1,13 +1,18 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { CLASSIFICATION_THRESHOLDS, SOURCE_LABELS, type KnownClassification } from "./types";
+import {
+  CLASSIFICATION_THRESHOLDS,
+  SOURCE_LABELS,
+  type KnownClassification,
+} from "./types";
 
 export function mergeStyles(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
 export function getScoreColor(score: number): string {
-  if (score < CLASSIFICATION_THRESHOLDS.FAVORABLE_MAX) return "text-emerald-500";
+  if (score < CLASSIFICATION_THRESHOLDS.FAVORABLE_MAX)
+    return "text-emerald-500";
   if (score >= CLASSIFICATION_THRESHOLDS.UNFAVORABLE_MIN) return "text-red-500";
   return "text-amber-500";
 }
@@ -21,7 +26,11 @@ export function scoreToClassification(score: number): KnownClassification {
 export function formatDate(dateStr?: string | null): string {
   if (!dateStr) return "—";
   const date = new Date(dateStr);
-  return date.toLocaleDateString("pt-BR");
+  return new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(date);
 }
 
 export function formatSource(source: string): string {

@@ -1,5 +1,8 @@
 # Radar Legislativo Ecológico — Status do Projeto
 
+- Keep this file in english
+- Go through the items iteratively, try to avoid doing too many unrelated things at the same time to allow me to commit what is really connected
+
 ## Última atualização
 
 2026-08-02
@@ -66,6 +69,7 @@ Migrar de SQLite para PostgreSQL no Supabase:
 5. Rodar pipeline para popular banco
 
 ### Sprint 5 — Revisão Colaborativa (Votação Pública)
+
 Permitir que usuários votem nas classificações para auxiliar os revisores:
 
 1. **Voto por PL**: qualquer visitante pode votar se concorda/discorda da classificação
