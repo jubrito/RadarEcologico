@@ -11,15 +11,22 @@ export function BillCard({ bill }: { bill: Bill }) {
     <Link href={`/bills/${bill.id}`}>
       <article
         className={cn(
-          "rounded-xl bg-card overflow-hidden h-full",
+          "rounded-xl border bg-black overflow-hidden h-full",
           "hover:shadow-lg hover:-translate-y-0.5 transition-all cursor-pointer",
+          `bg-card hover:${style.fadedBg}`,
+          `border-1 ${style.border}`,
         )}
       >
         <div className="p-4 space-y-2">
           <div className="flex items-start justify-between gap-2">
-            <h3 className="font-semibold text-sm leading-snug">
-              {bill.bill_type} {bill.number}/{bill.year}
-            </h3>
+            <div className="flex items-center gap-3">
+              <span
+                className={`w-2 h-2 rounded-full ${style.bgSolid} shrink-0`}
+              />
+              <h3 className="font-semibold text-sm leading-snug">
+                {bill.bill_type} {bill.number}/{bill.year}
+              </h3>
+            </div>
             <span
               className={cn(
                 "shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium",

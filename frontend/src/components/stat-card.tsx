@@ -18,7 +18,7 @@ export function StatCard({
   const style = STYLE_MAP[variant];
 
   return (
-    <Card className={style.cardBg}>
+    <Card className={style.fadedBg}>
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">
           {title}
