@@ -42,6 +42,29 @@ CLIMATE_THEME_MAP: dict[int, str] = {
 from backend.keywords.taxonomy import ementa_matches_climate
 
 
+def _fetch_themes(external_id: str) -> tuple[str | None, str | None]:
+    try:
+        response = requests.get(
+            f"{API_BASE}/proposicoes/{external_id}/temas", timeout=10
+        )
+        response.raise_for_status()
+        data = response.json()
+        temas = data.get("dados", [])
+        if not temas:
+            return None, None
+        codes = []
+        names = []
+        for t in temas:
+            code = str(t.get("codTema", ""))
+            if code and int(code) in CLIMATE_THEME_MAP:
+                codes.append(code)
+                names.append(CLIMATE_THEME_MAP[int(code)])
+        return (",".join(codes) if codes else None,
+                ",".join(names) if names else None)
+    except Exception:
+        return None, None
+
+
 def fetch_camara_bills(
     year: int,
     limit: int = 100,
@@ -93,26 +116,7 @@ def fetch_camara_bills(
 
                 external_id = str(prop.get("id", ""))
 
-                themes_list = prop.get("temas") or prop.get("temasLista") or []
-                if isinstance(themes_list, list):
-                    theme_codes = [
-                        str(t.get("codTema", t.get("codigo", "")))
-                        for t in themes_list
-                        if isinstance(t, dict)
-                    ]
-                    theme_names_list = [
-                        CLIMATE_THEME_MAP.get(int(c), t.get("tema", ""))
-                        for c in theme_codes
-                        for t in themes_list
-                        if isinstance(t, dict)
-                        and str(t.get("codTema", t.get("codigo", ""))) == c
-                    ]
-                else:
-                    theme_codes = []
-                    theme_names_list = []
-
-                theme_ids_str = ",".join(theme_codes) if theme_codes else None
-                theme_names_str = ",".join(theme_names_list) if theme_names_list else None
+                theme_ids_str, theme_names_str = _fetch_themes(external_id)
 
                 if external_id in seen:
                     continue

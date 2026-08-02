@@ -75,6 +75,9 @@ def run_pipeline() -> dict:
                 .first()
             )
             if existing:
+                if not existing.theme_ids and bill_data.get("theme_ids"):
+                    existing.theme_ids = bill_data["theme_ids"]
+                    existing.theme_names = bill_data["theme_names"]
                 continue
 
             summary["new_bills"] += 1

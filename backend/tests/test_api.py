@@ -286,6 +286,27 @@ class TestMultiThemeFilter:
         assert response.status_code == 200
         assert response.json()["total"] == 2
 
+    def test_filters_by_single_theme(self):
+        bills = [_bill_row(theme_ids="48")]
+        session = _make_session(bills=bills, total=1)
+
+        app.dependency_overrides[get_session] = lambda: session
+        client = TestClient(app)
+
+        response = client.get("/api/bills?theme=48")
+        assert response.status_code == 200
+        assert response.json()["total"] == 1
+
+    def test_combines_theme_with_other_filters(self):
+        bills = [_bill_row(theme_ids="48,54", classification="favorable")]
+        session = _make_session(bills=bills, total=1)
+
+        app.dependency_overrides[get_session] = lambda: session
+        client = TestClient(app)
+
+        response = client.get("/api/bills?theme=48&classification=favorable")
+        assert response.status_code == 200
+
 
 class TestClassify:
     def test_classifies_favorable(self):
