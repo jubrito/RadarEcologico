@@ -1,0 +1,334 @@
+"""
+Tests for REST API routes using FastAPI TestClient with dependency overrides.
+"""
+
+import uuid
+from datetime import datetime, timezone
+from typing import Generator
+from unittest.mock import MagicMock
+
+import pytest
+from fastapi.testclient import TestClient
+from sqlalchemy.orm import Session
+
+from backend.api.routes import get_session
+from backend.main import app
+
+
+def _bill_row(**overrides) -> MagicMock:
+    defaults = {
+        "id": str(uuid.uuid4()),
+        "external_id": "12345",
+        "source": "camara",
+        "bill_type": "PL",
+        "number": 123,
+        "year": 2026,
+        "ementa": "Institui política de combate ao desmatamento.",
+        "full_text": None,
+        "author": "Dep. João Silva",
+        "author_party": "PT",
+        "author_state": "SP",
+        "presentation_date": datetime(2026, 1, 15),
+        "status": "Tramitando",
+        "link": "https://www.camara.leg.br/proposicoes/12345",
+        "theme_ids": "48,54",
+        "theme_names": "Meio Ambiente,Energia",
+        "keyword_score": 0.12,
+        "bert_score": None,
+        "final_score": 0.12,
+        "classification": "favorable",
+        "classified_at": datetime(2026, 8, 1, tzinfo=timezone.utc),
+        "created_at": datetime(2026, 8, 1, tzinfo=timezone.utc),
+        "updated_at": datetime(2026, 8, 1, tzinfo=timezone.utc),
+    }
+    defaults.update(overrides)
+    return MagicMock(**defaults)
+
+
+def _make_session(*, bills: list[MagicMock] | None = None, total: int | None = None) -> MagicMock:
+    bills = bills or []
+    total = total if total is not None else len(bills)
+    session = MagicMock(spec=Session)
+
+    # get_bill: session.get(Bill, bill_id)
+    session.get.return_value = bills[0] if bills else None
+
+    # list_bills: count + scalars
+    count_result = MagicMock()
+    count_result.scalar.return_value = total
+
+    scalar_result = MagicMock()
+    scalar_result.scalars.return_value.all.return_value = bills
+    scalar_result.scalar.return_value = total
+
+    session.execute.return_value = scalar_result
+
+    return session
+
+
+@pytest.fixture(autouse=True)
+def override_db():
+    app.dependency_overrides[get_session] = lambda: MagicMock(spec=Session)
+    yield
+    app.dependency_overrides.pop(get_session, None)
+
+
+class TestListBills:
+    def test_returns_paginated_bills(self):
+        bills = [_bill_row() for _ in range(3)]
+        session = _make_session(bills=bills, total=3)
+
+        app.dependency_overrides[get_session] = lambda: session
+        client = TestClient(app)
+
+        response = client.get("/api/bills?page=1&limit=2")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["total"] == 3
+        assert data["page"] == 1
+        assert data["limit"] == 2
+        assert len(data["items"]) == 3
+
+    def test_filters_by_classification(self):
+        bills = [_bill_row(classification="unfavorable")]
+        session = _make_session(bills=bills, total=1)
+
+        app.dependency_overrides[get_session] = lambda: session
+        client = TestClient(app)
+
+        response = client.get("/api/bills?classification=unfavorable")
+        assert response.status_code == 200
+        assert response.json()["total"] == 1
+
+    def test_filters_by_source(self):
+        bills = [_bill_row(source="senado")]
+        session = _make_session(bills=bills, total=1)
+
+        app.dependency_overrides[get_session] = lambda: session
+        client = TestClient(app)
+
+        response = client.get("/api/bills?source=senado")
+        assert response.status_code == 200
+        assert response.json()["total"] == 1
+
+    def test_filters_by_theme(self):
+        bills = [_bill_row(theme_ids="48,64")]
+        session = _make_session(bills=bills, total=1)
+
+        app.dependency_overrides[get_session] = lambda: session
+        client = TestClient(app)
+
+        response = client.get("/api/bills?theme=48")
+        assert response.status_code == 200
+
+    def test_filters_by_year(self):
+        bills = [_bill_row(year=2025)]
+        session = _make_session(bills=bills, total=1)
+
+        app.dependency_overrides[get_session] = lambda: session
+        client = TestClient(app)
+
+        response = client.get("/api/bills?year=2025")
+        assert response.status_code == 200
+
+    def test_filters_by_search(self):
+        bills = [_bill_row(ementa="desmatamento na Amazônia")]
+        session = _make_session(bills=bills, total=1)
+
+        app.dependency_overrides[get_session] = lambda: session
+        client = TestClient(app)
+
+        response = client.get("/api/bills?search=desmatamento")
+        assert response.status_code == 200
+
+    def test_enforces_pagination_limits(self):
+        client = TestClient(app)
+        response = client.get("/api/bills?limit=200")
+        assert response.status_code == 422
+
+    def test_page_validation(self):
+        client = TestClient(app)
+        response = client.get("/api/bills?page=0")
+        assert response.status_code == 422
+
+
+class TestGetBill:
+    def test_returns_bill_by_id(self):
+        bill = _bill_row(id="abc-123")
+        session = _make_session(bills=[bill], total=1)
+
+        app.dependency_overrides[get_session] = lambda: session
+        client = TestClient(app)
+
+        response = client.get("/api/bills/abc-123")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["id"] == "abc-123"
+        assert data["classification"] == "favorable"
+        assert data["theme_ids"] == "48,54"
+        assert data["presentation_date"] is not None
+
+    def test_returns_404_for_missing_bill(self):
+        session = _make_session(bills=[], total=0)
+
+        app.dependency_overrides[get_session] = lambda: session
+        client = TestClient(app)
+
+        response = client.get("/api/bills/nonexistent")
+        assert response.status_code == 404
+
+    def test_normalizes_unknown_classification(self):
+        bill = _bill_row(id="xyz-999", classification="invalid_label")
+        session = _make_session(bills=[bill], total=1)
+
+        app.dependency_overrides[get_session] = lambda: session
+        client = TestClient(app)
+
+        response = client.get("/api/bills/xyz-999")
+        assert response.status_code == 200
+        assert response.json()["classification"] == "unknown"
+
+
+class TestGetStats:
+    def test_returns_stats(self):
+        session = MagicMock(spec=Session)
+
+        total_result = MagicMock()
+        total_result.scalar.return_value = 10
+
+        classification_rows = [("favorable", 4), ("unfavorable", 3), ("needs_review", 3)]
+        source_rows = [("camara", 7), ("senado", 3)]
+        year_rows = [(2026, 8), (2025, 2)]
+
+        session.execute.side_effect = [
+            total_result,
+            MagicMock(all=lambda: classification_rows),
+            MagicMock(all=lambda: source_rows),
+            MagicMock(all=lambda: year_rows),
+        ]
+
+        app.dependency_overrides[get_session] = lambda: session
+        client = TestClient(app)
+
+        response = client.get("/api/stats")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["total_bills"] == 10
+        assert data["by_classification"]["favorable"] == 4
+        assert data["by_source"]["camara"] == 7
+        assert data["by_year"]["2026"] == 8
+
+    def test_handles_empty_db(self):
+        session = MagicMock(spec=Session)
+
+        empty_total = MagicMock()
+        empty_total.scalar.return_value = 0
+
+        session.execute.side_effect = [
+            empty_total,
+            MagicMock(all=lambda: []),
+            MagicMock(all=lambda: []),
+            MagicMock(all=lambda: []),
+        ]
+
+        app.dependency_overrides[get_session] = lambda: session
+        client = TestClient(app)
+
+        response = client.get("/api/stats")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["total_bills"] == 0
+        assert data["by_classification"] == {}
+
+
+class TestClassify:
+    def test_classifies_favorable(self):
+        client = TestClient(app)
+
+        response = client.post(
+            "/api/classify",
+            json={
+                "text": "Institui política nacional de mudanças climáticas "
+                        "e cria programa de reflorestamento."
+            },
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert "final_score" in data
+        assert data["classification"] in ("favorable", "needs_review", "unfavorable")
+        assert "keyword_score" in data["components"]
+        assert "evidence" in data
+
+    def test_classifies_unfavorable(self):
+        client = TestClient(app)
+
+        response = client.post(
+            "/api/classify",
+            json={
+                "text": "Flexibiliza licenciamento ambiental e anistia "
+                        "desmatamento e autoriza mineração em terra indígena."
+            },
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["classification"] == "unfavorable"
+        assert data["final_score"] >= 0.60
+
+    def test_classifies_neutral(self):
+        client = TestClient(app)
+
+        response = client.post(
+            "/api/classify",
+            json={"text": "Institui o Dia Nacional do Brigadeiro de Panela."},
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["classification"] == "needs_review"
+        assert 0.30 <= data["final_score"] < 0.60
+
+    def test_rejects_short_text(self):
+        client = TestClient(app)
+        response = client.post("/api/classify", json={"text": "curto"})
+        assert response.status_code == 422
+
+    def test_rejects_empty_text(self):
+        client = TestClient(app)
+        response = client.post("/api/classify", json={"text": ""})
+        assert response.status_code == 422
+
+
+class TestHealthCheck:
+    def test_health_ok(self):
+        client = TestClient(app)
+        response = client.get("/health")
+        assert response.status_code == 200
+        assert response.json()["status"] == "ok"
+        assert response.json()["service"] == "radar-ecologico"
+
+
+class TestBillResponseShape:
+    def test_serialization(self):
+        bill = _bill_row(id="serial-1")
+        session = _make_session(bills=[bill], total=1)
+
+        app.dependency_overrides[get_session] = lambda: session
+        client = TestClient(app)
+
+        response = client.get("/api/bills/serial-1")
+        assert response.status_code == 200
+        data = response.json()
+
+        assert isinstance(data["id"], str)
+        assert isinstance(data["number"], int)
+        assert isinstance(data["year"], int)
+        assert isinstance(data["keyword_score"], float)
+        assert isinstance(data["final_score"], float)
+        assert isinstance(data["presentation_date"], str)
+        assert isinstance(data["classified_at"], str)
+        assert isinstance(data["created_at"], str)
+        assert data["theme_ids"] == "48,54"
+        assert data["theme_names"] == "Meio Ambiente,Energia"
