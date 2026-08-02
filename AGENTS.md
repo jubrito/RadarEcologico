@@ -1,213 +1,206 @@
 # AGENTS.md — Radar Legislativo Ecológico
 
-> Instruções permanentes para agentes de IA (OpenCode, Cursor, Copilot, etc.) que desenvolvem este projeto. Leia antes de qualquer alteração.
+> Instruções para agentes de IA (OpenCode, Cursor, Copilot, etc.).
+> Leia antes de qualquer alteração. Contexto adicional em `.opencode/plans/`.
 
 ---
 
-## Missão do Projeto
+## Missão
 
-Identificar automaticamente Projetos de Lei (PLs) propostos no Congresso Nacional,
-Assembleias Legislativas e Câmaras Municipais, classificando-os em:
+Classificar automaticamente Projetos de Lei brasileiros relacionados à crise climática:
 
-- ✅ **Potencialmente ajuda a combater a crise climática** (favorável)
-- ❌ **Potencialmente piora a crise climática** (desfavorável)
-- ⚠️ **Requer revisão humana** (revisão necessária)
+| Label          | Score       | Significado                                       |
+| -------------- | ----------- | ------------------------------------------------- |
+| `favorable`    | < 0.30      | Potencialmente ajuda a combater a crise climática |
+| `needs_review` | 0.30 - 0.60 | Requer análise humana                             |
+| `unfavorable`  | ≥ 0.60      | Potencialmente intensifica a crise climática      |
 
-Âmbito: Brasil. Fontes primárias: APIs públicas da Câmara dos Deputados e Senado
-Federal. Expansão futura para legislativos estaduais e municipais.
+**Atenção:** o código e a API usam `favorable`. Se você gerar código com o label `transforming`, ele estará errado.
+
+Âmbito: Brasil. Fontes atuais: APIs da Câmara dos Deputados e Senado Federal.
 
 ---
 
 ## Princípios (siga sempre, sem exceção)
 
-### 1. Green Software First
+### 1. Green Software First (não negociável)
 
-- **Principios do green software**: Sempre priorize seguir os principios do green software (carbon efficiency, energy efficiency, carbon awarenes, hardware efficiency)
-- **Minimize computação**: prefira processamento em lote a tempo real. Classificação
-  roda 1x/dia via cron, não em cada request.
-- **Sem chamadas desnecessárias**: use pré-filtros da API (ex: `temas` da Câmara)
-  para reduzir requisições em ~90%.
-- **Single process sempre que possível**: o backend Python FastAPI serve API,
-  classificação e scraping — um processo, sem sidecars.
-- **Dark mode como padrão**: economiza energia em telas OLED/AMOLED.
-- **Modelos quantizados**: carregue BERT com int8 para reduzir RAM e consumo
-  energético em ~50%.
-- **Rode em off-peak**: GitHub Actions cron às 2h BRT (madrugada, grade menos
-  demandada).
-- **ISR no Next.js**: revalide páginas só quando dados mudam. Cache agressivo.
-- **Pergunte-se antes de cada decisão**: "isso consome menos ou mais energia?" Foque em consumir menos energia e emitir menos carbono.
+- **Principios do green software**: Sempre priorize seguir os principios do green software (carbon efficiency, energy efficiency, carbon awareness, hardware efficiency).
 - **IA eficiente**: minimize o uso de tokens, seja objetivo nas respostas, use os tokens de forma estratégica pra gastar menos energia/tempo.
+- Batch > real-time: pipeline roda 1x/dia via cron, não em cada request.
+- Use pré-filtros da API da Câmara (`temas=40|41|42`) para reduzir requisições em ~90%.
+- Single process: o backend Python FastAPI serve API, classificação e scraping.
+- Dark mode como padrão (economiza energia em OLED).
+- ISR no Next.js: revalide páginas só quando dados mudam.
+- Modelos quantizados (int8 BERT, fase 2).
+- GitHub Actions cron às 2h BRT (5h UTC, off-peak).
+- **Pergunte-se antes de cada decisão**: "isso consome menos ou mais energia?" Foque em consumir menos.
 
 ### 2. Simplicidade (KISS)
 
-- **Evite complexidade a todo custo**. Se um `if` resolve, não use strategy pattern.
-- **Sem design patterns sem problema concreto**
-- **Menos arquivos é melhor**: prefira poucos arquivos bem estruturados a muitos
-  arquivos com 10 linhas cada.
-- **Python puro sobre frameworks obscuros**: FastAPI + SQLAlchemy são o suficiente.
-  Não adicione Celery, Redis, RabbitMQ a menos que seja estritamente necessário.
-- **TypeScript estrito, mas sem exagero**: use `strict: true` no tsconfig.
-  Não crie tipos genéricos complexos sem necessidade real.
+- Se um `if` resolve, não use design patterns.
+- Sem abstração prematura. Sem Celery, Redis, RabbitMQ.
+- FastAPI + SQLAlchemy são o suficiente.
+- TypeScript `strict: true`, sem tipos genéricos complexos desnecessários.
 
 ### 3. Testabilidade
 
-- **Toda função de classificação deve ter testes** (keyword classifier, ensemble,
-  BERT wrapper).
-- **Todo scraper deve ter testes** com mocks das APIs externas (pytest + responses
-  ou httpx mock).
+- **Toda função de classificação deve ter testes** (keyword classifier, ensemble, BERT wrapper).
+- **Todo scraper deve ter testes** com mocks das APIs externas (pytest + httpx).
 - **Toda rota da API deve ter testes** (FastAPI TestClient + pytest-asyncio).
-- **Frontend**: testes unitarios com RTL+jst nos componentes, testes de integração para
-  fluxos críticos (vitest + testing-library).
-- **Cobertura mínima desejada**: 80%. Não bloqueie PR por cobertura, mas
-  escreva testes para cada nova feature (buscando cobrir os requisitos do codigo escrito).
-- **Use pytest.mark.parametrize** para testar múltiplas variações de ementas.
+- **Frontend**: testes com vitest + testing-library (ainda não configurado — TODO Sprint 1).
+- Cobertura desejada: 80%. Não bloqueia PR, mas escreva testes para novas features.
+- Use `pytest.mark.parametrize` para testar múltiplas variações de ementas.
 
 ### 4. Acessibilidade (WCAG 2.1 AA)
 
-- **Semântica HTML correta**: `<nav>`, `<main>`, `<article>`, `<section>` no lugar
-  de `<div>` genéricos.
-- **Labels em todo input/formulário**: use `<label htmlFor>` ou `aria-label` quando isso for melhorar a acessibilidade.
-- **Navegação por teclado**: todos os elementos interativos devem ser focáveis
-  e operáveis sem mouse e acessiveis considerando screen readers. Skip-to-content link.
-- **Contraste mínimo**: 4.5:1 para texto normal, 3:1 para texto grande.
-- **Screen readers**: use `aria-live` para atualizações dinâmicas, `role` adequado
-  em componentes customizados.
-- **Testes**: No front-end, não use datatestid pois buscar o elemento usando componentes acessiveis ajudará a testar acessibilidade
-- **Gráficos**: toda visualização de dados deve ter uma tabela/texto alternativo.
-  Não dependa apenas de cor ou algo visual para transmitir informação.
-- **Teste com VoiceOver (macOS) antes de deploy**.
+- HTML semântico: `<nav>`, `<main>`, `<article>`, `<section>`, não `<div>` genéricos.
+- Labels em todo input: `<label htmlFor>` ou `aria-label`. Search inputs devem estar em `<form>`.
+- Skip-to-content link, navegação por teclado, `aria-live` para updates dinâmicos.
+- Contraste ≥ 4.5:1 (texto normal), ≥ 3:1 (texto grande).
+- Gráficos devem ter tabela/texto alternativo. Não dependa só de cor.
+- **Não use `data-testid`** — busque elementos por roles/labels acessíveis.
+- Teste com VoiceOver (macOS) antes de deploy.
 
 ### 5. Escalabilidade (desde o dia 1)
 
 - **Paginação em toda lista**: nunca retorne mais de 100 itens sem paginação.
-- **Índices no PostgreSQL**: crie índices para colunas usadas em filtros e
-  ordenação (`classification`, `year`, `source`, `final_score`).
-- **Idempotência nos scrapers**: rodar o pipeline 2x seguidas não deve duplicar
-  dados. Use `ON CONFLICT (source, external_id) DO UPDATE`.
-- **Materialized views** para dashboards e agregações pesadas.
-- **Connection pooling**: use o pool do SQLAlchemy (padrão 5 conexões no
-  pool_size, suficiente para este projeto).
+- **Índices no PostgreSQL**: crie índices para colunas usadas em filtros e ordenação (`classification`, `year`, `source`, `final_score`).
+- **Idempotência nos scrapers**: rodar o pipeline 2x seguidas não deve duplicar dados. Use `ON CONFLICT (source, external_id) DO UPDATE`.
+- **Connection pooling**: use o pool do SQLAlchemy (padrão 5 conexões, suficiente).
 
 ### 6. Manutenibilidade
 
-- **Type hints em todo código Python**: funções, métodos, variáveis complexas.
-- **TypeScript strict mode**: sem `any` exceto em wrappers de API externa.
-- **Docstrings em funções públicas**: descreva o que a função faz, parâmetros,
-  retorno. Não descreva o óbvio.
-- **Nomes claros**: `classify_bill_keywords()` — não `process()`, `handle()`,
-  `do_stuff()`. Se o código não esta muito claro, extraia constantes/variaveis/funções com nomes significativos que ajudem a exclarecer o que esta sendo executado.
-- **Sem código comentado**: se não é usado, delete. Git guarda histórico.
-- **README atualizado**: sempre que adicionar uma nova feature, se pergunte
-  se o README ainda está correto.
-- **Um comando para rodar tudo**: `make dev` sobe backend + frontend.
-  `make test` roda todos os testes.
+- Type hints em todo Python. TypeScript sem `any` (exceto wrappers de API externa).
+- Nomes claros: `classify_bill_keywords()`, não `process()` ou `handle()`. Se o código não está claro, extraia constantes/variáveis/funções com nomes significativos.
+- Sem código comentado — delete, git guarda histórico.
+- Docstrings em funções públicas (o que faz, parâmetros, retorno).
+- README atualizado: sempre que adicionar uma nova feature, verifique se o README continua correto.
 
 ---
 
-## Stack Tecnológica
+## Stack (versões reais instaladas)
 
-| Camada   | Tecnologia                                   | Justificativa                                                  |
-| -------- | -------------------------------------------- | -------------------------------------------------------------- |
-| Backend  | Python 3.12, FastAPI                         | Ecossistema AI (transformers, datasets), async nativo, simples |
-| AI/NLP   | Hugging Face, BERTimbau                      | Modelo PT-BR, open-source, gratuito                            |
-| Banco    | PostgreSQL (Supabase free)                   | Full-text search em português, confiável, gratuito             |
-| ORM      | SQLAlchemy 2.0 + Alembic                     | Maduro, bem documentado, async support                         |
-| Frontend | Next.js 14 (App Router), Tailwind, shadcn/ui | SSR/ISR, dark mode nativo                                      |
-| Pipeline | GitHub Actions cron                          | Gratuito para projetos públicos, 2000 min/mês                  |
-| Hosting  | Vercel (frontend), Fly.io (backend)          | Free tiers generosos, deploy simples                           |
-
----
-
-## Classificação (3 labels)
-
-| Label          | Score       | Significado                                               |
-| -------------- | ----------- | --------------------------------------------------------- |
-| `favorable`    | < 0.30      | ✅ Potencialmente Ajuda a combater a catástrofe climática |
-| `needs_review` | 0.30 - 0.60 | ⚠️ Requer análise humana                                  |
-| `unfavorable`  | ≥ 0.60      | ❌ Potencialmente intensifica a catástrofe climática      |
-
-O ensemble combina:
-
-- **Keyword classifier (peso 0.40)**: alta precisão, zero custo computacional
-- **BERTimbau fine-tuned (peso 0.60)**: nuance e contexto, adicionado na Fase 2
+| Camada   | Tecnologia                                                                    |
+| -------- | ----------------------------------------------------------------------------- |
+| Backend  | Python 3.12+, FastAPI                                                         |
+| AI       | Keyword classifier (fase 1). BERTimbau (fase 2)                               |
+| Banco    | SQLite (dev local). PostgreSQL/Supabase (prod)                                |
+| ORM      | SQLAlchemy 2.0 (sem Alembic — tabelas criadas via `Base.metadata.create_all`) |
+| Frontend | Next.js **16**, React 19, Turbopack                                           |
+| CSS      | Tailwind **v4** (CSS-first, sem `tailwind.config.ts`)                         |
+| UI       | shadcn/ui **v4** (style "base-nova", `@base-ui/react`, **não** Radix)         |
+| Pipeline | GitHub Actions cron, workflow_dispatch manual                                 |
 
 ---
 
-## Fontes de Dados
+## Gotchas (agentes frequentemente erram isto)
 
-### APIs Públicas (fase 1 — federal)
+1. **`shadcn/ui v4 usa @base-ui/react`, NÃO Radix UI.**
+   - Button: use `render={<Link />}` no lugar de `asChild`.
+   - Badge, Select, Input também têm APIs diferentes do Radix.
 
-- **Câmara dos Deputados**: `https://dadosabertos.camara.leg.br/api/v2/`
-  - Endpoint principal: `/proposicoes` (filtro por `siglaTipo`, `ano`, `temas`)
-  - Temas relevantes: 40 (Meio Ambiente), 41 (Recursos Hídricos), 42 (Energia)
-- **Senado Federal**: `https://legis.senado.leg.br/dadosabertos/`
-  - Endpoint: `/materia/pesquisa/lista` (filtro por `ano`).
-  - Atenção: A documentação do Senado indica que este serviço pode ser descontinuado em breve, sendo substituído por uma nova versão. Apesar do monitoramento manual de possíveis atualizações ser realizado, prepare-se para um cenário em que isso aconteça sem que todo o sistema quebre de forma inesperada e sem feedback.
+2. **Tailwind v4 é CSS-first.** O theming está em `globals.css` com `@theme {}`. Não existe `tailwind.config.ts`.
 
-### Dados Rotulados (para treino e validação)
+3. **ESLint v9 flat config** (`eslint.config.mjs`), não `.eslintrc.*`.
 
-- **Observatório do Clima** — "Pacote da Destruição" (~70 PLs com labels manuais)
-  - **Agenda legislativa 2026**: `https://oc.eco.br/wp-content/uploads/2026/07/OC-Agenda-Legislativa-2026_Versao-Web.pdf`
-  - **Observatorio do clima**: `https://oc.eco.br/`
-- **Plataforma CIPÓ** — Radar Legislativo Socioambiental `https://plataformacipo.org/`
-- **Formato**: CSV com colunas `external_id, source, ementa, manual_classification`
+4. **Tabelas são criadas automaticamente** no startup (`Base.metadata.create_all`). Não existem migrações Alembic. Se precisar de migrações, configure Alembic primeiro.
+
+5. **Não existe Makefile.** Os comandos `make dev`/`make test` não funcionam. Use os comandos abaixo.
+
+6. **`.env` vai em `backend/`**, não na raiz.
 
 ---
 
 ## Comandos
 
 ```bash
-# Backend
-source backend/.venv/bin/activate.   # Run from root
-uvicorn backend.main:app --reload    # Dev server (http://localhost:8000)
-pytest backend/tests -v              # Run all tests (ou: cd backend && pytest -v)
-python -m backend.pipeline           # Run pipeline manually (exige PostgreSQL)
+# Backend — sempre ative a venv primeiro (a partir da raiz do projeto)
+source backend/.venv/bin/activate
+uvicorn backend.main:app --reload          # API em http://localhost:8000
+pytest backend/tests -v                    # Testes (20 passando)
+python -m backend.pipeline                 # Pipeline manual (classifica + popula banco)
 
 # Frontend
 cd frontend
-npm run dev                        # Dev server (localhost:3000)
-npm run build && npm start         # Production build
-npm run test                       # Run tests (vitest)
+npm run dev                                # http://localhost:3000
+npm run build && npm start                 # Produção
+npm run lint                               # ESLint
 
-# Database
-source backend/.venv/bin/activate
-alembic upgrade head               # Apply migrations (requer alembic.ini + env.py)
-alembic revision --autogenerate    # Create migration from model changes
+# Database local (SQLite — zero setup)
+# Basta configurar backend/.env com: DATABASE_URL=sqlite:///./radar.db
+# O arquivo radar.db é criado na raiz automaticamente no primeiro startup.
+
+# CI
+# Roda automaticamente às 2h BRT (5h UTC). Testar manualmente:
+# gh workflow run "Daily Climate Radar Pipeline"
 ```
 
 ---
 
-## Estrutura de Diretórios
+## Estrutura (arquivos que realmente existem)
 
 ```
 radar-ecologico/
-├── AGENTS.md                      # ← este arquivo
+├── AGENTS.md
 ├── README.md
+├── .opencode/plans/              # Contexto de sessão para IA
 ├── backend/
-│   ├── main.py                    # FastAPI entrypoint
-│   ├── api/routes.py              # Endpoints REST
-│   ├── scrapers/
-│   │   ├── camara.py              # Câmara dos Deputados
-│   │   └── senado.py              # Senado Federal
+│   ├── main.py                   # FastAPI entrypoint
+│   ├── api/routes.py             # GET /api/bills, /api/stats, POST /api/classify
 │   ├── classifiers/
-│   │   ├── keywords.py            # Classificador por palavras-chave
-│   │   ├── bert_model.py          # Wrapper BERT (fase 2)
-│   │   └── ensemble.py            # Combina keywords + BERT
-│   ├── keywords/taxonomy.py       # Taxonomia de palavras-chave climáticas
-│   ├── database.py                # Conexão DB + session
-│   ├── models.py                  # ORM (Bill, BillSnapshot)
-│   ├── pipeline.py                # Orquestrador diário
-│   ├── requirements.txt
+│   │   ├── keywords.py           # Classificador por palavras-chave
+│   │   └── ensemble.py           # Ensemble (fase 1: 100% keyword)
+│   ├── keywords/taxonomy.py      # Taxonomia de termos climáticos
+│   ├── scrapers/
+│   │   ├── camara.py             # Câmara dos Deputados
+│   │   └── senado.py             # Senado Federal
+│   ├── database.py               # SQLAlchemy engine + session
+│   ├── models.py                 # ORM: Bill, BillSnapshot
+│   ├── pipeline.py               # Orquestrador diário
 │   ├── pyproject.toml
+│   ├── requirements.txt
 │   └── tests/
+│       ├── test_classifier.py    # 11 testes (parametrized)
+│       └── test_scrapers.py      # 4 testes (keyword matching)
 ├── frontend/
-│   ├── src/app/                   # Next.js App Router
-│   ├── src/components/            # Componentes React
-│   └── src/lib/api.ts             # Cliente TypeScript p/ backend
-├── notebooks/
-│   └── fine_tune_bert.ipynb       # Fine-tuning BERTimbau (Colab)
-├── data/
-│   └── labeled_bills.csv          # PLs rotuladas manualmente
+│   ├── src/app/                  # Next.js App Router
+│   │   ├── page.tsx              # Dashboard (stats + recent bills)
+│   │   └── bills/                # Lista + detalhe [id]
+│   ├── src/components/           # BillCard, ClassificationBadge, StatCard, ui/
+│   ├── src/lib/api.ts            # Cliente TypeScript (getBills, getStats, etc.)
+│   ├── src/lib/utils.ts          # cn(), formatDate(), formatSource(), cores
+│   ├── components.json           # shadcn/ui v4 config (base-nova)
+│   ├── eslint.config.mjs         # ESLint v9 flat config
+│   └── next.config.ts
+├── data/                         # PLs rotuladas (CSV) — ainda vazio
+├── notebooks/                    # Fine-tuning BERT (fase 2) — ainda vazio
 └── .github/workflows/
-    └── daily-pipeline.yml         # Cron diário
+    └── daily-pipeline.yml        # Cron 2h BRT + manual trigger
 ```
+
+---
+
+## Fontes de Dados
+
+### APIs (fase 1 — federal)
+
+- **Câmara**: `https://dadosabertos.camara.leg.br/api/v2/proposicoes`
+  - Filtros: `siglaTipo=PL|PLP|PEC|MPV`, `ano`, `temas=41|44|48|51|54|61|64|70`
+  - Lista completa: `https://dadosabertos.camara.leg.br/api/v2/referencias/proposicoes/codTema`
+- **Senado**: `https://legis.senado.leg.br/dadosabertos/materia/pesquisa/lista`
+  - Este serviço pode ser descontinuado. Prepare fallbacks.
+
+### Dados Rotulados (treino/validação)
+
+- Observatório do Clima: "Pacote da Destruição" (~70 PLs)
+- Plataforma CIPÓ: Radar Legislativo Socioambiental
+- Formato: CSV (`external_id, source, ementa, manual_classification`)
+
+---
+
+## Pipeline
+
+O ensemble atual (fase 1) usa 100% keyword classifier. A fase 2 adicionará BERTimbau com pesos: keyword 0.40 + BERT 0.60.
+
+Ordem do pipeline: scrape APIs → filtrar por keywords climáticas → deduplicar contra DB (`ON CONFLICT (source, external_id) DO UPDATE`) → classificar → salvar.
