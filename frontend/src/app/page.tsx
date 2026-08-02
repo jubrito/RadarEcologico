@@ -13,6 +13,9 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<StatsResponse | null>(null);
   const [recentBills, setRecentBills] = useState<Bill[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const showRecentBills = recentBills.length > 0;
+  const showEmptyBills = !showRecentBills && stats;
+  const showLoadingBills = !showRecentBills && !showEmptyBills;
 
   useEffect(() => {
     async function load() {
@@ -55,7 +58,7 @@ export default function DashboardPage() {
         aria-label="Estatísticas"
         className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10"
       >
-        {stats ? (
+        {stats && (
           <>
             <StatCard
               title="Combate à crise"
@@ -76,7 +79,8 @@ export default function DashboardPage() {
               variant="unfavorable"
             />
           </>
-        ) : (
+        )}
+        {!stats && (
           <>
             <Skeleton className="h-28 rounded-xl" />
             <Skeleton className="h-28 rounded-xl" />
@@ -94,18 +98,20 @@ export default function DashboardPage() {
           />
         </div>
 
-        {recentBills.length > 0 ? (
+        {showRecentBills && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {recentBills.map((bill) => (
               <BillCard key={bill.id} bill={bill} />
             ))}
           </div>
-        ) : stats ? (
+        )}
+        {showEmptyBills && (
           <p className="text-muted-foreground text-sm">
             Nenhum projeto de lei classificado ainda. Execute o pipeline diário
             para popular o banco.
           </p>
-        ) : (
+        )}
+        {showLoadingBills && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {Array.from({ length: 3 }).map((_, i) => (
               <Skeleton key={i} className="h-48 rounded-xl" />
