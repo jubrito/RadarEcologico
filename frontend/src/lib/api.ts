@@ -1,7 +1,7 @@
 import { CLASSIFICATION } from "./classifications";
+import type { Classification, BillQueryParams, ClassifyComponents } from "./types";
 
-export type Classification =
-  (typeof CLASSIFICATION)[keyof typeof CLASSIFICATION];
+export type { Classification };
 
 export interface Bill {
   id: string;
@@ -46,7 +46,7 @@ export interface ClassifyResponse {
   final_score: number;
   classification: string;
   confidence: string;
-  components: Record<string, number>;
+  components: ClassifyComponents;
   evidence: string[];
 }
 
@@ -63,29 +63,21 @@ async function fetchAPI<T>(path: string, params?: URLSearchParams): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-const VALID_CLASSIFICATIONS: ReadonlySet<string> = new Set([
-  "favorable",
-  "needs_review",
-  "unfavorable",
+const KNOWN_CLASSIFICATIONS: ReadonlySet<string> = new Set([
+  CLASSIFICATION.favorable,
+  CLASSIFICATION.needs_review,
+  CLASSIFICATION.unfavorable,
 ]);
 
 /** Ensures classification is always a known value, defaulting to "unknown". */
 function normalizeBill(bill: Bill): Bill {
-  if (!bill.classification || !VALID_CLASSIFICATIONS.has(bill.classification)) {
-    bill.classification = "unknown";
+  if (!KNOWN_CLASSIFICATIONS.has(bill.classification ?? "")) {
+    bill.classification = CLASSIFICATION.unknown;
   }
   return bill;
 }
 
-export async function getBills(params?: {
-  page?: number;
-  limit?: number;
-  classification?: string;
-  source?: string;
-  year?: number;
-  search?: string;
-  theme?: string;
-}): Promise<BillsResponse> {
+export async function getBills(params?: BillQueryParams): Promise<BillsResponse> {
   const searchParams = new URLSearchParams();
   if (params?.page) searchParams.set("page", String(params.page));
   if (params?.limit) searchParams.set("limit", String(params.limit));

@@ -1,19 +1,6 @@
-import type { Classification } from "./api";
+import type { Classification, ClassificationStyle } from "./types";
 
-export const STYLE_MAP: Record<
-  Classification,
-  {
-    gradient: string;
-    badge: string;
-    border: string;
-    fadedBg: string;
-    hoverFadedBg: string;
-    hoverSolidBg: string;
-    textAccent: string;
-    bgSolid: string;
-    label: string;
-  }
-> = {
+export const STYLE_MAP: Record<Classification, ClassificationStyle> = {
   favorable: {
     gradient: "from-emerald-500 to-emerald-300",
     badge: "bg-emerald-600/20 text-emerald-400",

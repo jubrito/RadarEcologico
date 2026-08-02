@@ -39,16 +39,7 @@ CLIMATE_THEME_MAP: dict[int, str] = {
     76: "Direito e Justiça",
 }
 
-from backend.keywords.taxonomy import NEGATIVE_KEYWORDS, POSITIVE_KEYWORDS
-
-
-def _ementa_matches_climate(ementa: str) -> bool:
-    """Check if an ementa contains any climate-related keywords."""
-    text = ementa.lower()
-    for kw in POSITIVE_KEYWORDS + NEGATIVE_KEYWORDS:
-        if kw in text:
-            return True
-    return False
+from backend.keywords.taxonomy import ementa_matches_climate
 
 
 def fetch_camara_bills(
@@ -97,7 +88,7 @@ def fetch_camara_bills(
 
             for prop in dados:
                 ementa = prop.get("ementa", "")
-                if not ementa or not _ementa_matches_climate(ementa):
+                if not ementa or not ementa_matches_climate(ementa):
                     continue
 
                 external_id = str(prop.get("id", ""))

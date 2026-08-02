@@ -8,16 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ClassificationBadge } from "@/components/classification-badge";
 import { getBill, type Bill } from "@/lib/api";
-import { formatDate, formatSource } from "@/lib/utils";
+import { formatDate, formatSource, scoreToClassification } from "@/lib/utils";
 import { STYLE_MAP } from "@/lib/style";
-
-function scoreToClassification(
-  score: number,
-): "favorable" | "needs_review" | "unfavorable" {
-  if (score < 0.3) return "favorable";
-  if (score >= 0.6) return "unfavorable";
-  return "needs_review";
-}
 
 export default function BillDetailPage({
   params,

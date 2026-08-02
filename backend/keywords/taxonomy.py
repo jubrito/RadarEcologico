@@ -2,7 +2,7 @@
 Climate keyword taxonomy for Brazilian legislative bills.
 
 Three tiers of signals:
-  Tier 1 — Keywords: high-confindence terms indicating climate stance
+  Tier 1 — Keywords: high-confidence terms indicating climate stance
   Tier 2 — Patterns: regex patterns that capture legislative intent
   Tier 3 — Modifiers: verbs that amplify/negate the signal
 
@@ -177,3 +177,11 @@ NEGATIVE_MODIFIERS: list[str] = [
     "facilita",
     "simplifica",
 ]
+
+
+def ementa_matches_climate(ementa: str) -> bool:
+    text = ementa.lower()
+    for kw in POSITIVE_KEYWORDS + NEGATIVE_KEYWORDS:
+        if kw in text:
+            return True
+    return False

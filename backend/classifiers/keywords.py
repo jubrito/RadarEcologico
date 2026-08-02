@@ -16,12 +16,18 @@ from backend.keywords.taxonomy import (
     negative_patterns,
     positive_patterns,
 )
+from backend.types import (
+    ClassificationLabel,
+    FAVORABLE_MAX,
+    NEUTRAL_DEFAULT,
+    UNFAVORABLE_MIN,
+)
 
 
 @dataclass
 class ClassificationResult:
     score: float
-    classification: str  # 'favorable' | 'unfavorable' | 'needs_review'
+    classification: ClassificationLabel
     evidence: list[str] = field(default_factory=list)
     positive_hits: int = 0
     negative_hits: int = 0
@@ -67,9 +73,9 @@ def classify_keywords(ementa: str) -> ClassificationResult:
 
     score = _compute_score(pos_hits, neg_hits, pos_patterns, neg_patterns)
 
-    if score >= 0.60:
+    if score >= UNFAVORABLE_MIN:
         classification = "unfavorable"
-    elif score < 0.30:
+    elif score < FAVORABLE_MAX:
         classification = "favorable"
     else:
         classification = "needs_review"
@@ -97,7 +103,7 @@ def _compute_score(
 
     # No climate signals at all — default to neutral center.
     if pos_hits == 0 and neg_hits == 0 and pos_patterns == 0 and neg_patterns == 0:
-        return 0.45
+        return NEUTRAL_DEFAULT
 
     base_score = 0.35
 

@@ -13,10 +13,10 @@ from sqlalchemy.orm import Session
 from backend.classifiers.ensemble import EnsembleResult, classify_ensemble
 from backend.database import get_session
 from backend.models import Bill
+from backend.types import ClassificationLabelWithUnknown, ComponentsDict
 
 router = APIRouter(prefix="/api")
 
-# Valid classification values the frontend expects.
 _VALID_CLASSIFICATIONS = frozenset({"favorable", "needs_review", "unfavorable"})
 
 
@@ -73,9 +73,9 @@ class ClassifyRequest(BaseModel):
 
 class ClassifyResponse(BaseModel):
     final_score: float
-    classification: str
+    classification: ClassificationLabelWithUnknown
     confidence: str
-    components: dict[str, float]
+    components: ComponentsDict
     evidence: list[str]
 
 
@@ -99,7 +99,7 @@ def list_bills(
     search: Optional[str] = None,
     theme: Optional[str] = None,
     session: Session = Depends(get_session),
-):
+) -> BillsResponse:
     """List classified bills with filters and pagination."""
     query = select(Bill)
 
@@ -131,7 +131,7 @@ def list_bills(
 
 
 @router.get("/bills/{bill_id}", response_model=BillOut)
-def get_bill(bill_id: str, session: Session = Depends(get_session)):
+def get_bill(bill_id: str, session: Session = Depends(get_session)) -> BillOut:
     """Get full bill details."""
     bill = session.get(Bill, bill_id)
     if not bill:
@@ -140,7 +140,7 @@ def get_bill(bill_id: str, session: Session = Depends(get_session)):
 
 
 @router.get("/stats", response_model=StatsResponse)
-def get_stats(session: Session = Depends(get_session)):
+def get_stats(session: Session = Depends(get_session)) -> StatsResponse:
     """Dashboard statistics."""
     total = session.execute(select(func.count(Bill.id))).scalar() or 0
 
@@ -177,7 +177,7 @@ def get_stats(session: Session = Depends(get_session)):
 
 
 @router.post("/classify", response_model=ClassifyResponse)
-def classify_bill(request: ClassifyRequest):
+def classify_bill(request: ClassifyRequest) -> ClassifyResponse:
     """Classify a bill ementa on-demand. Useful for testing and manual entry."""
     result: EnsembleResult = classify_ensemble(request.text)
     return ClassifyResponse(
