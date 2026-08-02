@@ -7,12 +7,13 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field, field_serializer, model_validator
-from sqlalchemy import desc, func, select
+from sqlalchemy import desc, func, or_, select
 from sqlalchemy.orm import Session
 
 from backend.classifiers.ensemble import EnsembleResult, classify_ensemble
 from backend.database import get_session
 from backend.models import Bill
+from backend.scrapers.camara import CLIMATE_THEME_MAP
 from backend.types import ClassificationLabelWithUnknown, ComponentsDict
 
 router = APIRouter(prefix="/api")
@@ -84,6 +85,7 @@ class StatsResponse(BaseModel):
     by_classification: dict[str, int]
     by_source: dict[str, int]
     by_year: dict[str, int]
+    by_theme: dict[str, int]
 
 
 # --- Endpoints ---
@@ -112,7 +114,10 @@ def list_bills(
     if search:
         query = query.where(Bill.ementa.ilike(f"%{search}%"))
     if theme:
-        query = query.where(Bill.theme_ids.ilike(f"%{theme}%"))
+        theme_codes = [t.strip() for t in theme.split(",") if t.strip()]
+        if theme_codes:
+            conditions = [Bill.theme_ids.ilike(f"%{t}%") for t in theme_codes]
+            query = query.where(or_(*conditions))
 
     count_query = select(func.count()).select_from(query.subquery())
     total = session.execute(count_query).scalar() or 0
@@ -168,11 +173,21 @@ def get_stats(session: Session = Depends(get_session)) -> StatsResponse:
     for yr, count in rows:
         by_year[str(yr)] = count
 
+    by_theme: dict[str, int] = {}
+    for code in CLIMATE_THEME_MAP:
+        count = session.execute(
+            select(func.count(Bill.id)).where(
+                Bill.theme_ids.ilike(f"%{code}%")
+            )
+        ).scalar() or 0
+        by_theme[str(code)] = count
+
     return StatsResponse(
         total_bills=total,
         by_classification=by_class,
         by_source=by_source,
         by_year=by_year,
+        by_theme=by_theme,
     )
 
 

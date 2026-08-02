@@ -201,12 +201,15 @@ class TestGetStats:
         source_rows = [("camara", 7), ("senado", 3)]
         year_rows = [(2026, 8), (2025, 2)]
 
+        theme_result = MagicMock()
+        theme_result.scalar.return_value = 1
+
         session.execute.side_effect = [
             total_result,
             MagicMock(all=lambda: classification_rows),
             MagicMock(all=lambda: source_rows),
             MagicMock(all=lambda: year_rows),
-        ]
+        ] + [theme_result] * 15
 
         app.dependency_overrides[get_session] = lambda: session
         client = TestClient(app)
@@ -218,6 +221,7 @@ class TestGetStats:
         assert data["by_classification"]["favorable"] == 4
         assert data["by_source"]["camara"] == 7
         assert data["by_year"]["2026"] == 8
+        assert data["by_theme"]["48"] == 1
 
     def test_handles_empty_db(self):
         session = MagicMock(spec=Session)
@@ -225,12 +229,15 @@ class TestGetStats:
         empty_total = MagicMock()
         empty_total.scalar.return_value = 0
 
+        empty_theme = MagicMock()
+        empty_theme.scalar.return_value = 0
+
         session.execute.side_effect = [
             empty_total,
             MagicMock(all=lambda: []),
             MagicMock(all=lambda: []),
             MagicMock(all=lambda: []),
-        ]
+        ] + [empty_theme] * 15
 
         app.dependency_overrides[get_session] = lambda: session
         client = TestClient(app)
@@ -240,6 +247,44 @@ class TestGetStats:
         data = response.json()
         assert data["total_bills"] == 0
         assert data["by_classification"] == {}
+
+    def test_by_theme_returns_counts(self):
+        session = MagicMock(spec=Session)
+
+        total_result = MagicMock()
+        total_result.scalar.return_value = 5
+
+        theme_result = MagicMock()
+        theme_result.scalar.return_value = 3
+
+        session.execute.side_effect = [
+            total_result,
+            MagicMock(all=lambda: []),
+            MagicMock(all=lambda: []),
+            MagicMock(all=lambda: []),
+        ] + [theme_result] * 15
+
+        app.dependency_overrides[get_session] = lambda: session
+        client = TestClient(app)
+
+        response = client.get("/api/stats")
+        assert response.status_code == 200
+        data = response.json()
+        assert "by_theme" in data
+        assert data["by_theme"]["48"] == 3
+
+
+class TestMultiThemeFilter:
+    def test_filters_by_comma_separated_themes(self):
+        bills = [_bill_row(theme_ids="48,54"), _bill_row(theme_ids="64")]
+        session = _make_session(bills=bills, total=2)
+
+        app.dependency_overrides[get_session] = lambda: session
+        client = TestClient(app)
+
+        response = client.get("/api/bills?theme=48,64")
+        assert response.status_code == 200
+        assert response.json()["total"] == 2
 
 
 class TestClassify:
