@@ -1,3 +1,8 @@
+import { CLASSIFICATION } from "./classifications";
+
+export type Classification =
+  (typeof CLASSIFICATION)[keyof typeof CLASSIFICATION];
+
 export interface Bill {
   id: string;
   external_id: string;
@@ -16,7 +21,7 @@ export interface Bill {
   keyword_score?: number | null;
   bert_score?: number | null;
   final_score?: number | null;
-  classification?: string | null;
+  classification: Classification;
   theme_ids?: string | null;
   theme_names?: string | null;
   classified_at?: string | null;
@@ -58,6 +63,20 @@ async function fetchAPI<T>(path: string, params?: URLSearchParams): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+const VALID_CLASSIFICATIONS: ReadonlySet<string> = new Set([
+  "favorable",
+  "needs_review",
+  "unfavorable",
+]);
+
+/** Ensures classification is always a known value, defaulting to "unknown". */
+function normalizeBill(bill: Bill): Bill {
+  if (!bill.classification || !VALID_CLASSIFICATIONS.has(bill.classification)) {
+    bill.classification = "unknown";
+  }
+  return bill;
+}
+
 export async function getBills(params?: {
   page?: number;
   limit?: number;
@@ -76,11 +95,14 @@ export async function getBills(params?: {
   if (params?.year) searchParams.set("year", String(params.year));
   if (params?.search) searchParams.set("search", params.search);
   if (params?.theme) searchParams.set("theme", params.theme);
-  return fetchAPI<BillsResponse>("/bills", searchParams);
+  const data = await fetchAPI<BillsResponse>("/bills", searchParams);
+  data.items = data.items.map(normalizeBill);
+  return data;
 }
 
 export async function getBill(id: string): Promise<Bill> {
-  return fetchAPI<Bill>(`/bills/${id}`);
+  const bill = await fetchAPI<Bill>(`/bills/${id}`);
+  return normalizeBill(bill);
 }
 
 export async function getStats(): Promise<StatsResponse> {

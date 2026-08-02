@@ -9,6 +9,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ClassificationBadge } from "@/components/classification-badge";
 import { getBill, type Bill } from "@/lib/api";
 import { formatDate, formatSource } from "@/lib/utils";
+import { COLORS, shade } from "@/lib/style";
+
+function scoreToClassification(
+  score: number,
+): "favorable" | "needs_review" | "unfavorable" {
+  if (score < 0.3) return "favorable";
+  if (score >= 0.6) return "unfavorable";
+  return "needs_review";
+}
 
 export default function BillDetailPage({
   params,
@@ -153,12 +162,18 @@ export default function BillDetailPage({
       {bill.final_score != null && (
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-base">Classificação de Risco Climático</CardTitle>
+            <CardTitle className="text-base">
+              Classificação de Risco Climático
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex justify-between text-xs text-muted-foreground mb-1.5">
-              <span className="text-emerald-500">Favorável ao clima</span>
-              <span className="text-red-500">Prejudicial ao clima</span>
+              <span className={`text-${shade(COLORS.favorable, 400)}`}>
+                Favorável ao clima
+              </span>
+              <span className={`text-${shade(COLORS.unfavorable, 400)}`}>
+                Prejudicial ao clima
+              </span>
             </div>
             <div className="flex items-center gap-4 mb-3">
               <div
@@ -170,13 +185,7 @@ export default function BillDetailPage({
                 aria-label={`Risco climático: ${Math.round(bill.final_score * 100)}%`}
               >
                 <div
-                  className={`h-full rounded-full transition-all ${
-                    bill.final_score < 0.3
-                      ? "bg-emerald-500"
-                      : bill.final_score >= 0.6
-                        ? "bg-red-500"
-                        : "bg-amber-500"
-                  }`}
+                  className={`h-full rounded-full transition-all bg-${COLORS[scoreToClassification(bill.final_score)]}`}
                   style={{ width: `${bill.final_score * 100}%` }}
                 />
               </div>
@@ -190,8 +199,8 @@ export default function BillDetailPage({
               {bill.classification === "unfavorable" &&
                 "Alto potencial de dano climático — a proposta tende a intensificar a crise do clima."}
               {bill.classification === "needs_review" &&
-                "Impacto climático incerto — requer análise humana para determinar o efeito da proposta."}
-              {" "}Quanto maior o percentual, maior o risco.
+                "Impacto climático incerto — requer análise humana para determinar o efeito da proposta."}{" "}
+              Quanto maior o percentual, maior o risco.
             </p>
             <p className="text-xs text-muted-foreground mt-1">
               Classificado em {formatDate(bill.classified_at)}

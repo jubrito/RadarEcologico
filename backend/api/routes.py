@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel, Field, field_serializer
+from pydantic import BaseModel, Field, field_serializer, model_validator
 from sqlalchemy import desc, func, select
 from sqlalchemy.orm import Session
 
@@ -15,6 +15,9 @@ from backend.database import get_session
 from backend.models import Bill
 
 router = APIRouter(prefix="/api")
+
+# Valid classification values the frontend expects.
+_VALID_CLASSIFICATIONS = frozenset({"favorable", "needs_review", "unfavorable"})
 
 
 # --- Pydantic schemas ---
@@ -51,6 +54,13 @@ class BillOut(BaseModel):
         if value is None:
             return None
         return value.isoformat()
+
+    @model_validator(mode="after")
+    def normalize_classification(self) -> "BillOut":
+        """Ensure classification is always a known value."""
+        if self.classification not in _VALID_CLASSIFICATIONS:
+            self.classification = "unknown"
+        return self
 
 
 class BillsResponse(BaseModel):
