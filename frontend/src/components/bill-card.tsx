@@ -10,11 +10,10 @@ export function BillCard({ bill }: { bill: Bill }) {
     <Link href={`/bills/${bill.id}`}>
       <article
         className={mergeStyles(
-          "group rounded-xl border overflow-hidden h-full",
+          "group rounded-xl overflow-hidden h-full",
           "bg-card transition-all cursor-pointer",
           "hover:shadow-lg hover:-translate-y-0.5",
           style.hoverSolidBg,
-          style.border,
         )}
       >
         <div className="p-4 space-y-2">
