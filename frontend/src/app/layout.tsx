@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Lexend, Geist_Mono, DM_Serif_Display } from "next/font/google";
-import Link from "next/link";
+import { MainNav } from "@/components/main-nav";
 import {
   SITE_TITLE,
   SITE_SUBTITLE,
@@ -55,20 +55,7 @@ export default function RootLayout({
             aria-label="Navegação principal"
             className="border-b border-border bg-card/80 backdrop-blur"
           >
-            <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-              <Link
-                href="/"
-                className="font-semibold text-lg hover:text-primary transition-colors"
-              >
-                {SITE_TITLE}
-              </Link>
-              <Link
-                href="/bills"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Projetos de Lei
-              </Link>
-            </div>
+            <MainNav />
           </nav>
         </header>
 
