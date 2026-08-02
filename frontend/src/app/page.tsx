@@ -61,21 +61,24 @@ export default function DashboardPage() {
         {stats && (
           <>
             <StatCard
-              title="Combate à crise"
+              prefix="PLs potencialmente responsáveis por "
+              tema="combater a crise climática"
               value={stats.by_classification.favorable || 0}
-              description="PLs que ajudam o clima"
+              desc="Ex: preservação ambiental, transição energética, sustentabilidade, proteção dos povos tradicionais."
               variant="favorable"
             />
             <StatCard
-              title="Requer revisão"
+              prefix="PLs sem classificação automática e com "
+              tema="revisão humana pendente"
               value={stats.by_classification.needs_review || 0}
-              description="PLs ambíguos ou incertos"
+              desc="PLs sem informações claras ou suficientes para serem classificadas com precisão por inteligência artificial."
               variant="needs_review"
             />
             <StatCard
-              title="Agravamento"
+              prefix="PLs potencialmente responsáveis por "
+              tema="agravar a crise climática"
               value={stats.by_classification.unfavorable || 0}
-              description="PLs que prejudicam o clima"
+              desc="Ex: incentivo a combustíveis fósseis, desmatamento, poluição, flexibilização da legislação ambiental."
               variant="unfavorable"
             />
           </>
