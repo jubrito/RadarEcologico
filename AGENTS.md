@@ -76,6 +76,8 @@ Classificar automaticamente Projetos de Lei brasileiros relacionados à crise cl
 - Sem código comentado — delete, git guarda histórico.
 - Docstrings em funções públicas (o que faz, parâmetros, retorno).
 - README atualizado: sempre que adicionar uma nova feature, verifique se o README continua correto.
+- No frontend, prefira cammelcase, no back end prefira snakecase
+- Funções, constantes e variáveis devem ter nomes significativos
 
 ---
 
