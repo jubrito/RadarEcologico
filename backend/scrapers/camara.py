@@ -3,25 +3,41 @@ Scraper for Câmara dos Deputados open data API.
 
 Endpoint: https://dadosabertos.camara.leg.br/api/v2/
 
-Key features:
-  - Searches propositions by year and type (PL, PLP, PEC, MPV)
-  - Pre-filters by theme IDs (40=Meio Ambiente, 41=Recursos Hídricos, 42=Energia)
-    to reduce API calls by ~90%
-  - Filters results by climate keywords in ementa
-  - Fetches full details for matching bills
+Two-phase filtering:
+  Phase 1 — API pre-filter by climate-relevant themes (reduces API calls ~80%)
+  Phase 2 — Keyword filter on ementa (catches bills misclassified by theme)
 """
 
-import re
-from datetime import datetime
 from typing import Optional
 
-import httpx
 import requests
 
 API_BASE = "https://dadosabertos.camara.leg.br/api/v2"
 
-# Theme IDs that are climate/environment related
-CLIMATE_THEME_IDS = [40, 41, 42]
+# Climate-relevant theme codes from Câmara API.
+# Source: https://dadosabertos.camara.leg.br/api/v2/referencias/proposicoes/codTema
+#
+# Direct: environment, energy, water, agriculture, land, cities, transport, indigenous.
+# Indirect: economy (carbon pricing, green subsidies), international (climate treaties),
+#   health (environmental), science (cleantech), industry (emissions, green standards),
+#   constitutional (environmental rights), justice (environmental crimes).
+CLIMATE_THEME_MAP: dict[int, str] = {
+    48: "Meio Ambiente e Desenvolvimento Sustentável",
+    54: "Energia, Recursos Hídricos e Minerais",
+    64: "Agricultura, Pecuária, Pesca e Extrativismo",
+    51: "Estrutura Fundiária",
+    61: "Viação, Transporte e Mobilidade",
+    44: "Direitos Humanos e Minorias",
+    70: "Finanças Públicas e Orçamento",
+    41: "Cidades e Desenvolvimento Urbano",
+    40: "Economia",
+    55: "Relações Internacionais e Comércio Exterior",
+    56: "Saúde",
+    62: "Ciência, Tecnologia e Inovação",
+    66: "Indústria, Comércio e Serviços",
+    68: "Direito Constitucional",
+    76: "Direito e Justiça",
+}
 
 from backend.keywords.taxonomy import NEGATIVE_KEYWORDS, POSITIVE_KEYWORDS
 
@@ -64,6 +80,7 @@ def fetch_camara_bills(
                 "itens": 100,
                 "pagina": page,
                 "ordem": "ASC",
+                "temas": list(CLIMATE_THEME_MAP.keys()),
             }
 
             try:
