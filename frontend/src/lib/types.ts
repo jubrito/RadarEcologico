@@ -12,6 +12,7 @@ export type ClassificationStyle = {
   fadedBg: string;
   hoverFadedBg: string;
   hoverSolidBg: string;
+  hoverSolidBorder: string;
   textAccent: string;
   bgSolid: string;
   label: string;

@@ -13,7 +13,7 @@ export function BillCard({ bill }: { bill: Bill }) {
           "group rounded-xl overflow-hidden h-full",
           "bg-card transition-all cursor-pointer",
           "hover:shadow-lg hover:-translate-y-0.5",
-          style.hoverSolidBg,
+          `border border-2 border-transparent ${style.hoverSolidBorder}`,
         )}
       >
         <div className="p-4 space-y-2">
@@ -23,43 +23,41 @@ export function BillCard({ bill }: { bill: Bill }) {
                 className={mergeStyles(
                   "w-2 h-2 rounded-full shrink-0",
                   style.bgSolid,
-                  "group-hover:bg-black",
                 )}
               />
-              <h3 className="font-bold text-md leading-snug group-hover:text-black">
+              <h3 className="font-bold text-md leading-snug">
                 {bill.bill_type} {bill.number}/{bill.year}
               </h3>
             </div>
             <span
               className={mergeStyles(
                 "shrink-0 rounded-full px-2 py-0.5 text-[13px] font-medium",
-                "group-hover:bg-black group-hover:text-white",
                 style.badge,
               )}
             >
               {style.label}
             </span>
           </div>
-          <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed group-hover:text-black">
+          <p className="text-sm text-muted-foreground group-hover:text-foreground line-clamp-3 leading-relaxed">
             {bill.ementa}
           </p>
           <div
             className={mergeStyles(
               "flex items-center gap-2 text-xs text-muted-foreground pt-2 border-t",
-              "group-hover:text-black group-hover:border-black",
             )}
           >
             <span>{formatSource(bill.source)}</span>
-            {bill.author && (
-              <>
-                <span aria-hidden="true">·</span>
-                <span>{bill.author}</span>
-              </>
-            )}
             <span aria-hidden="true">·</span>
             <time dateTime={bill.presentation_date || undefined}>
               {formatDate(bill.presentation_date)}
             </time>
+          </div>
+          <div
+            className={mergeStyles(
+              "flex items-center gap-2 text-xs text-muted-foreground pt-2",
+            )}
+          >
+            {bill.author && <span>Autor/Autora: {bill.author}</span>}
           </div>
         </div>
       </article>
