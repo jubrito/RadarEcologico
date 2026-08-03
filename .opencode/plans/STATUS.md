@@ -38,14 +38,16 @@
 
 Melhorar a página de detalhes (`/bills/[id]`) e consistência do frontend:
 
-1. **Autor e partido**: mostrar nome do parlamentar + sigla do partido + UF
-2. **Resumo da classificação**: uma frase curta (3-5 palavras) explicando porque a PL recebeu aquela classificação, baseada nas keywords/patterns que deram match
+- [x] **Autor e partido**: mostrar nome do parlamentar + sigla do partido + UF
+
 3. **Marcos importantes**: timeline com eventos da tramitação (ex: "Apresentada em 12/05/2026", "Aprovada na Comissão de Meio Ambiente", "Aguardando votação no Plenário")
 4. **Votação**: se houve votação em algum âmbito (comissão, plenário), mostrar placar por partido (quantos votaram a favor/contra). Dados disponíveis na API de Votações da Câmara.
 5. **Refatorar labels repetidos**: "Combate à crise climática", "Requer revisão humana", etc. estão espalhados em `utils.ts`, `bills-content.tsx`, `page.tsx`. Centralizar em constantes reutilizáveis e buscar outras repetições similares.
 6. **Mostrar tema no card**: cada `BillCard` deve exibir o tema da proposta (ex: "Meio Ambiente", "Energia") baseado no campo `theme_names`.
-7. **Contagem nos filtros**: dropdowns de Classificação, Fonte e Tema devem mostrar `Nome (N)` indicando quantos projetos existem em cada categoria. Ex: "Meio Ambiente (12)".
-8. **Multiselect de temas**: substituir o Select simples de tema por um multiselect. Regra: ao selecionar qualquer tema, "Todos os temas" é desmarcado; ao desmarcar todos, "Todos os temas" volta automaticamente.
+
+- [x] **Contagem nos filtros**: dropdowns de Classificação, Fonte e Tema devem mostrar `Nome (N)` indicando quantos projetos existem em cada categoria. Ex: "Meio Ambiente (12)".
+- [x] **Multiselect de temas**: substituir o Select simples de tema por um multiselect. Regra: ao selecionar qualquer tema, "Todos os temas" é desmarcado; ao desmarcar todos, "Todos os temas" volta automaticamente.
+- [ ] Replace current elements with React Accessible components
 
 ### Sprint 3 — Área de Revisão (Admin)
 
@@ -67,6 +69,16 @@ Migrar de SQLite para PostgreSQL no Supabase:
 3. Configurar `.env` com DATABASE_URL
 4. Tabelas criadas automaticamente via `Base.metadata.create_all`
 5. Rodar pipeline para popular banco
+
+### Sprint 5 — Dashboard pra analisar partidos
+
+- [ ] Mostrar os partidos e comparar como cada um vota
+- [ ] Fazer análises pra extrair dados
+
+### Sprint 6 - Melhorias
+
+- [ ] _Review AI logic_: improve how we classify blls
+- [ ] **Resumo da classificação**: uma frase curta (3-5 palavras) explicando porque a PL recebeu aquela classificação, baseada nas keywords/patterns que deram match
 
 ### Sprint 5 — Revisão Colaborativa (Votação Pública)
 
