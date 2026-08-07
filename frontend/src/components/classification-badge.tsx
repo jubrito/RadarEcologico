@@ -19,16 +19,18 @@ export function ClassificationBadge({
   const style = STYLE_MAP[classification];
 
   return (
-    <span className="inline-flex items-center gap-2">
-      <Badge className={style.badge} {...props}>
-        {style.label}
-      </Badge>
+    <span className="flex flex-col gap-2">
+      <span>
+        <Badge className={style.badge} {...props}>
+          {style.label}
+        </Badge>
+      </span>
       {score != null && (
         <span
           className={`text-sm font-mono tabular-nums ${getScoreColor(score)}`}
-          aria-label={`Score de risco climático: ${(score * 100).toFixed(0)}%`}
         >
-          {(score * 100).toFixed(0)}%
+          Potencial risco de agravar a crise climática:{" "}
+          <span className="font-extrabold">{(score * 100).toFixed(0)}%</span>
         </span>
       )}
     </span>
