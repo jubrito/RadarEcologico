@@ -1,19 +1,50 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { use } from "react";
+import { useEffect, useState, use } from "react";
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ClassificationBadge } from "@/components/classification-badge";
 import { getBill, type Bill } from "@/lib/api";
-import {
-  formatDate,
-  formatSource,
-  scoreToClassification,
-} from "@/lib/utils/utils";
+import { formatDate, formatSource } from "@/lib/utils/utils";
+import { CLASSIFICATION } from "@/lib/utils/classifications";
 import { STYLE_MAP } from "@/lib/style";
+import { RefreshCw, User, Building2, Landmark, Calendar } from "lucide-react";
+
+const LABEL_FOR: Record<string, string> = {
+  favorable:
+    "Baixo potencial de dano climático — a proposta tende a contribuir para o combate à crise do clima.",
+  unfavorable:
+    "Alto potencial de dano climático — a proposta tende a intensificar a crise do clima.",
+  needs_review:
+    "Impacto climático incerto — requer análise humana para determinar o efeito da proposta.",
+};
+
+function MetadataRow({
+  icon: Icon,
+  label,
+  children,
+  highlight = false,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  children: React.ReactNode;
+  highlight?: boolean;
+}) {
+  return (
+    <div
+      className={`flex gap-3 p-4 rounded-lg ${
+        highlight ? "border border-foreground" : "bg-card"
+      }`}
+    >
+      <Icon className="w-5 h-5 flex-shrink-0 mt-0.5 text-muted-foreground" />
+      <div>
+        <h2 className="font-bold uppercase text-sm">{label}</h2>
+        <div className="text-sm mt-0.5">{children}</div>
+      </div>
+    </div>
+  );
+}
 
 export default function BillDetailPage({
   params,
@@ -25,19 +56,29 @@ export default function BillDetailPage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const classification = bill?.classification ?? CLASSIFICATION.unknown;
+  const style = STYLE_MAP[classification];
+  const pct =
+    bill?.final_score != null ? Math.round(bill.final_score * 100) : null;
+
   useEffect(() => {
+    let cancelled = false;
     async function load() {
       setLoading(true);
       try {
         const data = await getBill(id);
-        setBill(data);
+        if (!cancelled) setBill(data);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Erro ao carregar");
+        if (!cancelled)
+          setError(err instanceof Error ? err.message : "Erro ao carregar");
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
     load();
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
 
   if (loading) {
@@ -65,7 +106,7 @@ export default function BillDetailPage({
   }
 
   return (
-    <article className="max-w-3xl mx-auto px-4 py-8">
+    <div className="max-w-3xl mx-auto px-4 py-8">
       <nav aria-label="Breadcrumb" className="mb-6">
         <Link
           href="/bills"
@@ -75,150 +116,165 @@ export default function BillDetailPage({
         </Link>
       </nav>
 
-      <header className="mb-6">
-        <div className="flex items-start justify-between gap-4 flex-wrap">
-          <h1 className="text-2xl font-bold">
-            {bill.bill_type} {bill.number}/{bill.year}
-          </h1>
-          {bill.classification && (
+      <article className={`rounded-xl border ${style.border} overflow-hidden`}>
+        {/* Colored top stripe */}
+        <div className={`h-1.5 w-full ${style.bgSolid}`} />
+
+        <div className="p-6 sm:p-10">
+          {/* Header: Title + source link */}
+          <header className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
+            <h1 className="text-2xl font-bold">
+              {bill.bill_type} {bill.number}/{bill.year}
+            </h1>
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-shrink-0"
+              render={
+                <a href={bill.link} target="_blank" rel="noopener noreferrer">
+                  Ver fonte original ↗
+                </a>
+              }
+            />
+          </header>
+
+          {/* Classification badge + bar */}
+          <div className="mb-6">
             <ClassificationBadge
               classification={bill.classification}
               score={bill.final_score}
             />
-          )}
-        </div>
-      </header>
-
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="text-base">Ementa</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground leading-relaxed">{bill.ementa}</p>
-        </CardContent>
-      </Card>
-
-      <section className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Fonte
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>{formatSource(bill.source)}</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Data de apresentação
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <time dateTime={bill.presentation_date || undefined}>
-              {formatDate(bill.presentation_date)}
-            </time>
-          </CardContent>
-        </Card>
-
-        {bill.author && (
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Autor
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p>{bill.author}</p>
-              {bill.author_party && (
-                <p className="text-xs text-muted-foreground">
-                  {bill.author_party}
-                </p>
-              )}
-            </CardContent>
-          </Card>
-        )}
-
-        {bill.status && (
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Status
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p>{bill.status}</p>
-            </CardContent>
-          </Card>
-        )}
-      </section>
-
-      {bill.final_score != null && (
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="text-base">
-              Classificação de Risco Climático
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex justify-between text-xs text-muted-foreground mb-1.5">
-              <span className={STYLE_MAP.favorable.textAccent}>
-                Favorável ao clima
-              </span>
-              <span className={STYLE_MAP.unfavorable.textAccent}>
-                Prejudicial ao clima
-              </span>
-            </div>
-            <div className="flex items-center gap-4 mb-3">
-              <div
-                className="flex-1 h-3 rounded-full bg-muted overflow-hidden"
-                role="progressbar"
-                aria-valuenow={Math.round(bill.final_score * 100)}
-                aria-valuemin={0}
-                aria-valuemax={100}
-                aria-label={`Risco climático: ${Math.round(bill.final_score * 100)}%`}
-              >
-                <div
-                  className={`h-full rounded-full transition-all ${STYLE_MAP[scoreToClassification(bill.final_score)].bgSolid}`}
-                  style={{ width: `${bill.final_score * 100}%` }}
-                />
+            {pct != null && (
+              <div aria-hidden="true">
+                <div className="h-2 rounded-full bg-muted overflow-hidden mt-5">
+                  <div
+                    className={`h-full rounded-full ${style.bgSolid}`}
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+                <div className="flex justify-between text-sm text-muted-foreground mt-1">
+                  <span>Favorável</span>
+                  <span>Prejudicial</span>
+                </div>
               </div>
-              <span className="text-sm font-mono font-bold tabular-nums w-12 text-right">
-                {Math.round(bill.final_score * 100)}%
-              </span>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {bill.classification === "favorable" &&
-                "Baixo potencial de dano climático — a proposta tende a contribuir para o combate à crise do clima."}
-              {bill.classification === "unfavorable" &&
-                "Alto potencial de dano climático — a proposta tende a intensificar a crise do clima."}
-              {bill.classification === "needs_review" &&
-                "Impacto climático incerto — requer análise humana para determinar o efeito da proposta."}{" "}
-              Quanto maior o percentual, maior o risco.
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Classificado em {formatDate(bill.classified_at)}
-              {bill.keyword_score != null &&
-                ` • Análise por palavras-chave: ${(bill.keyword_score * 100).toFixed(0)}%`}
-            </p>
-          </CardContent>
-        </Card>
-      )}
+            )}
+          </div>
 
-      <Button
-        variant="outline"
-        className="w-full sm:w-auto"
-        render={
-          <a href={bill.link} target="_blank" rel="noopener noreferrer">
-            Ver fonte original
-            <span aria-hidden="true" className="ml-1">
-              ↗
-            </span>
-          </a>
-        }
-      />
-    </article>
+          {/* Ementa */}
+          <section>
+            <h2 className="text-xl font-bold mb-2">Ementa</h2>
+            <div className={`border-l-2 ${style.border} pl-4`}>
+              <p className="text-md text-muted-foreground leading-relaxed">
+                {bill.ementa}
+              </p>
+            </div>
+          </section>
+
+          {/* Analysis box */}
+          {pct != null && (
+            <div
+              className={`mt-5 rounded-lg ${style.fadedBg} border ${style.border} p-4`}
+            >
+              <h2
+                className={`text-xs font-bold uppercase tracking-wider ${style.textAccent} mb-2`}
+              >
+                Análise de risco e impacto ecológico da proposta
+              </h2>
+              <p className="text-sm leading-relaxed">
+                {LABEL_FOR[bill.classification] ??
+                  "Classificação não disponível."}
+              </p>
+            </div>
+          )}
+
+          {/* Metadata */}
+          <section className="mt-7 space-y-3">
+            {/* Status — always full-width, highlighted */}
+            {bill.status && (
+              <MetadataRow icon={RefreshCw} label="Status:" highlight>
+                {bill.status}
+              </MetadataRow>
+            )}
+
+            {/* Non-status items — paired in 2-column grid when even */}
+            {(() => {
+              const items: Array<{
+                icon: React.ComponentType<{ className?: string }>;
+                label: string;
+                content: string;
+              }> = [];
+
+              if (bill.author)
+                items.push({
+                  icon: User,
+                  label: "Autor:",
+                  content: bill.author,
+                });
+              if (bill.author_party || bill.author_state)
+                items.push({
+                  icon: Building2,
+                  label: "Partido:",
+                  content: [bill.author_party, bill.author_state]
+                    .filter(Boolean)
+                    .join(" / "),
+                });
+              items.push({
+                icon: Landmark,
+                label: "Fonte do projeto:",
+                content: formatSource(bill.source),
+              });
+              if (bill.presentation_date)
+                items.push({
+                  icon: Calendar,
+                  label: "Data de apresentação:",
+                  content: formatDate(bill.presentation_date),
+                });
+
+              if (items.length === 0) return null;
+              if (items.length === 1) {
+                const [item] = items;
+                return (
+                  <MetadataRow icon={item.icon} label={item.label}>
+                    {item.content}
+                  </MetadataRow>
+                );
+              }
+
+              const isOdd = items.length % 2 !== 0;
+              const pairs = [];
+              for (let i = 0; i < items.length - (isOdd ? 1 : 0); i += 2) {
+                pairs.push(items.slice(i, i + 2));
+              }
+
+              return (
+                <>
+                  {pairs.map(([a, b], i) => (
+                    <div
+                      key={i}
+                      className="grid grid-cols-1 sm:grid-cols-2 gap-3"
+                    >
+                      <MetadataRow icon={a.icon} label={a.label}>
+                        {a.content}
+                      </MetadataRow>
+                      <MetadataRow icon={b.icon} label={b.label}>
+                        {b.content}
+                      </MetadataRow>
+                    </div>
+                  ))}
+                  {isOdd && (
+                    <MetadataRow
+                      icon={items[items.length - 1].icon}
+                      label={items[items.length - 1].label}
+                    >
+                      {items[items.length - 1].content}
+                    </MetadataRow>
+                  )}
+                </>
+              );
+            })()}
+          </section>
+        </div>
+      </article>
+    </div>
   );
 }
