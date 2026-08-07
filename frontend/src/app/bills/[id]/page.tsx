@@ -10,6 +10,14 @@ import { formatDate, formatSource } from "@/lib/utils/utils";
 import { CLASSIFICATION } from "@/lib/utils/classifications";
 import { STYLE_MAP } from "@/lib/style";
 import { RefreshCw, User, Building2, Landmark, Calendar } from "lucide-react";
+import { STATE_NAMES } from "@/lib/content";
+
+function stateName(abbr: string | null | undefined): string | null {
+  if (!abbr) return null;
+  const upper = abbr.toUpperCase().trim();
+  const name = STATE_NAMES[upper];
+  return name ? `${name}, ${upper}` : upper;
+}
 
 const LABEL_FOR: Record<string, string> = {
   favorable:
@@ -230,24 +238,28 @@ export default function BillDetailPage({
                 if (cleanAuthor)
                   items.push({
                     icon: User,
-                    label: "Autor:",
+                    label: "Autor",
                     content: cleanAuthor,
                   });
-                if (party || state)
+                if (party || state) {
+                  const stateFormatted = stateName(state);
                   items.push({
                     icon: Building2,
-                    label: "Partido:",
-                    content: [party, state].filter(Boolean).join(" / "),
+                    label: "Partido",
+                    content: stateFormatted
+                      ? `${party} (${stateFormatted})`
+                      : (party ?? ""),
                   });
+                }
                 if (bill.presentation_date)
                   items.push({
                     icon: Calendar,
-                    label: "Data de apresentação:",
+                    label: "Data de apresentação",
                     content: formatDate(bill.presentation_date),
                   });
                 items.push({
                   icon: Landmark,
-                  label: "Fonte do projeto:",
+                  label: "Fonte do projeto",
                   content: formatSource(bill.source),
                 });
 
