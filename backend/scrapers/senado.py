@@ -89,7 +89,7 @@ def fetch_senado_bills(
 
 
 def fetch_senado_bill_details(codigo: str) -> Optional[dict]:
-    """Fetch full details for a single bill from Senado."""
+    """Fetch full details for a single bill from Senado, including status."""
     url = f"{API_BASE}/materia/{codigo}"
     headers = {"Accept": "application/json"}
     try:
@@ -101,11 +101,28 @@ def fetch_senado_bill_details(codigo: str) -> Optional[dict]:
             .get("Materia", {})
         )
 
+        dados = materia.get("DadosBasicosMateria", {})
+        decisao = materia.get("DecisaoEDestino", {}).get("Decisao", {})
+        ident = materia.get("IdentificacaoMateria", {})
+
+        # Build status from decision info
+        tramitando = ident.get("IndicadorTramitando", "")
+        decisao_desc = decisao.get("Descricao", "")
+        status_parts = []
+        if tramitando == "Sim":
+            status_parts.append("Em tramitação")
+        elif tramitando == "Não":
+            status_parts.append("Tramitação encerrada")
+        if decisao_desc:
+            status_parts.append(decisao_desc)
+        status = " — ".join(status_parts) if status_parts else None
+
         return {
             "external_id": codigo,
             "full_text": materia.get("ExplicacaoEmenta", ""),
-            "ementa": materia.get("Ementa", ""),
-            "author": materia.get("Autor", ""),
+            "ementa": dados.get("EmentaMateria", ""),
+            "author": dados.get("Autor", ""),
+            "status": status,
         }
     except requests.RequestException as e:
         print(f"  Senado detail error (codigo={codigo}): {e}")

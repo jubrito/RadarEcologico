@@ -82,13 +82,18 @@ def run_pipeline() -> dict:
 
             summary["new_bills"] += 1
 
-            # Enrich Câmara bills with author/party/state from detail endpoint
+            # Enrich bills with details from individual endpoints
             if source == "camara":
                 details = fetch_camara_bill_details(external_id)
                 if details:
                     bill_data["author"] = bill_data.get("author") or details.get("author", "")
                     bill_data["author_party"] = details.get("author_party", "")
                     bill_data["author_state"] = details.get("author_state", "")
+            elif source == "senado":
+                details = fetch_senado_bill_details(external_id)
+                if details:
+                    bill_data["author"] = bill_data.get("author") or details.get("author", "")
+                    bill_data["status"] = bill_data.get("status") or details.get("status", "")
 
             # Classify using keyword ensemble
             result = classify_ensemble(bill_data["ementa"])
