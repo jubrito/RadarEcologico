@@ -153,7 +153,7 @@ def fetch_camara_bills(
 
 
 def fetch_camara_bill_details(external_id: str) -> Optional[dict]:
-    """Fetch full details for a single bill from Câmara."""
+    """Fetch full details for a single bill from Câmara, including author party/state."""
     url = f"{API_BASE}/proposicoes/{external_id}"
     try:
         response = requests.get(url, timeout=10)
@@ -161,14 +161,30 @@ def fetch_camara_bill_details(external_id: str) -> Optional[dict]:
         data = response.json()
         prop = data.get("dados", {})
 
-        authors_info = prop.get("autores", [])
+        # Fetch author name, party, and state via autores + deputado endpoints
         author_name = ""
         author_party = ""
         author_state = ""
-        if authors_info:
-            first = authors_info[0] if isinstance(authors_info, list) else authors_info
-            author_name = (first.get("nome") or first.get("nomeAutor") or "")
-            author_party = first.get("siglaPartido", "")
+
+        try:
+            aut_response = requests.get(
+                f"{API_BASE}/proposicoes/{external_id}/autores", timeout=10
+            )
+            aut_response.raise_for_status()
+            autores = aut_response.json().get("dados", [])
+            if autores:
+                first = autores[0]
+                author_name = first.get("nome", "")
+                # Follow deputado URI to get party/state
+                deputado_uri = first.get("uri", "")
+                if deputado_uri:
+                    dep_response = requests.get(deputado_uri, timeout=10)
+                    dep_response.raise_for_status()
+                    ult = dep_response.json().get("dados", {}).get("ultimoStatus", {})
+                    author_party = ult.get("siglaPartido", "")
+                    author_state = ult.get("siglaUf", "")
+        except requests.RequestException:
+            pass  # author fields stay empty if detail calls fail
 
         return {
             "external_id": external_id,
