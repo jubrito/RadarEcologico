@@ -75,9 +75,39 @@ def run_pipeline() -> dict:
                 .first()
             )
             if existing:
+                updated = False
                 if not existing.theme_ids and bill_data.get("theme_ids"):
                     existing.theme_ids = bill_data["theme_ids"]
                     existing.theme_names = bill_data["theme_names"]
+                    updated = True
+
+                # Backfill missing author/party/state/status for existing bills
+                if not existing.author or not existing.author_party or not existing.status:
+                    if source == "camara":
+                        details = fetch_camara_bill_details(external_id)
+                        if details:
+                            if not existing.author and details.get("author"):
+                                existing.author = details["author"]
+                                updated = True
+                            if not existing.author_party and details.get("author_party"):
+                                existing.author_party = details["author_party"]
+                                updated = True
+                            if not existing.author_state and details.get("author_state"):
+                                existing.author_state = details["author_state"]
+                                updated = True
+                    elif source == "senado":
+                        details = fetch_senado_bill_details(external_id)
+                        if details:
+                            if not existing.author and details.get("author"):
+                                existing.author = details["author"]
+                                updated = True
+                            if not existing.status and details.get("status"):
+                                existing.status = details["status"]
+                                updated = True
+
+                if updated:
+                    summary.setdefault("updated", 0)
+                    summary["updated"] += 1
                 continue
 
             summary["new_bills"] += 1
