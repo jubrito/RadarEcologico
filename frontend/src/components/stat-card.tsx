@@ -31,6 +31,7 @@ export function StatCard({
           "absolute top-0 left-0 right-0 h-1",
           style.bgSolid,
         )}
+        aria-hidden="true"
       />
       <div className="flex-1 flex-row justify-start gap-4">
         <span
