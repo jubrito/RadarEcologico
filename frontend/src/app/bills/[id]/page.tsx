@@ -191,7 +191,7 @@ export default function BillDetailPage({
           <section className="mt-7 space-y-3">
             {/* Status — always full-width, highlighted */}
             {bill.status && (
-              <MetadataRow icon={RefreshCw} label="Status:" highlight>
+              <MetadataRow icon={RefreshCw} label="Status" highlight>
                 {bill.status}
               </MetadataRow>
             )}
@@ -207,28 +207,28 @@ export default function BillDetailPage({
               if (bill.author)
                 items.push({
                   icon: User,
-                  label: "Autor:",
+                  label: "Autor",
                   content: bill.author,
                 });
               if (bill.author_party || bill.author_state)
                 items.push({
                   icon: Building2,
-                  label: "Partido:",
+                  label: "Partido",
                   content: [bill.author_party, bill.author_state]
                     .filter(Boolean)
                     .join(" / "),
                 });
-              items.push({
-                icon: Landmark,
-                label: "Fonte do projeto:",
-                content: formatSource(bill.source),
-              });
               if (bill.presentation_date)
                 items.push({
                   icon: Calendar,
-                  label: "Data de apresentação:",
+                  label: "Data de apresentação",
                   content: formatDate(bill.presentation_date),
                 });
+              items.push({
+                icon: Landmark,
+                label: "Fonte do projeto",
+                content: formatSource(bill.source),
+              });
 
               if (items.length === 0) return null;
               if (items.length === 1) {
