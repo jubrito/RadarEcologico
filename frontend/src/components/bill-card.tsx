@@ -58,8 +58,17 @@ export function BillCard({ bill }: { bill: Bill }) {
             )}
           >
             {bill.author && (
-              <span aria-label={`Autor ou autora: ${bill.author}`}>
-                Autor(a): {bill.author}
+              <span className="text-xs text-muted-foreground">
+                {bill.author}
+                {(bill.author_party || bill.author_state) && (
+                  <span>
+                    {" "}
+                    ({[bill.author_party, bill.author_state]
+                      .filter(Boolean)
+                      .join("/")}
+                    )
+                  </span>
+                )}
               </span>
             )}
           </div>

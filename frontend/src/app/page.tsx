@@ -62,7 +62,7 @@ export default function DashboardPage() {
           <>
             <StatCard
               prefix="PLs potencialmente "
-              tema="combatendo a crise climática"
+              tema="combatem a crise climática"
               value={stats.by_classification.favorable || 0}
               desc="Ex: preservação ambiental, transição energética, sustentabilidade, proteção dos povos tradicionais."
               variant="favorable"
@@ -76,7 +76,7 @@ export default function DashboardPage() {
             />
             <StatCard
               prefix="PLs potencialmente "
-              tema="agravando a crise climática"
+              tema="agravam a crise climática"
               value={stats.by_classification.unfavorable || 0}
               desc="Ex: incentivo a combustíveis fósseis, desmatamento, poluição, flexibilização da legislação ambiental."
               variant="unfavorable"
