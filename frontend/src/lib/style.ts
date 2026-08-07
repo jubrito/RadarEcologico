@@ -11,7 +11,7 @@ export const STYLE_MAP: Record<Classification, ClassificationStyle> = {
     hoverSolidBorder: "hover:border-emerald-500",
     textAccent: "text-emerald-400",
     bgSolid: "bg-emerald-500",
-    label: "Combate à crise climática",
+    label: "Combate a crise climática",
   },
   needs_review: {
     gradient: "from-amber-500 to-amber-300",
