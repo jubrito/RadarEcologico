@@ -57,7 +57,11 @@ export function BillCard({ bill }: { bill: Bill }) {
               "flex items-center gap-2 text-xs text-muted-foreground pt-2",
             )}
           >
-            {bill.author && <span>Autor/Autora: {bill.author}</span>}
+            {bill.author && (
+              <span aria-label={`Autor ou autora: ${bill.author}`}>
+                Autor(a): {bill.author}
+              </span>
+            )}
           </div>
         </div>
       </article>
