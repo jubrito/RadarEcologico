@@ -67,9 +67,7 @@ export default function RootLayout({
           role="contentinfo"
           className="border-t border-border py-6 text-center text-sm text-muted-foreground"
         >
-          <p>
-            <span className="font-semibold">{SITE_TITLE}</span> {SITE_TAGLINE}
-          </p>
+          <p>{SITE_TAGLINE}</p>
         </footer>
       </body>
     </html>
