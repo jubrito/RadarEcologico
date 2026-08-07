@@ -59,11 +59,11 @@ export function BillCard({ bill }: { bill: Bill }) {
           >
             {bill.author && (
               <span className="text-xs text-muted-foreground">
-                {bill.author}
+                <span className="mr-1">{bill.author}</span>
                 {(bill.author_party || bill.author_state) && (
                   <span>
-                    {" "}
-                    ({[bill.author_party, bill.author_state]
+                    (
+                    {[bill.author_party, bill.author_state]
                       .filter(Boolean)
                       .join("/")}
                     )
