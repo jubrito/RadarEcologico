@@ -16,12 +16,13 @@ import requests
 API_BASE = "https://legis.senado.leg.br/dadosabertos"
 
 from backend.keywords.taxonomy import ementa_matches_climate
+from backend.types import ScrapedBill
 
 
 def fetch_senado_bills(
     year: int,
     limit: int = 100,
-) -> list[dict]:
+) -> list[ScrapedBill]:
     """
     Fetch bills from Senado for a given year, filtered by climate keywords.
     """
@@ -88,7 +89,7 @@ def fetch_senado_bills(
     return bills
 
 
-def fetch_senado_bill_details(codigo: str) -> Optional[dict]:
+def fetch_senado_bill_details(codigo: str) -> Optional[dict[str, object]]:
     """Fetch full details for a single bill from Senado, including status."""
     url = f"{API_BASE}/materia/{codigo}"
     headers = {"Accept": "application/json"}
