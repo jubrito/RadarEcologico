@@ -114,6 +114,7 @@ export function MultiSelect({
         aria-expanded={open}
         aria-haspopup="listbox"
         aria-controls="theme-listbox"
+        aria-label="Filtrar por tema"
         onClick={() => setOpen(!open)}
         className={mergeStyles(
           "flex w-full items-center text-left justify-between gap-1.5 rounded-lg border border-input",
