@@ -50,7 +50,8 @@ Melhorar a página de detalhes (`/bills/[id]`) e consistência do frontend:
 
 - [x] **Contagem nos filtros**: dropdowns de Classificação, Fonte e Tema devem mostrar `Nome (N)` indicando quantos projetos existem em cada categoria. Ex: "Meio Ambiente (12)".
 - [x] **Multiselect de temas**: substituir o Select simples de tema por um multiselect. Regra: ao selecionar qualquer tema, "Todos os temas" é desmarcado; ao desmarcar todos, "Todos os temas" volta automaticamente.
-- [ ] Replace current elements with React Accessible components
+- Review current project to determine if we need to add more types / update the existing ones
+- [ ] Check to see if it's worth it to replace current elements with React Accessible components (pros and cons)
 
 ### Sprint 3 — Área de Revisão (Admin)
 
@@ -93,6 +94,10 @@ Permitir que usuários votem nas classificações para auxiliar os revisores:
 4. **Modelo `BillVote`**: `bill_id`, `vote`, `voted_at`, `fingerprint` (hash IP+user-agent, evita duplicata sem login)
 5. **Anti-duplicação**: mesmo fingerprint vota 1x por PL
 6. **UI no detalhe da PL**: seção com 3 botões de voto + barras de proporção
+
+## Sprint 6
+
+- Review status summary to see if map needs to be updated
 
 ## Bloqueios atuais
 
