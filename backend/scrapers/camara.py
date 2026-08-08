@@ -40,6 +40,7 @@ CLIMATE_THEME_MAP: dict[int, str] = {
 }
 
 from backend.keywords.taxonomy import ementa_matches_climate
+from backend.types import ScrapedBill
 
 
 def _fetch_themes(external_id: str) -> tuple[str | None, str | None]:
@@ -68,7 +69,7 @@ def _fetch_themes(external_id: str) -> tuple[str | None, str | None]:
 def fetch_camara_bills(
     year: int,
     limit: int = 100,
-) -> list[dict]:
+) -> list[ScrapedBill]:
     """
     Fetch bills from Câmara for a given year, filtered by climate keywords.
 
@@ -152,7 +153,7 @@ def fetch_camara_bills(
     return bills
 
 
-def fetch_camara_bill_details(external_id: str) -> Optional[dict]:
+def fetch_camara_bill_details(external_id: str) -> Optional[dict[str, object]]:
     """Fetch full details for a single bill from Câmara, including author party/state."""
     url = f"{API_BASE}/proposicoes/{external_id}"
     try:
