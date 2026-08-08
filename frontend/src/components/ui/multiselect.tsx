@@ -3,14 +3,10 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { ChevronDownIcon, XIcon } from "lucide-react";
 import { mergeStyles } from "@/lib/utils/utils";
-
-interface MultiSelectOption {
-  value: string;
-  label: string;
-}
+import type { SelectOption } from "@/lib/types";
 
 interface MultiSelectProps {
-  options: MultiSelectOption[];
+  options: SelectOption[];
   selected: string[];
   onChange: (values: string[]) => void;
   placeholder?: string;
