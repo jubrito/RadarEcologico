@@ -10,6 +10,7 @@ from dataclasses import dataclass, field
 from backend.classifiers.keywords import ClassificationResult, classify_keywords
 from backend.types import (
     ClassificationLabel,
+    ComponentsDict,
     CONFIDENCE_HIGH_THRESHOLD,
     CONFIDENCE_MEDIUM_THRESHOLD,
     FAVORABLE_MAX,
@@ -22,7 +23,7 @@ class EnsembleResult:
     final_score: float
     classification: ClassificationLabel
     confidence: str  # 'high' | 'medium' | 'low'
-    components: dict[str, float] = field(default_factory=dict)
+    components: ComponentsDict = field(default_factory=dict)
     evidence: list[str] = field(default_factory=list)
 
 
