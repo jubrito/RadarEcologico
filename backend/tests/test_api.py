@@ -367,6 +367,43 @@ class TestClassify:
         assert response.status_code == 422
 
 
+class TestSearch:
+    def test_searches_ementa(self):
+        session = _make_session(bills=[], total=0)
+        app.dependency_overrides[get_session] = lambda: session
+        client = TestClient(app)
+        response = client.get("/api/bills?search=desmatamento")
+        assert response.status_code == 200
+
+    def test_searches_bill_type(self):
+        session = _make_session(bills=[], total=0)
+        app.dependency_overrides[get_session] = lambda: session
+        client = TestClient(app)
+        response = client.get("/api/bills?search=PLP")
+        assert response.status_code == 200
+
+    def test_searches_author(self):
+        session = _make_session(bills=[], total=0)
+        app.dependency_overrides[get_session] = lambda: session
+        client = TestClient(app)
+        response = client.get("/api/bills?search=João")
+        assert response.status_code == 200
+
+    def test_searches_status(self):
+        session = _make_session(bills=[], total=0)
+        app.dependency_overrides[get_session] = lambda: session
+        client = TestClient(app)
+        response = client.get("/api/bills?search=Tramitando")
+        assert response.status_code == 200
+
+    def test_searches_number(self):
+        session = _make_session(bills=[], total=0)
+        app.dependency_overrides[get_session] = lambda: session
+        client = TestClient(app)
+        response = client.get("/api/bills?search=456")
+        assert response.status_code == 200
+
+
 class TestHealthCheck:
     def test_health_ok(self):
         client = TestClient(app)
