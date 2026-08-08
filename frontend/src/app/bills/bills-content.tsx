@@ -76,17 +76,22 @@ const THEME_OPTIONS = [
 export function BillsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const search = searchParams.get("search") || "";
 
   const [data, setData] = useState<BillsResponse | null>(null);
   const [stats, setStats] = useState<StatsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchInput, setSearchInput] = useState(search);
+
+  useEffect(() => {
+    setSearchInput(search);
+  }, [search]);
 
   const page = Number(searchParams.get("page") || "1");
   const classification = searchParams.get("classification") || "all";
   const source = searchParams.get("source") || "all";
   const themeParam = searchParams.get("theme") || "";
-  const search = searchParams.get("search") || "";
 
   useEffect(() => {
     let cancelled = false;
@@ -155,20 +160,24 @@ export function BillsContent() {
     <>
       <section className="flex flex-col sm:flex-row gap-3 mb-6">
         <div className="flex-1">
-          <label htmlFor="search-bills" className="sr-only">
-            Buscar projetos de lei
-          </label>
-          <Input
-            id="search-bills"
-            placeholder="Buscar por ementa..."
-            defaultValue={search}
-            className="w-full"
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                updateParam("search", (e.target as HTMLInputElement).value);
-              }
+          <form
+            role="search"
+            onSubmit={(e) => {
+              e.preventDefault();
+              updateParam("search", searchInput || null);
             }}
-          />
+          >
+            <label htmlFor="search-bills" className="sr-only">
+              Buscar projetos de lei
+            </label>
+            <Input
+              id="search-bills"
+              placeholder="Buscar PL (título, ementa, tipo, autor...)"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              className="w-full"
+            />
+          </form>
         </div>
 
         <Select
