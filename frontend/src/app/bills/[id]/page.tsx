@@ -11,8 +11,8 @@ import {
 } from "@/lib/utils/classifications";
 import { STYLE_MAP } from "@/lib/style";
 import { useBill } from "@/lib/hooks/use-bill";
-import { RefreshCw } from "lucide-react";
 import { BillMetadata } from "@/components/bill-metadata/bill-metadata";
+import { StatusCallout } from "@/components/status-callout/status-callout";
 
 export default function BillDetailPage({
   params,
@@ -104,7 +104,7 @@ export default function BillDetailPage({
 
             <section>
               <h2 className="text-xl font-bold mb-2">Ementa</h2>
-              <div className={`border-l-2 ${style.border} pl-4`}>
+              <div className={`border-l-4 ${style.border} pl-4`}>
                 <p className="text-md text-muted-foreground leading-relaxed">
                   {bill.ementa}
                 </p>
@@ -130,17 +130,7 @@ export default function BillDetailPage({
             <BillMetadata
               bill={bill}
               statusRow={
-                bill.status && (
-                  <div className="flex gap-3 p-4 rounded-lg border border-foreground">
-                    <RefreshCw className="w-5 h-5 flex-shrink-0 mt-0.5 text-muted-foreground" />
-                    <div>
-                      <h2 className="font-bold uppercase text-sm">
-                        Status do projeto
-                      </h2>
-                      <div className="text-sm mt-0.5">{bill.status}</div>
-                    </div>
-                  </div>
-                )
+                bill.status ? <StatusCallout status={bill.status} /> : null
               }
             />
           </div>
