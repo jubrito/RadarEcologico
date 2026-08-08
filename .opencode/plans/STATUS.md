@@ -30,8 +30,8 @@
 
 **Pendente:**
 
-- [ ] Simplify bill details page logic because it's too complex inside the component, it must follow the single responsibility principle, extract functions, be simple and not complex, ensure maintainability, etc
-- [ ] Add tests for all that was changed (check the missing tests and implement them)
+- [x] Simplify bill details page logic because it's too complex inside the component, it must follow the single responsibility principle, extract functions, be simple and not complex, ensure maintainability, etc
+- [x] Add tests for all that was changed (check the missing tests and implement them)
 - [ ] Add github link and icon to the nav
 - Revisar tipos/constantes e extrair valores reutilizáveis (evitar duplicação de strings, cores, labels)
 - Remover comentários desnecessários do código
