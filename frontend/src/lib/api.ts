@@ -49,7 +49,7 @@ export interface StatsResponse {
 
 export interface ClassifyResponse {
   final_score: number;
-  classification: string;
+  classification: Classification;
   confidence: string;
   components: ClassifyComponents;
   evidence: string[];
