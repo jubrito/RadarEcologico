@@ -50,8 +50,11 @@ Melhorar a página de detalhes (`/bills/[id]`) e consistência do frontend:
 
 - [x] **Contagem nos filtros**: dropdowns de Classificação, Fonte e Tema devem mostrar `Nome (N)` indicando quantos projetos existem em cada categoria. Ex: "Meio Ambiente (12)".
 - [x] **Multiselect de temas**: substituir o Select simples de tema por um multiselect. Regra: ao selecionar qualquer tema, "Todos os temas" é desmarcado; ao desmarcar todos, "Todos os temas" volta automaticamente.
-- Review current project to determine if we need to add more types / update the existing ones
+- [ ]Review current project to determine if we need to add more types / update the existing ones
 - [ ] Check to see if it's worth it to replace current elements with React Accessible components (pros and cons)
+- [ ] Ask to review the sprint to see if there's anything we're missing, if the order is correct. Review the plan.
+- [ ] Code review
+- [ ] Review the AI algoritm
 
 ### Sprint 3 — Área de Revisão (Admin)
 
