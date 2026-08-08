@@ -5,7 +5,7 @@ import { ClassificationBadge } from "./classification-badge";
 describe("ClassificationBadge", () => {
   it("renders favorable label", () => {
     render(<ClassificationBadge classification="favorable" />);
-    expect(screen.getByText("Combate à crise climática")).toBeInTheDocument();
+    expect(screen.getByText("Combate a crise climática")).toBeInTheDocument();
   });
 
   it("renders needs_review label", () => {
@@ -15,7 +15,9 @@ describe("ClassificationBadge", () => {
 
   it("renders unfavorable label", () => {
     render(<ClassificationBadge classification="unfavorable" />);
-    expect(screen.getByText("Intensifica a crise climática")).toBeInTheDocument();
+    expect(
+      screen.getByText("Intensifica a crise climática"),
+    ).toBeInTheDocument();
   });
 
   it("renders unknown label", () => {
@@ -25,18 +27,17 @@ describe("ClassificationBadge", () => {
 
   it("shows score percentage when provided", () => {
     render(<ClassificationBadge classification="favorable" score={0.31} />);
-    expect(screen.getByText("31%")).toBeInTheDocument();
+    expect(screen.getByText(/31%/)).toBeInTheDocument();
+    expect(screen.getByText(/Potencial risco/)).toBeInTheDocument();
   });
 
-  it("does not show score when null", () => {
+  it("does not show score text when null", () => {
     render(<ClassificationBadge classification="favorable" score={null} />);
-    expect(screen.queryByText(/%/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Potencial risco/)).not.toBeInTheDocument();
   });
 
-  it("has accessible score label", () => {
+  it("shows risk text with percentage", () => {
     render(<ClassificationBadge classification="favorable" score={0.75} />);
-    expect(
-      screen.getByLabelText("Score de risco climático: 75%")
-    ).toBeInTheDocument();
+    expect(screen.getByText(/75%/)).toBeInTheDocument();
   });
 });

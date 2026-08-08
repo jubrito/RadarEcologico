@@ -29,8 +29,10 @@ export function ClassificationBadge({
         <span
           className={`text-sm font-mono tabular-nums ${getScoreColor(score)}`}
         >
-          Potencial risco de agravar a crise climática:{" "}
-          <span className="font-extrabold">{(score * 100).toFixed(0)}%</span>
+          Potencial risco de agravar a crise climática:
+          <span className="font-extrabold ml-1">
+            {(score * 100).toFixed(0)}%
+          </span>
         </span>
       )}
     </span>
