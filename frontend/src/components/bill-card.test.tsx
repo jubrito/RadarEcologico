@@ -31,7 +31,7 @@ describe("BillCard", () => {
 
   it("renders classification label", () => {
     render(<BillCard bill={baseBill} />);
-    expect(screen.getByText("Combate à crise climática")).toBeInTheDocument();
+    expect(screen.getByText("Combate a crise climática")).toBeInTheDocument();
   });
 
   it("renders unknown label for unknown classification", () => {
