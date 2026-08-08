@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor, act } from "@testing-library/react";
 import { Suspense } from "react";
 import BillDetailPage from "./page";
+import { createBill, FAVORABLE_BILL } from "@/test-fixtures/bills";
 
 const { mockGetBill } = vi.hoisted(() => ({
   mockGetBill: vi.fn(),
@@ -10,27 +11,6 @@ const { mockGetBill } = vi.hoisted(() => ({
 vi.mock("@/lib/api", () => ({
   getBill: mockGetBill,
 }));
-
-const mockBill = {
-  id: "abc-123",
-  external_id: "12345",
-  source: "camara",
-  bill_type: "PL",
-  number: 456,
-  year: 2026,
-  ementa: "Institui política de combate ao desmatamento na Amazônia.",
-  author: "Dep. João Silva",
-  author_party: "PT",
-  author_state: "SP",
-  presentation_date: "2026-01-15T00:00:00",
-  status: "Tramitando",
-  link: "https://www.camara.leg.br/proposicoes/12345",
-  keyword_score: 0.12,
-  final_score: 0.12,
-  classification: "favorable" as const,
-  classified_at: "2026-08-02T00:00:00",
-  created_at: "2026-08-01T00:00:00",
-};
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -48,7 +28,7 @@ function renderBill(id: string) {
 
 describe("BillDetailPage", () => {
   it("renders bill data after load", async () => {
-    mockGetBill.mockResolvedValue(mockBill);
+    mockGetBill.mockResolvedValue(FAVORABLE_BILL);
     await renderBill("abc-123");
 
     await waitFor(() => {
@@ -57,7 +37,7 @@ describe("BillDetailPage", () => {
   });
 
   it("shows classification badge", async () => {
-    mockGetBill.mockResolvedValue(mockBill);
+    mockGetBill.mockResolvedValue(FAVORABLE_BILL);
     await renderBill("abc-123");
 
     await waitFor(() => {
@@ -66,24 +46,26 @@ describe("BillDetailPage", () => {
   });
 
   it("shows score and risk description", async () => {
-    mockGetBill.mockResolvedValue(mockBill);
+    mockGetBill.mockResolvedValue(FAVORABLE_BILL);
     await renderBill("abc-123");
 
     await waitFor(() => {
-      expect(screen.getByText(/Baixo potencial de dano climático/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Baixo potencial de dano climático/),
+      ).toBeInTheDocument();
     });
   });
 
   it("handles unfavorable bills", async () => {
-    mockGetBill.mockResolvedValue({
-      ...mockBill,
-      classification: "unfavorable",
-      final_score: 0.85,
-    });
+    mockGetBill.mockResolvedValue(
+      createBill({ classification: "unfavorable", final_score: 0.85 }),
+    );
     await renderBill("abc-123");
 
     await waitFor(() => {
-      expect(screen.getByText(/Alto potencial de dano climático/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Alto potencial de dano climático/),
+      ).toBeInTheDocument();
     });
   });
 
@@ -97,7 +79,7 @@ describe("BillDetailPage", () => {
   });
 
   it("shows source link", async () => {
-    mockGetBill.mockResolvedValue(mockBill);
+    mockGetBill.mockResolvedValue(FAVORABLE_BILL);
     await renderBill("abc-123");
 
     await waitFor(() => {
@@ -106,7 +88,7 @@ describe("BillDetailPage", () => {
   });
 
   it("shows author with party", async () => {
-    mockGetBill.mockResolvedValue(mockBill);
+    mockGetBill.mockResolvedValue(FAVORABLE_BILL);
     await renderBill("abc-123");
 
     await waitFor(() => {

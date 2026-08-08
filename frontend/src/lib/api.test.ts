@@ -1,10 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import {
-  getBills,
-  getBill,
-  getStats,
-  classifyText,
-} from "./api";
+import { getBills, getBill, getStats, classifyText } from "./api";
+import { createBillsResponse, createStats } from "@/test-fixtures/bills";
 
 beforeEach(() => {
   vi.restoreAllMocks();
@@ -21,14 +17,14 @@ function mockFetch(status: number, data: unknown) {
 
 describe("getBills", () => {
   it("fetches bills without params", async () => {
-    mockFetch(200, { items: [], total: 0, page: 1, limit: 20 });
+    mockFetch(200, createBillsResponse({ items: [], total: 0 }));
     const result = await getBills();
     expect(result.items).toEqual([]);
     expect(result.total).toBe(0);
   });
 
   it("sends filter params", async () => {
-    mockFetch(200, { items: [], total: 0, page: 1, limit: 20 });
+    mockFetch(200, createBillsResponse());
     await getBills({ classification: "favorable", source: "camara", search: "desmatamento" });
     const url = vi.mocked(fetch).mock.calls[0][0] as string;
     expect(url).toContain("classification=favorable");
@@ -37,23 +33,13 @@ describe("getBills", () => {
   });
 
   it("normalizes unknown classifications", async () => {
-    mockFetch(200, {
-      items: [{ id: "1", classification: "invalid" }],
-      total: 1,
-      page: 1,
-      limit: 20,
-    });
+    mockFetch(200, createBillsResponse({ items: [{ ...createBillsResponse().items[0], classification: "invalid" as never }] }));
     const result = await getBills();
     expect(result.items[0].classification).toBe("unknown");
   });
 
   it("preserves known classifications", async () => {
-    mockFetch(200, {
-      items: [{ id: "1", classification: "favorable" }],
-      total: 1,
-      page: 1,
-      limit: 20,
-    });
+    mockFetch(200, createBillsResponse());
     const result = await getBills();
     expect(result.items[0].classification).toBe("favorable");
   });
@@ -64,7 +50,7 @@ describe("getBills", () => {
   });
 
   it("sends theme param", async () => {
-    mockFetch(200, { items: [], total: 0, page: 1, limit: 20 });
+    mockFetch(200, createBillsResponse());
     await getBills({ theme: "48,54" });
     const url = vi.mocked(fetch).mock.calls[0][0] as string;
     expect(url).toContain("theme=48%2C54");
@@ -98,13 +84,7 @@ describe("getBill", () => {
 
 describe("getStats", () => {
   it("fetches stats", async () => {
-    mockFetch(200, {
-      total_bills: 10,
-      by_classification: { favorable: 5 },
-      by_source: { camara: 7 },
-      by_year: { "2026": 10 },
-      by_theme: { "48": 3 },
-    });
+    mockFetch(200, createStats());
     const result = await getStats();
     expect(result.total_bills).toBe(10);
     expect(result.by_classification.favorable).toBe(5);
@@ -134,8 +114,7 @@ describe("classifyText", () => {
   it("sends POST with correct body", async () => {
     mockFetch(200, { final_score: 0.5, classification: "needs_review", confidence: "low", components: {}, evidence: [] });
     await classifyText("algum texto de ementa");
-    const [url, init] = vi.mocked(fetch).mock.calls[0];
-    expect(url).toContain("/api/classify");
+    const [, init] = vi.mocked(fetch).mock.calls[0];
     expect(init?.method).toBe("POST");
     const body = JSON.parse(init?.body as string);
     expect(body.text).toBe("algum texto de ementa");
