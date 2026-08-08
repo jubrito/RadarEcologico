@@ -193,6 +193,11 @@ def fetch_camara_bill_details(external_id: str) -> Optional[dict]:
             "author_party": author_party,
             "author_state": author_state,
             "ementa": prop.get("ementa", ""),
+            "status": (
+                prop.get("statusProposicao", {}).get("descricaoSituacao", "")
+                if prop.get("statusProposicao")
+                else ""
+            ),
         }
     except requests.RequestException as e:
         print(f"  Câmara detail error (id={external_id}): {e}")

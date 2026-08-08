@@ -5,13 +5,20 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ClassificationBadge } from "@/components/classification-badge";
-import { CLASSIFICATION, CLASSIFICATION_DESCRIPTIONS } from "@/lib/utils/classifications";
+import {
+  CLASSIFICATION,
+  CLASSIFICATION_DESCRIPTIONS,
+} from "@/lib/utils/classifications";
 import { STYLE_MAP } from "@/lib/style";
 import { useBill } from "@/lib/hooks/use-bill";
 import { RefreshCw } from "lucide-react";
 import { BillMetadata } from "@/components/bill-metadata/bill-metadata";
 
-export default function BillDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default function BillDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = use(params);
   const { bill, loading, error } = useBill(id);
 
@@ -37,7 +44,8 @@ export default function BillDetailPage({ params }: { params: Promise<{ id: strin
 
   const classification = bill.classification ?? CLASSIFICATION.unknown;
   const style = STYLE_MAP[classification];
-  const pct = bill.final_score != null ? Math.round(bill.final_score * 100) : null;
+  const pct =
+    bill.final_score != null ? Math.round(bill.final_score * 100) : null;
 
   return (
     <div className={`max-w-6xl mx-auto px-4 py-8 ${style.fadedBg}`}>
@@ -51,7 +59,9 @@ export default function BillDetailPage({ params }: { params: Promise<{ id: strin
           </Link>
         </nav>
 
-        <article className={`rounded-xl border ${style.border} overflow-hidden`}>
+        <article
+          className={`rounded-xl border ${style.border} overflow-hidden`}
+        >
           <div className={`h-1.5 w-full ${style.bgSolid}`} />
 
           <div className="p-6 sm:p-10 bg-background">
@@ -105,7 +115,9 @@ export default function BillDetailPage({ params }: { params: Promise<{ id: strin
               <div
                 className={`mt-5 rounded-lg ${style.fadedBg} border ${style.border} p-4`}
               >
-                <h2 className={`text-xs font-bold uppercase tracking-wider ${style.textAccent} mb-2`}>
+                <h2
+                  className={`text-xs font-bold uppercase tracking-wider ${style.textAccent} mb-2`}
+                >
                   Análise de risco e impacto ecológico da proposta
                 </h2>
                 <p className="text-sm leading-relaxed">
@@ -122,7 +134,9 @@ export default function BillDetailPage({ params }: { params: Promise<{ id: strin
                   <div className="flex gap-3 p-4 rounded-lg border border-foreground">
                     <RefreshCw className="w-5 h-5 flex-shrink-0 mt-0.5 text-muted-foreground" />
                     <div>
-                      <h2 className="font-bold uppercase text-sm">Status</h2>
+                      <h2 className="font-bold uppercase text-sm">
+                        Status do projeto
+                      </h2>
                       <div className="text-sm mt-0.5">{bill.status}</div>
                     </div>
                   </div>

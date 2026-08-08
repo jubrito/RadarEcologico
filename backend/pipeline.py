@@ -95,6 +95,9 @@ def run_pipeline() -> dict:
                             if not existing.author_state and details.get("author_state"):
                                 existing.author_state = details["author_state"]
                                 updated = True
+                            if not existing.status and details.get("status"):
+                                existing.status = details["status"]
+                                updated = True
                     elif source == "senado":
                         details = fetch_senado_bill_details(external_id)
                         if details:
