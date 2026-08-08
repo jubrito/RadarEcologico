@@ -18,6 +18,7 @@ from dotenv import load_dotenv
 from backend.classifiers.ensemble import classify_ensemble
 from backend.database import SessionLocal
 from backend.models import Bill
+from backend.types import PipelineSummary
 from backend.scrapers.camara import fetch_camara_bills, fetch_camara_bill_details
 from backend.scrapers.senado import fetch_senado_bills, fetch_senado_bill_details
 
@@ -33,7 +34,7 @@ def _parse_date(value: str | None) -> datetime | None:
         return None
 
 
-def run_pipeline() -> dict:
+def run_pipeline() -> PipelineSummary:
     """
     Execute the full daily pipeline.
     Returns a summary dict with counts.

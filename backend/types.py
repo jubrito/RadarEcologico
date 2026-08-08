@@ -26,13 +26,6 @@ class ComponentsDict(TypedDict, total=False):
     bert_score: float
 
 
-class StatsByClassification(TypedDict, total=False):
-    favorable: int
-    needs_review: int
-    unfavorable: int
-    unknown: int
-
-
 class ScrapedBill(TypedDict, total=False):
     external_id: str
     source: str
@@ -48,8 +41,9 @@ class ScrapedBill(TypedDict, total=False):
     author: str | None
 
 
-class PipelineSummary(TypedDict):
+class PipelineSummary(TypedDict, total=False):
     camara_fetched: int
     senado_fetched: int
     new_bills: int
     classified: int
+    updated: int
