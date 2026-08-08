@@ -7,7 +7,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field, field_serializer, model_validator
-from sqlalchemy import desc, func, or_, select
+from sqlalchemy import String, desc, func, or_, select
 from sqlalchemy.orm import Session
 
 from backend.classifiers.ensemble import EnsembleResult, classify_ensemble
@@ -112,7 +112,16 @@ def list_bills(
     if year:
         query = query.where(Bill.year == year)
     if search:
-        query = query.where(Bill.ementa.ilike(f"%{search}%"))
+        search_term = f"%{search}%"
+        query = query.where(
+            or_(
+                Bill.ementa.ilike(search_term),
+                Bill.bill_type.ilike(search_term),
+                Bill.author.ilike(search_term),
+                Bill.status.ilike(search_term),
+                func.cast(Bill.number, String).ilike(search_term),
+            )
+        )
     if theme:
         theme_codes = [t.strip() for t in theme.split(",") if t.strip()]
         if theme_codes:
