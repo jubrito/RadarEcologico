@@ -3,7 +3,10 @@ import type { CLASSIFICATION } from "./utils/classifications";
 export type Classification =
   (typeof CLASSIFICATION)[keyof typeof CLASSIFICATION];
 
-export type KnownClassification = Exclude<Classification, "unknown">;
+export type KnownClassification = Exclude<
+  Classification,
+  typeof CLASSIFICATION.unknown
+>;
 
 export type ClassificationStyle = {
   gradient: string;
@@ -43,7 +46,10 @@ export const CLASSIFICATION_THRESHOLDS = {
   UNFAVORABLE_MIN: 0.6,
 } as const;
 
-export const SOURCE_LABELS: Record<string, string> = {
+export const SOURCE_LABELS: Record<
+  "camara" | "senado" | "alesp" | "camara-sp",
+  string
+> = {
   camara: "Câmara dos Deputados",
   senado: "Senado Federal",
   alesp: "ALESP",

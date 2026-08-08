@@ -1,3 +1,5 @@
+import type { Classification, KnownClassification } from "../types";
+
 export const CLASSIFICATION = {
   favorable: "favorable",
   needs_review: "needs_review",
@@ -5,15 +7,13 @@ export const CLASSIFICATION = {
   unknown: "unknown",
 } as const;
 
-import type { Classification } from "../types";
-
 const VALID_CLASSIFICATIONS = new Set<string>(Object.values(CLASSIFICATION));
 
 export function isValidClassification(value: string): value is Classification {
   return VALID_CLASSIFICATIONS.has(value);
 }
 
-export const CLASSIFICATION_DESCRIPTIONS: Record<string, string> = {
+export const CLASSIFICATION_DESCRIPTIONS: Record<KnownClassification, string> = {
   favorable:
     "Baixo potencial de dano climático — a proposta tende a contribuir para o combate à crise do clima.",
   unfavorable:
