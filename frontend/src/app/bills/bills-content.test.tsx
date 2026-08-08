@@ -24,7 +24,7 @@ describe("BillsContent", () => {
   it("renders search input", () => {
     render(<BillsContent />);
     expect(
-      screen.getByPlaceholderText("Buscar por ementa..."),
+      screen.getByPlaceholderText("Buscar PL (título, ementa, tipo, autor...)"),
     ).toBeInTheDocument();
   });
 
