@@ -34,6 +34,11 @@ describe("BillMetadata", () => {
     expect(screen.getByText("Em tramitação")).toBeInTheDocument();
   });
 
+  it("renders without status row", () => {
+    render(<BillMetadata bill={FAVORABLE_BILL} />);
+    expect(screen.queryByText("Status")).not.toBeInTheDocument();
+  });
+
   it("hides author section when no author", () => {
     const bill = createBill({ author: null });
     render(<BillMetadata bill={bill} />);
