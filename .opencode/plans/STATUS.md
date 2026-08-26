@@ -3,6 +3,16 @@
 - Keep this file in English (except code identifiers like variables/constants/functions).
 - Go through the items iteratively; avoid too many unrelated things at once so commits stay cohesive.
 
+## Princípios do projeto
+
+- **Green software**: dark mode padrão, batch processing (não real-time), single process, modelos quantizados
+- **Acessibilidade WCAG 2.1 AA**: semântica HTML, navegação por teclado, contraste, labels, screen readers
+- **KISS**: sem abstração prematura, sem patterns desnecessários, código direto
+- **Testabilidade**: testes para classificador, scrapers e rotas (pytest + vitest)
+- **Good practices**: clean code, scalability, maintainability, simplicity over complexity, clearity, extracting variables/constants/functions with meaningful names to avoid comments or unintuitive big blocks of code
+- **Open Source**: always prioritize open-source projects/tools/technologies projetos
+- **Security**: security must be a priority
+
 ## Last updated
 
 2026-08-26
@@ -62,9 +72,9 @@
 Create the human-review interface:
 
 1. List of `needs_review` bills
-2. Review form: confirm/change classification (`favorable` / `unfavorable` / `needs_review`)
+2. Review form: confirm/change classification, i.e `favorable` / `unfavorable` / `needs_review` / `unrelated` (needs to be removed since it's not related to the climate emergency themes)
 3. Notes field
-4. Simple auth (shared password or magic link — no complex OAuth)
+4. Simple auth (shared password or magic link — no complex OAuth, but need to be a safe auth)
 5. `PATCH /api/bills/{id}/review` → `reviewer_classification`, `reviewer_notes`, `reviewed_by`, `reviewed_at`
 6. New `Bill` fields: `reviewer_classification`, `reviewer_notes`, `reviewed_by`, `reviewed_at`
 
