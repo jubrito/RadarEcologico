@@ -14,36 +14,70 @@ import requests
 
 API_BASE = "https://dadosabertos.camara.leg.br/api/v2"
 
-# Climate-relevant theme codes from Câmara API.
-# Source: https://dadosabertos.camara.leg.br/api/v2/referencias/proposicoes/codTema
-#
-# Direct: environment, energy, water, agriculture, land, cities, transport, indigenous.
-# Indirect: economy (carbon pricing, green subsidies), international (climate treaties),
-#   health (environmental), science (cleantech), industry (emissions, green standards),
-#   constitutional (environmental rights), justice (environmental crimes).
-CLIMATE_THEME_MAP: dict[int, str] = {
-    48: "Meio Ambiente e Desenvolvimento Sustentável",
-    54: "Energia, Recursos Hídricos e Minerais",
-    64: "Agricultura, Pecuária, Pesca e Extrativismo",
-    51: "Estrutura Fundiária",
-    61: "Viação, Transporte e Mobilidade",
-    44: "Direitos Humanos e Minorias",
-    70: "Finanças Públicas e Orçamento",
-    41: "Cidades e Desenvolvimento Urbano",
-    40: "Economia",
-    55: "Relações Internacionais e Comércio Exterior",
-    56: "Saúde",
-    62: "Ciência, Tecnologia e Inovação",
-    66: "Indústria, Comércio e Serviços",
-    68: "Direito Constitucional",
-    76: "Direito e Justiça",
+# Canonical climate themes shared by both sources (id → display name).
+# Most ids are Câmara ``codTema`` codes; "povos_indigenas" is a synthetic id for
+# a theme the Câmara folds into "Direitos Humanos e Minorias".
+THEME_NAMES: dict[str, str] = {
+    "40": "Economia",
+    "41": "Cidades e Desenvolvimento Urbano",
+    "44": "Direitos Humanos",
+    "48": "Meio Ambiente e Desenvolvimento Sustentável",
+    "51": "Estrutura Fundiária",
+    "54": "Energia, Recursos Hídricos e Minerais",
+    "55": "Relações Internacionais e Comércio Exterior",
+    "56": "Saúde",
+    "61": "Viação, Transporte e Mobilidade",
+    "62": "Ciência, Tecnologia e Inovação",
+    "64": "Agricultura, Pecuária, Pesca e Extrativismo",
+    "66": "Indústria, Comércio e Serviços",
+    "70": "Finanças Públicas e Orçamento",
+    "76": "Direito e Justiça",
+    "povos_indigenas": "Povos Indígenas e Comunidades Tradicionais",
 }
+
+# Câmara ``codTema`` → canonical theme id. Codes absent here are not climate themes.
+CAMARA_THEME_TO_ID: dict[int, str] = {
+    40: "40",
+    41: "41",
+    44: "44",
+    48: "48",
+    51: "51",
+    54: "54",
+    55: "55",
+    56: "56",
+    61: "61",
+    62: "62",
+    64: "64",
+    66: "66",
+    68: "76",  # Direito Constitucional is folded into Direito e Justiça
+    70: "70",
+    76: "76",
+}
+
+# Keywords that mark a bill as about indigenous/traditional peoples, used to
+# route bills into the "povos_indigenas" theme regardless of the source code.
+INDIGENOUS_KEYWORDS: tuple[str, ...] = (
+    "indígena",
+    "quilombola",
+    "ribeirinho",
+    "seringueiro",
+    "comunidades tradicionais",
+    "povos tradicionais",
+    "povos originários",
+    "populações tradicionais",
+)
+
+
+def is_indigenous_theme(ementa: str) -> bool:
+    """True when the ementa mentions indigenous/traditional peoples."""
+    text = ementa.lower()
+    return any(kw in text for kw in INDIGENOUS_KEYWORDS)
 
 from backend.keywords.taxonomy import ementa_matches_climate
 from backend.types import ScrapedBill
 
 
-def _fetch_themes(external_id: str) -> tuple[str | None, str | None]:
+def _fetch_themes(external_id: str, ementa: str) -> tuple[str | None, str | None]:
     try:
         response = requests.get(
             f"{API_BASE}/proposicoes/{external_id}/temas", timeout=10
@@ -51,17 +85,21 @@ def _fetch_themes(external_id: str) -> tuple[str | None, str | None]:
         response.raise_for_status()
         data = response.json()
         temas = data.get("dados", [])
-        if not temas:
-            return None, None
-        codes = []
-        names = []
+        ids: list[str] = []
         for t in temas:
-            code = str(t.get("codTema", ""))
-            if code and int(code) in CLIMATE_THEME_MAP:
-                codes.append(code)
-                names.append(CLIMATE_THEME_MAP[int(code)])
-        return (",".join(codes) if codes else None,
-                ",".join(names) if names else None)
+            code = t.get("codTema", "")
+            try:
+                theme_id = CAMARA_THEME_TO_ID.get(int(code))
+            except (ValueError, TypeError):
+                theme_id = None
+            if theme_id and theme_id not in ids:
+                ids.append(theme_id)
+        if is_indigenous_theme(ementa) and "povos_indigenas" not in ids:
+            ids.append("povos_indigenas")
+        return (
+            ",".join(ids) if ids else None,
+            ",".join(THEME_NAMES[i] for i in ids) if ids else None,
+        )
     except Exception:
         return None, None
 
@@ -95,7 +133,7 @@ def fetch_camara_bills(
                 "itens": 100,
                 "pagina": page,
                 "ordem": "ASC",
-                "codTema": ",".join(str(k) for k in CLIMATE_THEME_MAP),
+                "codTema": ",".join(str(k) for k in CAMARA_THEME_TO_ID),
             }
 
             try:
@@ -117,7 +155,7 @@ def fetch_camara_bills(
 
                 external_id = str(prop.get("id", ""))
 
-                theme_ids_str, theme_names_str = _fetch_themes(external_id)
+                theme_ids_str, theme_names_str = _fetch_themes(external_id, ementa)
 
                 if external_id in seen:
                     continue

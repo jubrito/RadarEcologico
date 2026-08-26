@@ -76,7 +76,7 @@ export function BillCard({ bill }: { bill: Bill }) {
             )}
           </div>
           {themes.length > 0 && (
-            <div className="flex flex-wrap gap-2 pt-2 border-t mt-2">
+            <div className="flex flex-wrap gap-2 pt-3 border-t">
               {themes.map((name) => (
                 <span
                   key={name}

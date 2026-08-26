@@ -243,6 +243,39 @@ def test_camara_fetch_bill_details_extracts_author_party_state():
     assert details["author_state"] == "SP"
 
 
+# ── Câmara theme mapping tests ───────────────────────────────────────────────
+
+
+def test_camara_fetch_bills_merges_constitutional_into_justice():
+    """codTema 68 should be folded into the Direito e Justiça theme (76)."""
+    themes = {"dados": [{"codTema": 68}, {"codTema": 48}]}
+
+    with patch("backend.scrapers.camara.requests.get",
+               _make_camara_mock([CAMARA_BILL_FIXTURE], themes)):
+        bills = fetch_camara_bills(2026, limit=10)
+
+    assert bills[0]["theme_ids"] == "76,48"
+    assert bills[0]["theme_names"] == (
+        "Direito e Justiça,Meio Ambiente e Desenvolvimento Sustentável"
+    )
+
+
+def test_camara_fetch_bills_detects_indigenous_theme():
+    """A bill mentioning indigenous peoples should gain the povos_indigenas theme."""
+    bill = {
+        **CAMARA_BILL_FIXTURE,
+        "ementa": "Institui política de proteção aos povos indígenas "
+                  "e territórios tradicionais na Amazônia.",
+    }
+    themes = {"dados": [{"codTema": 44}]}
+
+    with patch("backend.scrapers.camara.requests.get",
+               _make_camara_mock([bill], themes)):
+        bills = fetch_camara_bills(2026, limit=10)
+
+    assert bills[0]["theme_ids"] == "44,povos_indigenas"
+
+
 # ── Senado list + theme mapping tests ────────────────────────────────────────
 
 
@@ -306,6 +339,35 @@ def test_senado_fetch_bills_deduplicates_theme_codes():
     bills = _fetch_senado([SENADO_PROCESSO_LIST[0]], {"9012932": detail})
 
     assert bills[0]["theme_ids"] == "48"
+
+
+def test_senado_fetch_bills_maps_indigenous_class():
+    """The "População Indígena" class should map to the povos_indigenas theme."""
+    detail = {
+        "id": 9012932,
+        "codigoMateria": 173091,
+        "classificacoes": [{"codigo": 1, "descricao": "População Indígena"}],
+    }
+    bills = _fetch_senado([SENADO_PROCESSO_LIST[0]], {"9012932": detail})
+
+    assert bills[0]["theme_ids"] == "povos_indigenas"
+    assert bills[0]["theme_names"] == "Povos Indígenas e Comunidades Tradicionais"
+
+
+def test_senado_fetch_bills_detects_indigenous_from_ementa():
+    """An indigenous ementa should add povos_indigenas even without the class."""
+    bill = {
+        **SENADO_PROCESSO_LIST[0],
+        "ementa": "Institui política de proteção aos povos indígenas na Amazônia.",
+    }
+    detail = {
+        "id": 9012932,
+        "codigoMateria": 173091,
+        "classificacoes": [{"codigo": 1, "descricao": "Mudanças Climáticas"}],
+    }
+    bills = _fetch_senado([bill], {"9012932": detail})
+
+    assert bills[0]["theme_ids"] == "48,povos_indigenas"
 
 
 def test_senado_fetch_bills_deduplicates_by_codigo():

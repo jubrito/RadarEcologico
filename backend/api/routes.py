@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 from backend.classifiers.ensemble import EnsembleResult, classify_ensemble
 from backend.database import get_session
 from backend.models import Bill
-from backend.scrapers.camara import CLIMATE_THEME_MAP
+from backend.scrapers.camara import THEME_NAMES
 from backend.types import ClassificationLabelWithUnknown, ComponentsDict
 
 router = APIRouter(prefix="/api")
@@ -182,13 +182,13 @@ def get_stats(session: Session = Depends(get_session)) -> StatsResponse:
         by_year[str(yr)] = count
 
     by_theme: dict[str, int] = {}
-    for code in CLIMATE_THEME_MAP:
+    for theme_id in THEME_NAMES:
         count = session.execute(
             select(func.count(Bill.id)).where(
-                Bill.theme_ids.ilike(f"%{code}%")
+                Bill.theme_ids.ilike(f"%{theme_id}%")
             )
         ).scalar() or 0
-        by_theme[str(code)] = count
+        by_theme[theme_id] = count
 
     return StatsResponse(
         total_bills=total,

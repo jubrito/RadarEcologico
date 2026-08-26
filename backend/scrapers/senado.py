@@ -8,7 +8,7 @@ and deactivated). Key features:
   - Lists processos by year (``/processo?ano=YYYY``)
   - Filters by sigla (PL, PLS, PLC, PLP)
   - Filters results by climate keywords in ementa
-  - Maps the bill's "Classificação Temática Unificada" to the Câmara theme codes
+  - Maps the bill's "Classificação Temática Unificada" to a canonical theme id
     (``SENADO_CLASS_TO_THEME``) so both sources share the same themes.
 """
 
@@ -18,58 +18,58 @@ from typing import Optional
 import requests
 
 from backend.keywords.taxonomy import ementa_matches_climate
-from backend.scrapers.camara import CLIMATE_THEME_MAP
+from backend.scrapers.camara import THEME_NAMES, is_indigenous_theme
 from backend.types import ScrapedBill
 
 API_BASE = "https://legis.senado.leg.br/dadosabertos"
 
 SENADO_SIGLAS = ("PL", "PLS", "PLC", "PLP")
 
-# Curated mapping: Senado leaf class name ("descricao") → Câmara ``codTema``.
+# Curated mapping: Senado leaf class name ("descricao") → canonical theme id.
 # Only the climate-relevant subset is mapped; everything else is ignored.
 # Keyed by name (not the Senado numeric code) so it survives taxonomy changes.
-SENADO_CLASS_TO_THEME: dict[str, int] = {
+SENADO_CLASS_TO_THEME: dict[str, str] = {
     # Meio Ambiente
-    "Crimes e Infrações Ambientais": 48,
-    "Desenvolvimento Sustentável": 48,
-    "Espaços Especialmente Protegidos": 48,
-    "Licenciamento Ambiental": 48,
-    "Mudanças Climáticas": 48,
-    "Patrimônio Genético": 48,
-    "Poluição": 48,
-    "Proteção aos Animais": 48,
-    "Resíduos Sólidos": 48,
-    "Vegetação Nativa": 48,
+    "Crimes e Infrações Ambientais": "48",
+    "Desenvolvimento Sustentável": "48",
+    "Espaços Especialmente Protegidos": "48",
+    "Licenciamento Ambiental": "48",
+    "Mudanças Climáticas": "48",
+    "Patrimônio Genético": "48",
+    "Poluição": "48",
+    "Proteção aos Animais": "48",
+    "Resíduos Sólidos": "48",
+    "Vegetação Nativa": "48",
     # Infraestrutura
-    "Energia": 54,
-    "Mineração": 54,
-    "Recursos Hídricos": 54,
-    "Transporte Aéreo": 61,
-    "Transporte Hidroviário": 61,
-    "Transporte Terrestre": 61,
+    "Energia": "54",
+    "Mineração": "54",
+    "Recursos Hídricos": "54",
+    "Transporte Aéreo": "61",
+    "Transporte Hidroviário": "61",
+    "Transporte Terrestre": "61",
     # Economia e Desenvolvimento
-    "Agropecuária e Abastecimento": 64,
-    "Ciência, Tecnologia e Informática": 62,
-    "Desenvolvimento Regional": 40,
-    "Finanças Públicas": 70,
-    "Indústria, Comércio e Serviços": 66,
-    "Política Fundiária e Reforma Agrária": 51,
+    "Agropecuária e Abastecimento": "64",
+    "Ciência, Tecnologia e Informática": "62",
+    "Desenvolvimento Regional": "40",
+    "Finanças Públicas": "70",
+    "Indústria, Comércio e Serviços": "66",
+    "Política Fundiária e Reforma Agrária": "51",
     # Política Social
-    "Combate a Epidemias e Pandemias": 56,
-    "Defesa e Vigilância Sanitária": 56,
-    "Direitos Humanos e Minorias": 44,
-    "Mobilidade Urbana": 61,
-    "População Indígena": 44,
-    "Saneamento Básico": 41,
-    "Saúde Pública": 56,
-    "Saúde Suplementar": 56,
+    "Combate a Epidemias e Pandemias": "56",
+    "Defesa e Vigilância Sanitária": "56",
+    "Direitos Humanos e Minorias": "44",
+    "Mobilidade Urbana": "61",
+    "População Indígena": "povos_indigenas",
+    "Saneamento Básico": "41",
+    "Saúde Pública": "56",
+    "Saúde Suplementar": "56",
     # Orçamento Público
-    "Crédito Adicional": 70,
-    "Diretrizes Orçamentárias": 70,
-    "Orçamento Anual": 70,
-    "Plano Plurianual (PPA)": 70,
+    "Crédito Adicional": "70",
+    "Diretrizes Orçamentárias": "70",
+    "Orçamento Anual": "70",
+    "Plano Plurianual (PPA)": "70",
     # Soberania, Defesa Nacional e Ordem Pública
-    "Relações Internacionais": 55,
+    "Relações Internacionais": "55",
 }
 
 _IDENTIFICACAO_RE = re.compile(r"^(\S+)\s+(\d+)/(\d+)$")
@@ -96,24 +96,26 @@ def _build_status(tramitando: str, situacao: str) -> Optional[str]:
     return " — ".join(parts) if parts else None
 
 
-def _map_themes(classificacoes: list[dict]) -> tuple[Optional[str], Optional[str]]:
+def _map_themes(
+    classificacoes: list[dict], ementa: str
+) -> tuple[Optional[str], Optional[str]]:
     """Map Senado classifications to (theme_ids, theme_names) using the curated table."""
-    ids: list[int] = []
-    names: list[str] = []
+    ids: list[str] = []
     for classificacao in classificacoes or []:
         descricao = (classificacao.get("descricao") or "").strip()
-        code = SENADO_CLASS_TO_THEME.get(descricao)
-        if code is None or code in ids:
+        theme_id = SENADO_CLASS_TO_THEME.get(descricao)
+        if theme_id is None or theme_id in ids:
             continue
-        ids.append(code)
-        names.append(CLIMATE_THEME_MAP[code])
+        ids.append(theme_id)
+    if is_indigenous_theme(ementa) and "povos_indigenas" not in ids:
+        ids.append("povos_indigenas")
     return (
-        ",".join(str(code) for code in ids) if ids else None,
-        ",".join(names) if names else None,
+        ",".join(ids) if ids else None,
+        ",".join(THEME_NAMES[theme_id] for theme_id in ids) if ids else None,
     )
 
 
-def _fetch_themes(process_id: str) -> tuple[Optional[str], Optional[str]]:
+def _fetch_themes(process_id: str, ementa: str) -> tuple[Optional[str], Optional[str]]:
     """Fetch a processo detail and return its mapped themes."""
     try:
         response = requests.get(
@@ -123,7 +125,7 @@ def _fetch_themes(process_id: str) -> tuple[Optional[str], Optional[str]]:
         )
         response.raise_for_status()
         data = response.json()
-        return _map_themes(data.get("classificacoes", []))
+        return _map_themes(data.get("classificacoes", []), ementa)
     except requests.RequestException:
         return None, None
 
@@ -178,7 +180,7 @@ def fetch_senado_bills(
             continue
         seen.add(codigo)
 
-        theme_ids, theme_names = _fetch_themes(str(item.get("id", "")))
+        theme_ids, theme_names = _fetch_themes(str(item.get("id", "")), ementa)
 
         bills.append(
             {

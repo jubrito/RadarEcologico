@@ -28,6 +28,7 @@
 - [x] Cleanup: unused deps (alembic, pydantic-settings, duplicate httpx), dead code (`POSITIVE_MODIFIERS`/`NEGATIVE_MODIFIERS`), stale docstrings
 - [x] Centralized classification/source/theme labels (single source of truth)
 - [x] Migrated Senado scraper to the `/processo` API (the `/materia/*` endpoints were deprecated); maps Senado `Classificações Temáticas` to Câmara themes via `SENADO_CLASS_TO_THEME`
+- [x] Canonical theme taxonomy (`THEME_NAMES` shared by Câmara + Senado): merged `Direito Constitucional` (68) into `Direito e Justiça` (76); split `Povos Indígenas e Comunidades Tradicionais` out of `Direitos Humanos e Minorias` (renamed to `Direitos Humanos`), detected via ementa keywords
 
 ## Sprint 1 — Infrastructure & data (complete)
 
@@ -46,6 +47,7 @@
 - [x] Review/update the frontend types
 - [x] Centralize repeated labels (classification/source/theme)
 - [x] Show the theme on each `BillCard` (from `theme_ids` → `THEME_MAP`)
+- [ ] Themes page: a page listing every theme with its name, a short climate-relevant description, and links to the source taxonomies (Câmara `codTema` reference / Senado "Classificação Temática Unificada" tree)
 - [ ] Important milestones: timeline of tramitação events (e.g. "Apresentada em 12/05/2026", "Aprovada na Comissão…", "Aguardando votação no Plenário")
 - [ ] Voting: if a vote happened (committee/plenary), show a per-party tally (for/against). Data from the Câmara Votações API.
 - [ ] Evaluate replacing elements with React accessible components (pros/cons)

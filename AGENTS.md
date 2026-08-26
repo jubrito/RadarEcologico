@@ -208,7 +208,7 @@ radar-ecologico/
 - **Senate**: `https://legis.senado.leg.br/dadosabertos/processo`
   - List by year: `/processo?ano=YYYY`; detail: `/processo/{idProcesso}` (returns `classificacoes`, `documento.autoria`, `situacaoAtual`, `tramitando`).
   - The old `/materia/*` endpoints (list, detail, classes) were deprecated (deactivation 2026-02-01) and replaced by `/processo/*`. Do NOT use `/materia/*`.
-  - Senado "Classificação Temática Unificada" is a hierarchical tree (10 top-level categories). We map its climate-relevant leaf classes to Câmara `codTema` via `SENADO_CLASS_TO_THEME` in `backend/scrapers/senado.py`.
+  - Senado "Classificação Temática Unificada" is a hierarchical tree (10 top-level categories). We map its climate-relevant leaf classes to the canonical theme ids (`THEME_NAMES`) via `SENADO_CLASS_TO_THEME` in `backend/scrapers/senado.py`.
 
 ### Labeled Data (training/validation)
 

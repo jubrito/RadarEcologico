@@ -14,9 +14,9 @@ const BACKEND_THEME_CODES = [
   "62",
   "64",
   "66",
-  "68",
   "70",
   "76",
+  "povos_indigenas",
 ];
 
 describe("THEME_MAP", () => {
@@ -42,6 +42,12 @@ describe("themeNamesFromIds", () => {
     expect(themeNamesFromIds("48,54")).toEqual([
       "Meio Ambiente e Desenvolvimento Sustentável",
       "Energia, Recursos Hídricos e Minerais",
+    ]);
+  });
+
+  it("maps the indigenous theme id to its name", () => {
+    expect(themeNamesFromIds("povos_indigenas")).toEqual([
+      "Povos Indígenas e Comunidades Tradicionais",
     ]);
   });
 
