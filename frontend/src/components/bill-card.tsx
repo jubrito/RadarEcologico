@@ -49,33 +49,34 @@ export function BillCard({ bill }: { bill: Bill }) {
             )}
           >
             <span>{formatSource(bill.source)}</span>
-            <span aria-hidden="true">·</span>
             <time dateTime={bill.presentation_date || undefined}>
-              {formatDate(bill.presentation_date)}
+              ({formatDate(bill.presentation_date)})
             </time>
           </div>
           <div
             className={mergeStyles(
-              "flex items-center gap-2 text-xs text-muted-foreground pt-2",
+              "flex items-center gap-2 text-xs text-muted-foreground pt-2 border-t",
             )}
           >
             {bill.author && (
-              <span className="text-xs text-muted-foreground">
-                <span className="mr-1">{bill.author}</span>
-                {(bill.author_party || bill.author_state) && (
-                  <span>
-                    (
-                    {[bill.author_party, bill.author_state]
-                      .filter(Boolean)
-                      .join("/")}
-                    )
-                  </span>
-                )}
-              </span>
+              <>
+                <span className="text-xs text-muted-foreground">
+                  <span className="mr-1">{bill.author}</span>
+                  {(bill.author_party || bill.author_state) && (
+                    <span>
+                      (
+                      {[bill.author_party, bill.author_state]
+                        .filter(Boolean)
+                        .join("/")}
+                      )
+                    </span>
+                  )}
+                </span>
+              </>
             )}
           </div>
           {themes.length > 0 && (
-            <div className="flex flex-wrap gap-1">
+            <div className="flex flex-wrap gap-2 pt-2 border-t mt-2">
               {themes.map((name) => (
                 <span
                   key={name}
