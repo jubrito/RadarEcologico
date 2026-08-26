@@ -7,8 +7,12 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from backend.keywords.taxonomy import ementa_matches_climate, is_comunidade_tradicional
-from backend.scrapers.camara import fetch_camara_bills, fetch_camara_bill_details
-from backend.scrapers.senado import fetch_senado_bills
+from backend.scrapers.camara import (
+    fetch_camara_bill_details,
+    fetch_camara_bills,
+    fetch_camara_tramitacoes,
+)
+from backend.scrapers.senado import fetch_senado_bills, fetch_senado_tramitacoes
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -465,3 +469,72 @@ def test_senado_fetch_bills_returns_empty_on_request_error():
         bills = fetch_senado_bills(2026, limit=10)
 
     assert bills == []
+
+
+# ── Tramitação (timeline) tests ───────────────────────────────────────────────
+
+
+def test_camara_fetch_tramitacoes_extracts_events():
+    """Câmara tramitações should map to dated events sorted ascending."""
+    response = _build_mock_response(
+        {
+            "dados": [
+                {"dataHora": "2026-03-10T14:00", "descricaoTramitacao": "Aprovado na Comissão", "siglaOrgao": "CMADS"},
+                {"dataHora": "2026-02-02T09:27", "descricaoTramitacao": "Apresentação de Proposição", "siglaOrgao": "MESA"},
+            ]
+        }
+    )
+
+    with patch("backend.scrapers.camara.requests.get", return_value=response):
+        eventos = fetch_camara_tramitacoes("12345")
+
+    assert len(eventos) == 2
+    assert eventos[0]["date"] == "2026-02-02"
+    assert eventos[0]["description"] == "Apresentação de Proposição"
+    assert eventos[0]["orgao"] == "MESA"
+    assert eventos[1]["date"] == "2026-03-10"
+
+
+def test_camara_fetch_tramitacoes_returns_empty_on_error():
+    """A network error should return an empty list."""
+    with patch("backend.scrapers.camara.requests.get",
+               side_effect=__import__("requests").RequestException("boom")):
+        eventos = fetch_camara_tramitacoes("12345")
+
+    assert eventos == []
+
+
+def test_senado_fetch_tramitacoes_resolves_and_extracts():
+    """Senado tramitação should resolve the process id and map informes legislativos."""
+    resolve_response = _build_mock_response([{"id": 9012932}])
+    detail_response = _build_mock_response(
+        {
+            "autuacoes": [
+                {
+                    "informesLegislativos": [
+                        {"data": "2026-05-19 08:40:59", "descricao": "Encerrado o prazo regimental.", "colegiado": {"sigla": "CAE"}},
+                        {"data": "2026-03-17 16:37:16", "descricao": "Autuado o Projeto de Lei nº 1222/2026.", "colegiado": {"sigla": "PLEN"}},
+                    ]
+                }
+            ]
+        }
+    )
+
+    with patch("backend.scrapers.senado.requests.get") as mock_get:
+        mock_get.side_effect = [resolve_response, detail_response]
+        eventos = fetch_senado_tramitacoes("173091")
+
+    assert len(eventos) == 2
+    assert eventos[0]["date"] == "2026-03-17"
+    assert eventos[0]["description"] == "Autuado o Projeto de Lei nº 1222/2026."
+    assert eventos[0]["orgao"] == "PLEN"
+    assert eventos[1]["orgao"] == "CAE"
+
+
+def test_senado_fetch_tramitacoes_returns_empty_when_unresolvable():
+    """When the process id can't be resolved, return an empty list."""
+    with patch("backend.scrapers.senado.requests.get",
+               return_value=_build_mock_response([])):
+        eventos = fetch_senado_tramitacoes("99999")
+
+    assert eventos == []

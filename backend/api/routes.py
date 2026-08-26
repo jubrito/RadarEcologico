@@ -13,7 +13,8 @@ from sqlalchemy.orm import Session
 from backend.classifiers.ensemble import EnsembleResult, classify_ensemble
 from backend.database import get_session
 from backend.models import Bill
-from backend.scrapers.camara import THEME_NAMES
+from backend.scrapers.camara import THEME_NAMES, fetch_camara_tramitacoes
+from backend.scrapers.senado import fetch_senado_tramitacoes
 from backend.types import ClassificationLabelWithUnknown, ComponentsDict
 
 router = APIRouter(prefix="/api")
@@ -87,6 +88,12 @@ class StatsResponse(BaseModel):
     by_theme: dict[str, int]
 
 
+class TramitacaoEventOut(BaseModel):
+    date: str
+    description: str
+    orgao: Optional[str] = None
+
+
 # --- Endpoints ---
 
 
@@ -150,6 +157,24 @@ def get_bill(bill_id: str, session: Session = Depends(get_session)) -> BillOut:
     if not bill:
         raise HTTPException(status_code=404, detail="Bill not found")
     return BillOut.model_validate(bill)
+
+
+@router.get("/bills/{bill_id}/tramitacoes", response_model=list[TramitacaoEventOut])
+def get_bill_tramitacoes(
+    bill_id: str, session: Session = Depends(get_session)
+) -> list[TramitacaoEventOut]:
+    """Get the tramitação (milestone) events for a bill, from the source API."""
+    bill = session.get(Bill, bill_id)
+    if not bill:
+        raise HTTPException(status_code=404, detail="Bill not found")
+
+    if bill.source == "camara":
+        events = fetch_camara_tramitacoes(bill.external_id)
+    elif bill.source == "senado":
+        events = fetch_senado_tramitacoes(bill.external_id)
+    else:
+        events = []
+    return [TramitacaoEventOut(**event) for event in events]
 
 
 @router.get("/stats", response_model=StatsResponse)

@@ -25,7 +25,9 @@ export function scoreToClassification(score: number): KnownClassification {
 
 export function formatDate(dateStr?: string | null): string {
   if (!dateStr) return "—";
-  const date = new Date(dateStr);
+  // Date-only strings (e.g. "2026-02-02") are parsed as UTC by `new Date`,
+  // which can shift the day in negative offsets. Force local midnight.
+  const date = new Date(dateStr.includes("T") ? dateStr : `${dateStr}T00:00:00`);
   return new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",
     month: "2-digit",

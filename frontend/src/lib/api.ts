@@ -54,6 +54,12 @@ export interface ClassifyResponse {
   evidence: string[];
 }
 
+export interface TramitacaoEvent {
+  date: string;
+  description: string;
+  orgao?: string | null;
+}
+
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 async function fetchAPI<T>(path: string, params?: URLSearchParams): Promise<T> {
@@ -101,6 +107,10 @@ export async function getBills(
 export async function getBill(id: string): Promise<Bill> {
   const bill = await fetchAPI<Bill>(`/bills/${id}`);
   return normalizeBill(bill);
+}
+
+export async function getTramitacoes(id: string): Promise<TramitacaoEvent[]> {
+  return fetchAPI<TramitacaoEvent[]>(`/bills/${id}/tramitacoes`);
 }
 
 export async function getStats(): Promise<StatsResponse> {

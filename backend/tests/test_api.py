@@ -5,7 +5,7 @@ Tests for REST API routes using FastAPI TestClient with dependency overrides.
 import uuid
 from datetime import datetime, timezone
 from typing import Generator
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -187,6 +187,36 @@ class TestGetBill:
         response = client.get("/api/bills/xyz-999")
         assert response.status_code == 200
         assert response.json()["classification"] == "unknown"
+
+
+class TestTramitacoes:
+    def test_returns_tramitacoes_for_camara_bill(self):
+        bill = _bill_row(id="abc-123", source="camara", external_id="12345")
+        session = _make_session(bills=[bill], total=1)
+        events = [
+            {"date": "2026-02-02", "description": "Apresentação de Proposição", "orgao": "MESA"},
+        ]
+
+        app.dependency_overrides[get_session] = lambda: session
+        client = TestClient(app)
+
+        with patch("backend.api.routes.fetch_camara_tramitacoes", return_value=events):
+            response = client.get("/api/bills/abc-123/tramitacoes")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data) == 1
+        assert data[0]["description"] == "Apresentação de Proposição"
+        assert data[0]["orgao"] == "MESA"
+
+    def test_returns_404_for_missing_bill(self):
+        session = _make_session(bills=[], total=0)
+
+        app.dependency_overrides[get_session] = lambda: session
+        client = TestClient(app)
+
+        response = client.get("/api/bills/nonexistent/tramitacoes")
+        assert response.status_code == 404
 
 
 class TestGetStats:

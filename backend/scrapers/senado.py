@@ -19,7 +19,7 @@ import requests
 
 from backend.keywords.taxonomy import ementa_matches_climate, is_comunidade_tradicional
 from backend.scrapers.camara import THEME_NAMES
-from backend.types import ScrapedBill
+from backend.types import ScrapedBill, TramitacaoEvent
 
 API_BASE = "https://legis.senado.leg.br/dadosabertos"
 
@@ -208,3 +208,52 @@ def fetch_senado_bills(
             break
 
     return bills
+
+
+def _resolve_process_id(codigo_materia: str) -> Optional[str]:
+    """Resolve a materia código to its processo id."""
+    try:
+        response = requests.get(
+            f"{API_BASE}/processo",
+            params={"codigoMateria": codigo_materia},
+            headers={"Accept": "application/json"},
+            timeout=15,
+        )
+        response.raise_for_status()
+        data = response.json()
+        if isinstance(data, list) and data:
+            return str(data[0].get("id", ""))
+    except requests.RequestException:
+        pass
+    return None
+
+
+def fetch_senado_tramitacoes(codigo_materia: str) -> list[TramitacaoEvent]:
+    """Fetch the tramitação (milestone) events for a Senado bill."""
+    process_id = _resolve_process_id(codigo_materia)
+    if not process_id:
+        return []
+
+    try:
+        response = requests.get(
+            f"{API_BASE}/processo/{process_id}",
+            headers={"Accept": "application/json"},
+            timeout=15,
+        )
+        response.raise_for_status()
+        detail = response.json()
+    except requests.RequestException:
+        return []
+
+    eventos: list[TramitacaoEvent] = []
+    for autuacao in detail.get("autuacoes", []):
+        for informe in autuacao.get("informesLegislativos", []):
+            eventos.append(
+                {
+                    "date": (informe.get("data") or "")[:10],
+                    "description": informe.get("descricao", ""),
+                    "orgao": (informe.get("colegiado") or {}).get("sigla", ""),
+                }
+            )
+    eventos.sort(key=lambda e: e["date"])
+    return eventos

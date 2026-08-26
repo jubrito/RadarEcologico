@@ -79,6 +79,10 @@ describe("formatDate", () => {
     expect(result).toContain("15");
     expect(result).toContain("2026");
   });
+
+  it("formats date-only string without timezone shift", () => {
+    expect(formatDate("2026-02-02")).toBe("02/02/2026");
+  });
 });
 
 describe("formatSource", () => {

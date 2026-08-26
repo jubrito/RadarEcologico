@@ -12,8 +12,10 @@ import {
 import { STYLE_MAP } from "@/lib/style";
 import { themeNamesFromIds } from "@/lib/themes";
 import { useBill } from "@/lib/hooks/use-bill";
+import { useTramitacoes } from "@/lib/hooks/use-tramitacoes";
 import { BillMetadata } from "@/components/bill-metadata/bill-metadata";
 import { StatusCallout } from "@/components/status-callout/status-callout";
+import { Timeline } from "@/components/timeline";
 
 export default function BillDetailPage({
   params,
@@ -22,6 +24,7 @@ export default function BillDetailPage({
 }) {
   const { id } = use(params);
   const { bill, loading, error } = useBill(id);
+  const { events, loading: tramitacoesLoading } = useTramitacoes(id);
 
   if (loading || !bill) {
     return loading ? (
@@ -147,6 +150,12 @@ export default function BillDetailPage({
                 bill.status ? <StatusCallout status={bill.status} /> : null
               }
             />
+
+            {tramitacoesLoading ? (
+              <Skeleton className="h-32 w-full rounded-xl mt-7" />
+            ) : (
+              <Timeline events={events} />
+            )}
           </div>
         </article>
       </div>

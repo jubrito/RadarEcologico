@@ -49,3 +49,9 @@ class PipelineSummary(TypedDict, total=False):
     new_bills: int
     classified: int
     updated: int
+
+
+class TramitacaoEvent(TypedDict):
+    date: str
+    description: str
+    orgao: str

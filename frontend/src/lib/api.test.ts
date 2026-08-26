@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { getBills, getBill, getStats, classifyText } from "./api";
+import { getBills, getBill, getStats, classifyText, getTramitacoes } from "./api";
 import { createBillsResponse, createStats } from "@/test-fixtures/bills";
 
 beforeEach(() => {
@@ -89,6 +89,20 @@ describe("getStats", () => {
     expect(result.total_bills).toBe(10);
     expect(result.by_classification.favorable).toBe(5);
     expect(result.by_theme["48"]).toBe(3);
+  });
+});
+
+describe("getTramitacoes", () => {
+  it("fetches tramitação events", async () => {
+    mockFetch(200, [{ date: "2026-02-02", description: "Apresentação", orgao: "MESA" }]);
+    const result = await getTramitacoes("abc-123");
+    expect(result).toHaveLength(1);
+    expect(result[0].description).toBe("Apresentação");
+  });
+
+  it("throws on API error", async () => {
+    mockFetch(500, {});
+    await expect(getTramitacoes("abc-123")).rejects.toThrow("API error");
   });
 });
 

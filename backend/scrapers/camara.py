@@ -55,7 +55,7 @@ CAMARA_THEME_TO_ID: dict[int, str] = {
 }
 
 from backend.keywords.taxonomy import ementa_matches_climate, is_comunidade_tradicional
-from backend.types import ScrapedBill
+from backend.types import ScrapedBill, TramitacaoEvent
 
 
 def _fetch_themes(external_id: str, ementa: str) -> tuple[str | None, str | None]:
@@ -221,3 +221,28 @@ def fetch_camara_bill_details(external_id: str) -> Optional[dict[str, object]]:
     except requests.RequestException as e:
         print(f"  Câmara detail error (id={external_id}): {e}")
         return None
+
+
+def fetch_camara_tramitacoes(external_id: str) -> list[TramitacaoEvent]:
+    """Fetch the tramitação (milestone) events for a Câmara bill."""
+    try:
+        response = requests.get(
+            f"{API_BASE}/proposicoes/{external_id}/tramitacoes", timeout=10
+        )
+        response.raise_for_status()
+        data = response.json()
+    except requests.RequestException as e:
+        print(f"  Câmara tramitações error (id={external_id}): {e}")
+        return []
+
+    eventos: list[TramitacaoEvent] = []
+    for t in data.get("dados", []):
+        eventos.append(
+            {
+                "date": (t.get("dataHora") or "")[:10],
+                "description": t.get("descricaoTramitacao", ""),
+                "orgao": t.get("siglaOrgao", ""),
+            }
+        )
+    eventos.sort(key=lambda e: e["date"])
+    return eventos

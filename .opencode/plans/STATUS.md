@@ -25,6 +25,7 @@
 - [x] `favorable` label everywhere (not `transforming`)
 - [x] Valence detection in the classifier: `NEGATING_VERBS` ("revoga a proteção ambiental" → unfavorable) and `PROHIBITING_VERBS` ("proíbe a mineração" → favorable)
 - [x] Split positive keywords into `FIGHTING_KEYWORDS` (strong: protection, restoration, renewables, just transition) vs `MARKET_KEYWORDS` (weak/greenwashing-prone: carbon credits, green hydrogen, "low-carbon" labels) — market terms alone land in `needs_review`, not `favorable`
+- [x] Tramitação timeline on the bill detail page: `GET /api/bills/{id}/tramitacoes` (Câmara `/tramitacoes`, Senado `/processo` "informes legislativos") + `Timeline` component
 - [x] Removed `Bill.full_text` (dead field, never populated) — reintroduce with clear semantics when a consumer exists (Sprint 3 / phase 2 BERT)
 - [x] Cleanup: unused deps (alembic, pydantic-settings, duplicate httpx), dead code (`POSITIVE_MODIFIERS`/`NEGATIVE_MODIFIERS`), stale docstrings
 - [x] Centralized classification/source/theme labels (single source of truth)
@@ -49,12 +50,12 @@
 - [x] Review/update the frontend types
 - [x] Centralize repeated labels (classification/source/theme)
 - [x] Show the theme on each `BillCard` (from `theme_ids` → `THEME_MAP`)
-- [ ] Themes page: a page listing every theme with its name, a short climate-relevant description, and links to the source taxonomies (Câmara `codTema` reference / Senado "Classificação Temática Unificada" tree)
-- [ ] Important milestones: timeline of tramitação events (e.g. "Apresentada em 12/05/2026", "Aprovada na Comissão…", "Aguardando votação no Plenário")
+- [x] Important milestones: timeline of tramitação events (e.g. "Apresentada em 12/05/2026", "Aprovada na Comissão…", "Aguardando votação no Plenário")
+- [ ] Add filter by party to the bills dashboardy
 - [ ] Voting: if a vote happened (committee/plenary), show a per-party tally (for/against). Data from the Câmara Votações API.
-- [ ] Evaluate replacing elements with React accessible components (pros/cons)
 - [ ] Code review
 - [ ] Review the AI algorithm
+- [ ] Themes page: a page listing every theme with its name, a short climate-relevant description, and links to the source taxonomies (Câmara `codTema` reference / Senado "Classificação Temática Unificada" tree)
 
 ## Sprint 3 — Review area (admin)
 
