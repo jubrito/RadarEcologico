@@ -277,12 +277,23 @@ def test_score_trend():
     )
 
 
-def test_green_economy_keywords_are_favorable():
+def test_market_keywords_are_needs_review():
+    """Market/greenwashing-prone terms alone should not count as fighting."""
     result = classify_keywords(
-        "Institui a política de transição justa e fomento ao hidrogênio "
-        "verde e à economia de baixo carbono."
+        "Institui o fomento ao hidrogênio verde e à economia de baixo carbono."
+    )
+    assert result.classification == "needs_review"
+    assert result.market_hits >= 1
+    assert result.fighting_hits == 0
+
+
+def test_fighting_keywords_are_favorable():
+    """Genuine climate action should reach favorable even without market terms."""
+    result = classify_keywords(
+        "Institui a transição justa, a proteção ambiental e o combate ao desmatamento."
     )
     assert result.classification == "favorable"
+    assert result.fighting_hits >= 1
 
 
 def test_classify_ensemble_with_bert():

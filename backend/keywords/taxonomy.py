@@ -1,34 +1,45 @@
 """
 Climate keyword taxonomy for Brazilian legislative bills.
 
-Three tiers of signals:
-  Tier 1 — Keywords: high-confidence terms indicating climate stance
-  Tier 2 — Patterns: regex patterns that capture legislative intent
-  Tier 3 — Valence verbs: verbs that flip a keyword's stance (negating/prohibiting)
+Signal tiers:
+  Tier 1 — Fighting keywords: genuine action that reduces emissions or protects
+           ecosystems (renewables, restoration, protection, just transition).
+  Tier 2 — Market keywords: green-economy/market mechanisms prone to greenwashing
+           (carbon credits, green hydrogen, "low-carbon" labels) — weak positive,
+           i.e. "not making it worse, but not solving the problem".
+  Tier 3 — Negative keywords: terms that intensify the climate crisis.
+  Tier 4 — Patterns: regex patterns that capture legislative intent.
+  Tier 5 — Valence verbs: negating/prohibiting verbs that flip a signal's stance.
 
 All keywords in Portuguese (target language for Brazilian bills).
 """
 
-POSITIVE_KEYWORDS: list[str] = [
+# Tier 1 — genuine climate action (strong positive).
+FIGHTING_KEYWORDS: list[str] = [
     "energia renovável",
     "energia limpa",
     "energia solar",
     "energia eólica",
+    "energia fotovoltaica",
     "transição energética",
+    "transição climática",
+    "transição justa",
     "descarbonização",
-    "neutralidade de carbono",
-    "carbono zero",
+    "eficiência energética",
     "redução de emissões",
-    "mercado de carbono",
-    "crédito de carbono",
     "mudanças climáticas",
     "emergência climática",
     "aquecimento global",
     "acordo de paris",
     "metas climáticas",
     "justiça climática",
+    "mitigação climática",
+    "adaptação climática",
+    "resiliência climática",
+    "política nacional de mudanças do clima",
     "desmatamento zero",
     "desmatamento ilegal",
+    "combate ao desmatamento",
     "reflorestamento",
     "recuperação florestal",
     "restauração ecológica",
@@ -37,9 +48,9 @@ POSITIVE_KEYWORDS: list[str] = [
     "unidades de conservação",
     "reservas extrativistas",
     "proteção dos biomas",
+    "proteção de nascentes",
     "educação ambiental",
     "fiscalização ambiental",
-    "combate ao desmatamento",
     "povos indígenas",
     "comunidades tradicionais",
     "territórios indígenas",
@@ -54,42 +65,43 @@ POSITIVE_KEYWORDS: list[str] = [
     "economia circular",
     "mobilidade sustentável",
     "transporte público limpo",
+    "transporte coletivo",
     "agricultura sustentável",
     "agroecologia",
     "agricultura regenerativa",
     "recursos hídricos",
     "gestão de bacias",
-    "proteção de nascentes",
-    "adaptação climática",
-    "resiliência climática",
-    "política nacional de mudanças do clima",
     "pagamento por serviços ambientais",
+    "cidades resilientes",
+    "infraestrutura verde",
+]
+
+# Tier 2 — market mechanisms / greenwashing-prone labels (weak positive).
+MARKET_KEYWORDS: list[str] = [
+    "mercado de carbono",
+    "crédito de carbono",
+    "neutralidade de carbono",
+    "carbono zero",
+    "compensação de emissões",
     "inventário de emissões",
     "sequestro de carbono",
-    "mitigação climática",
-    "transporte coletivo",
-    "energia fotovoltaica",
-    "biocombustíveis",
-    "eficiência energética",
-    "certificação ambiental",
-    "manejo sustentável",
-    "uso sustentável",
-    "desenvolvimento sustentável",
-    # Climate transition & green economy
-    "transição climática",
-    "transição justa",
     "hidrogênio verde",
     "hidrogênio de baixo carbono",
     "economia de baixo carbono",
     "economia verde",
     "empregos verdes",
+    "agricultura de baixo carbono",
     "financiamento climático",
     "finanças sustentáveis",
-    "compensação de emissões",
-    "infraestrutura verde",
-    "agricultura de baixo carbono",
-    "cidades resilientes",
+    "biocombustíveis",
+    "certificação ambiental",
+    "manejo sustentável",
+    "uso sustentável",
+    "desenvolvimento sustentável",
 ]
+
+# Combined positive list, used only for recall (the pre-filter).
+POSITIVE_KEYWORDS: list[str] = FIGHTING_KEYWORDS + MARKET_KEYWORDS
 
 NEGATIVE_KEYWORDS: list[str] = [
     "flexibiliza licenciamento",

@@ -24,6 +24,7 @@
 - [x] Classification bar UX (labels + contextual explanation)
 - [x] `favorable` label everywhere (not `transforming`)
 - [x] Valence detection in the classifier: `NEGATING_VERBS` ("revoga a proteção ambiental" → unfavorable) and `PROHIBITING_VERBS` ("proíbe a mineração" → favorable)
+- [x] Split positive keywords into `FIGHTING_KEYWORDS` (strong: protection, restoration, renewables, just transition) vs `MARKET_KEYWORDS` (weak/greenwashing-prone: carbon credits, green hydrogen, "low-carbon" labels) — market terms alone land in `needs_review`, not `favorable`
 - [x] Removed `Bill.full_text` (dead field, never populated) — reintroduce with clear semantics when a consumer exists (Sprint 3 / phase 2 BERT)
 - [x] Cleanup: unused deps (alembic, pydantic-settings, duplicate httpx), dead code (`POSITIVE_MODIFIERS`/`NEGATIVE_MODIFIERS`), stale docstrings
 - [x] Centralized classification/source/theme labels (single source of truth)

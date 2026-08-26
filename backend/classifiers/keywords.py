@@ -9,9 +9,10 @@ import re
 from dataclasses import dataclass, field
 
 from backend.keywords.taxonomy import (
+    FIGHTING_KEYWORDS,
+    MARKET_KEYWORDS,
     NEGATING_VERBS,
     NEGATIVE_KEYWORDS,
-    POSITIVE_KEYWORDS,
     PROHIBITING_VERBS,
     negative_patterns,
     positive_patterns,
@@ -31,6 +32,8 @@ class ClassificationResult:
     evidence: list[str] = field(default_factory=list)
     positive_hits: int = 0
     negative_hits: int = 0
+    fighting_hits: int = 0
+    market_hits: int = 0
     positive_pattern_matches: int = 0
     negative_pattern_matches: int = 0
 
@@ -40,7 +43,10 @@ def classify_keywords(ementa: str) -> ClassificationResult:
     Classify a bill's ementa using keyword and pattern matching.
 
     Scoring logic:
-      - Positive keywords / patterns push score DOWN (toward 0).
+      - Fighting keywords / positive patterns push score DOWN strongly (genuine
+        action against the climate crisis).
+      - Market keywords push score DOWN weakly (green-economy mechanisms prone
+        to greenwashing — "not making it worse, but not solving").
       - Negative keywords / patterns push score UP (toward 1).
       - A signal preceded by a negating verb (e.g. "revoga a proteção
         ambiental") is flipped to the opposite stance, and likewise a
@@ -54,14 +60,15 @@ def classify_keywords(ementa: str) -> ClassificationResult:
     """
     text = ementa.lower()
 
-    pos_hits = 0
+    fighting_hits = 0
+    market_hits = 0
     neg_hits = 0
     pos_patterns = 0
     neg_patterns = 0
     positive_evidence: list[str] = []
     negative_evidence: list[str] = []
 
-    for kw in POSITIVE_KEYWORDS:
+    for kw in FIGHTING_KEYWORDS:
         idx = text.find(kw)
         if idx < 0:
             continue
@@ -69,7 +76,18 @@ def classify_keywords(ementa: str) -> ClassificationResult:
             neg_patterns += 1
             negative_evidence.append(kw)
         else:
-            pos_hits += 1
+            fighting_hits += 1
+            positive_evidence.append(kw)
+
+    for kw in MARKET_KEYWORDS:
+        idx = text.find(kw)
+        if idx < 0:
+            continue
+        if _is_preceded_by(text, idx, NEGATING_VERBS):
+            neg_patterns += 1
+            negative_evidence.append(kw)
+        else:
+            market_hits += 1
             positive_evidence.append(kw)
 
     for kw in NEGATIVE_KEYWORDS:
@@ -105,7 +123,9 @@ def classify_keywords(ementa: str) -> ClassificationResult:
             neg_patterns += 1
             negative_evidence.append(pattern)
 
-    score = _compute_score(pos_hits, neg_hits, pos_patterns, neg_patterns)
+    score = _compute_score(
+        fighting_hits, market_hits, neg_hits, pos_patterns, neg_patterns
+    )
 
     if score >= UNFAVORABLE_MIN:
         classification = "unfavorable"
@@ -120,8 +140,10 @@ def classify_keywords(ementa: str) -> ClassificationResult:
         score=score,
         classification=classification,
         evidence=evidence,
-        positive_hits=pos_hits,
+        positive_hits=fighting_hits + market_hits,
         negative_hits=neg_hits,
+        fighting_hits=fighting_hits,
+        market_hits=market_hits,
         positive_pattern_matches=pos_patterns,
         negative_pattern_matches=neg_patterns,
     )
@@ -141,17 +163,27 @@ def _contains_any(window: str, verbs: list[str]) -> bool:
 
 
 def _compute_score(
-    pos_hits: int,
+    fighting_hits: int,
+    market_hits: int,
     neg_hits: int,
     pos_patterns: int,
     neg_patterns: int,
 ) -> float:
     """
     Compute a score 0.0–1.0 where higher = more harmful to climate.
+
+    Fighting keywords lower the score strongly (toward "favorable"); market
+    keywords lower it only weakly (they can't reach "favorable" on their own).
     """
+    positive_hits = fighting_hits + market_hits
 
     # No climate signals at all — default to neutral center.
-    if pos_hits == 0 and neg_hits == 0 and pos_patterns == 0 and neg_patterns == 0:
+    if (
+        positive_hits == 0
+        and neg_hits == 0
+        and pos_patterns == 0
+        and neg_patterns == 0
+    ):
         return NEUTRAL_DEFAULT
 
     base_score = 0.35
@@ -165,13 +197,17 @@ def _compute_score(
     elif neg_hits >= 1:
         base_score += neg_hits * 0.04
 
-    # Positive signals lower score
+    # Strong positive signals (fighting) lower score
     if pos_patterns > 0:
         base_score -= 0.20 + min(0.10, pos_patterns * 0.08)
 
-    if pos_hits >= 3:
+    if fighting_hits >= 3:
         base_score -= 0.15
-    elif pos_hits >= 1:
-        base_score -= pos_hits * 0.04
+    elif fighting_hits >= 1:
+        base_score -= fighting_hits * 0.05
+
+    # Weak positive signals (market / greenwashing-prone) lower score only slightly
+    if market_hits >= 1:
+        base_score -= min(0.04, market_hits * 0.02)
 
     return max(0.0, min(1.0, round(base_score, 3)))
