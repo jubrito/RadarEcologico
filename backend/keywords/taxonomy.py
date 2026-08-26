@@ -43,6 +43,12 @@ POSITIVE_KEYWORDS: list[str] = [
     "povos indígenas",
     "comunidades tradicionais",
     "territórios indígenas",
+    "terras indígenas",
+    "comunidades indígenas",
+    "povos tradicionais",
+    "quilombola",
+    "ribeirinho",
+    "demarcação de terras indígenas",
     "saneamento sustentável",
     "reciclagem",
     "economia circular",
@@ -196,9 +202,34 @@ PROHIBITING_VERBS: list[str] = [
 ]
 
 
+# Broad terms that mark a bill as about indigenous/traditional peoples. Used by
+# ``is_indigenous`` to tag bills with the "povos_indigenas" theme and to let
+# such bills through the climate pre-filter, regardless of the other keywords.
+INDIGENOUS_KEYWORDS: tuple[str, ...] = (
+    "indígena",
+    "índio",
+    "índios",
+    "quilombola",
+    "quilombo",
+    "ribeirinho",
+    "seringueiro",
+    "povos tradicionais",
+    "comunidades tradicionais",
+    "povos originários",
+    "populações tradicionais",
+    "terras indígenas",
+)
+
+
+def is_indigenous(ementa: str) -> bool:
+    """True when the ementa mentions indigenous/traditional peoples."""
+    text = ementa.lower()
+    return any(kw in text for kw in INDIGENOUS_KEYWORDS)
+
+
 def ementa_matches_climate(ementa: str) -> bool:
     text = ementa.lower()
     for kw in POSITIVE_KEYWORDS + NEGATIVE_KEYWORDS:
         if kw in text:
             return True
-    return False
+    return is_indigenous(text)

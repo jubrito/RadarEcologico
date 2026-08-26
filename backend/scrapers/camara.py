@@ -54,26 +54,7 @@ CAMARA_THEME_TO_ID: dict[int, str] = {
     76: "76",
 }
 
-# Keywords that mark a bill as about indigenous/traditional peoples, used to
-# route bills into the "povos_indigenas" theme regardless of the source code.
-INDIGENOUS_KEYWORDS: tuple[str, ...] = (
-    "indígena",
-    "quilombola",
-    "ribeirinho",
-    "seringueiro",
-    "comunidades tradicionais",
-    "povos tradicionais",
-    "povos originários",
-    "populações tradicionais",
-)
-
-
-def is_indigenous_theme(ementa: str) -> bool:
-    """True when the ementa mentions indigenous/traditional peoples."""
-    text = ementa.lower()
-    return any(kw in text for kw in INDIGENOUS_KEYWORDS)
-
-from backend.keywords.taxonomy import ementa_matches_climate
+from backend.keywords.taxonomy import ementa_matches_climate, is_indigenous
 from backend.types import ScrapedBill
 
 
@@ -94,7 +75,7 @@ def _fetch_themes(external_id: str, ementa: str) -> tuple[str | None, str | None
                 theme_id = None
             if theme_id and theme_id not in ids:
                 ids.append(theme_id)
-        if is_indigenous_theme(ementa) and "povos_indigenas" not in ids:
+        if is_indigenous(ementa) and "povos_indigenas" not in ids:
             ids.append("povos_indigenas")
         return (
             ",".join(ids) if ids else None,

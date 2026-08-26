@@ -17,8 +17,8 @@ from typing import Optional
 
 import requests
 
-from backend.keywords.taxonomy import ementa_matches_climate
-from backend.scrapers.camara import THEME_NAMES, is_indigenous_theme
+from backend.keywords.taxonomy import ementa_matches_climate, is_indigenous
+from backend.scrapers.camara import THEME_NAMES
 from backend.types import ScrapedBill
 
 API_BASE = "https://legis.senado.leg.br/dadosabertos"
@@ -107,7 +107,7 @@ def _map_themes(
         if theme_id is None or theme_id in ids:
             continue
         ids.append(theme_id)
-    if is_indigenous_theme(ementa) and "povos_indigenas" not in ids:
+    if is_indigenous(ementa) and "povos_indigenas" not in ids:
         ids.append("povos_indigenas")
     return (
         ",".join(ids) if ids else None,

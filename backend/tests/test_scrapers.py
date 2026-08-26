@@ -126,6 +126,14 @@ def test_ementa_matches_negative_keyword():
     ) is True
 
 
+def test_ementa_matches_indigenous_bill():
+    """Bills about indigenous/traditional peoples should pass the climate filter."""
+    assert ementa_matches_climate(
+        "Institui a Política Nacional de Proteção Territorial das "
+        "Comunidades Quilombolas."
+    ) is True
+
+
 def test_ementa_no_match():
     assert ementa_matches_climate(
         "Institui o Dia Nacional do Professor de Educação Física."
