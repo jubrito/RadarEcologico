@@ -1,10 +1,9 @@
 """
 Climate keyword taxonomy for Brazilian legislative bills.
 
-Three tiers of signals:
+Two tiers of signals:
   Tier 1 — Keywords: high-confidence terms indicating climate stance
   Tier 2 — Patterns: regex patterns that capture legislative intent
-  Tier 3 — Modifiers: verbs that amplify/negate the signal
 
 All keywords in Portuguese (target language for Brazilian bills).
 """
@@ -140,43 +139,6 @@ def negative_patterns() -> list[str]:
         r"(autoriza|permite).*(cultivo|criação).*(transgênico|organismo.*geneticamente).*indígena",
         r"(reduz|extingue|elimina).*(reserva legal|área.*preservação|app).*percentual",
     ]
-
-
-POSITIVE_MODIFIERS: list[str] = [
-    "protege",
-    "preserva",
-    "conserva",
-    "restaura",
-    "recupera",
-    "promove",
-    "incentiva",
-    "fomenta",
-    "garante",
-    "assegura",
-    "combate",
-    "previne",
-    "mitiga",
-    "reduz",
-    "compensa",
-    "reconhece",
-]
-
-NEGATIVE_MODIFIERS: list[str] = [
-    "flexibiliza",
-    "dispensa",
-    "reduz",
-    "elimina",
-    "extingue",
-    "revoga",
-    "anistia",
-    "perdoa",
-    "amplia",
-    "prorroga",
-    "permite",
-    "autoriza",
-    "facilita",
-    "simplifica",
-]
 
 
 def ementa_matches_climate(ementa: str) -> bool:

@@ -27,7 +27,7 @@ async def lifespan(app: FastAPI):
     except Exception as exc:  # noqa: BLE001 — DB may be offline during dev
         logger.warning(
             "Banco de dados indisponível no startup (%s). "
-            "Inicie o PostgreSQL (ou ajuste DATABASE_URL) e reinicie.",
+            "Ajuste DATABASE_URL e reinicie o backend.",
             exc,
         )
     yield

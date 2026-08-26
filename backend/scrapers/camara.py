@@ -4,7 +4,7 @@ Scraper for Câmara dos Deputados open data API.
 Endpoint: https://dadosabertos.camara.leg.br/api/v2/
 
 Two-phase filtering:
-  Phase 1 — API pre-filter by climate-relevant themes (reduces API calls ~80%)
+  Phase 1 — API pre-filter by climate-relevant themes (reduces API calls ~90%)
   Phase 2 — Keyword filter on ementa (catches bills misclassified by theme)
 """
 

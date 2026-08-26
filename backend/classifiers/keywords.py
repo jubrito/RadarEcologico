@@ -10,9 +10,7 @@ from dataclasses import dataclass, field
 
 from backend.keywords.taxonomy import (
     NEGATIVE_KEYWORDS,
-    NEGATIVE_MODIFIERS,
     POSITIVE_KEYWORDS,
-    POSITIVE_MODIFIERS,
     negative_patterns,
     positive_patterns,
 )
@@ -42,8 +40,6 @@ def classify_keywords(ementa: str) -> ClassificationResult:
     Scoring logic:
       - Positive keywords / patterns push score DOWN (toward 0).
       - Negative keywords / patterns push score UP (toward 1).
-      - Critical negative patterns (revoke, mining in indigenous land, amnesty)
-        give a strong push.
 
     Classification thresholds:
       score < 0.30  → favorable

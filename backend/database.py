@@ -1,7 +1,7 @@
 """
 Database connection and session management.
 
-Uses SQLAlchemy 2.0 with psycopg2 for PostgreSQL.
+Uses SQLAlchemy 2.0 (SQLite in dev, PostgreSQL in prod).
 Set DATABASE_URL in environment or .env file.
 """
 
@@ -18,7 +18,7 @@ load_dotenv()
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql://localhost:5432/radar_ecologico",
+    "sqlite:///./radar.db",
 )
 
 engine = create_engine(

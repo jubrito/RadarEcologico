@@ -7,7 +7,7 @@ Flow:
   1. Fetch new bills from Câmara + Senado APIs
   2. Deduplicate against database
   3. Classify each new bill using ensemble
-  4. Store results in PostgreSQL
+  4. Store results in the database
 """
 
 import os

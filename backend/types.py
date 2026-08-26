@@ -39,6 +39,8 @@ class ScrapedBill(TypedDict, total=False):
     theme_ids: str | None
     theme_names: str | None
     author: str | None
+    author_party: str | None
+    author_state: str | None
 
 
 class PipelineSummary(TypedDict, total=False):
