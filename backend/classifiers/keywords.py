@@ -204,7 +204,7 @@ def _compute_score(
     if fighting_hits >= 3:
         base_score -= 0.15
     elif fighting_hits >= 1:
-        base_score -= fighting_hits * 0.05
+        base_score -= fighting_hits * 0.06
 
     # Weak positive signals (market / greenwashing-prone) lower score only slightly
     if market_hits >= 1:

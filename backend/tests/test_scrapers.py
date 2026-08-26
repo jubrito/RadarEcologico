@@ -167,6 +167,13 @@ def test_ementa_matches_wealth_tax_bill():
     ) is True
 
 
+def test_ementa_matches_market_bill():
+    """Market/greenwashing-prone terms should still pass the pre-filter (recall)."""
+    assert ementa_matches_climate(
+        "Institui o mercado de carbono regulado."
+    ) is True
+
+
 def test_is_comunidade_tradicional():
     assert is_comunidade_tradicional(
         "Proteção aos povos indígenas isolados."

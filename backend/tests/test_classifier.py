@@ -277,23 +277,62 @@ def test_score_trend():
     )
 
 
-def test_market_keywords_are_needs_review():
-    """Market/greenwashing-prone terms alone should not count as fighting."""
-    result = classify_keywords(
-        "Institui o fomento ao hidrogênio verde e à economia de baixo carbono."
-    )
+@pytest.mark.parametrize(
+    "ementa",
+    [
+        "Institui o mercado de carbono regulado.",
+        "Institui o fomento ao hidrogênio verde.",
+        "Cria o programa de economia de baixo carbono.",
+        "Institui a política de compensação de emissões.",
+        "Regulamenta a certificação ambiental de produtos.",
+        "Institui a política de desenvolvimento sustentável.",
+    ],
+)
+def test_market_keywords_are_not_favorable(ementa):
+    """Market/greenwashing-prone terms alone should never reach favorable."""
+    result = classify_keywords(ementa)
     assert result.classification == "needs_review"
     assert result.market_hits >= 1
     assert result.fighting_hits == 0
 
 
-def test_fighting_keywords_are_favorable():
-    """Genuine climate action should reach favorable even without market terms."""
+@pytest.mark.parametrize(
+    "ementa",
+    [
+        "Institui o combate ao desmatamento.",
+        "Cria o programa de reflorestamento.",
+        "Institui a política de transição justa.",
+        "Institui o programa de eficiência energética.",
+        "Cria o fundo de adaptação climática.",
+        "Institui a política de preservação ambiental.",
+    ],
+)
+def test_fighting_keywords_are_favorable(ementa):
+    """Genuine climate action should reach favorable on its own."""
+    result = classify_keywords(ementa)
+    assert result.classification == "favorable"
+    assert result.fighting_hits >= 1
+    assert result.market_hits == 0
+
+
+def test_market_is_weaker_than_fighting():
+    """A market keyword should push the score less than a fighting keyword."""
+    market = classify_keywords("Institui o mercado de carbono.")
+    fighting = classify_keywords("Institui o combate ao desmatamento.")
+
+    assert market.fighting_hits == 0
+    assert fighting.fighting_hits >= 1
+    assert fighting.score < market.score
+
+
+def test_fighting_and_market_combine():
+    """A bill with both fighting and market signals is favorable, with both counted."""
     result = classify_keywords(
-        "Institui a transição justa, a proteção ambiental e o combate ao desmatamento."
+        "Institui a transição justa e o fomento ao hidrogênio verde."
     )
     assert result.classification == "favorable"
     assert result.fighting_hits >= 1
+    assert result.market_hits >= 1
 
 
 def test_classify_ensemble_with_bert():

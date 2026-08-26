@@ -147,7 +147,7 @@ NEGATIVE_KEYWORDS: list[str] = [
 def positive_patterns() -> list[str]:
     return [
         r"(institui|cria|estabelece).*(política|programa|fundo|sistema).*clim[áa]tic",
-        r"(institui|cria|estabelece).*(mercado|carbono|emissões).*(regulad|control|compens)",
+        r"(institui|cria|estabelece).*(emiss[ãõ]es).*(regulad|control|compens)",
         r"(proteção|preservação|conservação).*(bioma|amazônia|cerrado|caatinga|mata atlântica|pantanal|pampa)",
         r"(redução|diminuição|compensação).*(emissão|gases|efeito estufa|gee)",
         r"(proíbe|veda|restringe).*(desmatamento|queimada|garimpo).*(ilegal|irregular)",

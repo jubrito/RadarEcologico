@@ -12,6 +12,18 @@ Fontes atuais: Câmara dos Deputados e Senado Federal (APIs públicas). Expansã
 
 ---
 
+## Como a classificação funciona
+
+O classificador usa palavras-chave em três níveis (além de padrões regex e verbos de negação/proibição):
+
+- **Combate** (`FIGHTING_KEYWORDS`): ação climática genuína — proteção, restauração, renováveis, transição justa, povos indígenas e tradicionais. Empurra fortemente para `favorable`.
+- **Mercado** (`MARKET_KEYWORDS`): mecanismos de mercado propensos a greenwashing — crédito/mecado de carbono, hidrogênio verde, "baixo carbono", compensação de emissões. Empurra fracamente, então sozinhos caem em `needs_review` (não pioram, mas não resolvem).
+- **Intensifica** (`NEGATIVE_KEYWORDS`): termos que agravam a crise — flexibilização de licenciamento, mineração em terra indígena, subsídios a combustíveis fósseis. Empurra para `unfavorable`.
+
+Verbos de negação ("revoga a proteção ambiental") e proibição ("proíbe a mineração") invertem o sinal do termo.
+
+---
+
 ## Stack
 
 **Backend:** Python 3.12+, FastAPI, SQLAlchemy, PostgreSQL (Supabase free tier)  
