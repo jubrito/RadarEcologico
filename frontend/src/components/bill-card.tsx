@@ -43,18 +43,6 @@ export function BillCard({ bill }: { bill: Bill }) {
           <p className="text-sm text-muted-foreground group-hover:text-foreground line-clamp-3 leading-relaxed">
             {bill.ementa}
           </p>
-          {themes.length > 0 && (
-            <div className="flex flex-wrap gap-1">
-              {themes.map((name) => (
-                <span
-                  key={name}
-                  className="rounded-full border border-border px-2 py-0.5 text-[11px] text-muted-foreground"
-                >
-                  {name}
-                </span>
-              ))}
-            </div>
-          )}
           <div
             className={mergeStyles(
               "flex items-center gap-2 text-xs text-muted-foreground pt-2 border-t",
@@ -86,6 +74,18 @@ export function BillCard({ bill }: { bill: Bill }) {
               </span>
             )}
           </div>
+          {themes.length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {themes.map((name) => (
+                <span
+                  key={name}
+                  className="rounded-full border border-border px-2 py-0.5 text-[11px] text-muted-foreground"
+                >
+                  {name}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       </article>
     </Link>

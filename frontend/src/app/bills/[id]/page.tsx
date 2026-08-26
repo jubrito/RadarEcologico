@@ -10,6 +10,7 @@ import {
   CLASSIFICATION_DESCRIPTIONS,
 } from "@/lib/utils/classifications";
 import { STYLE_MAP } from "@/lib/style";
+import { themeNamesFromIds } from "@/lib/themes";
 import { useBill } from "@/lib/hooks/use-bill";
 import { BillMetadata } from "@/components/bill-metadata/bill-metadata";
 import { StatusCallout } from "@/components/status-callout/status-callout";
@@ -44,6 +45,7 @@ export default function BillDetailPage({
 
   const classification = bill.classification ?? CLASSIFICATION.unknown;
   const style = STYLE_MAP[classification];
+  const themes = themeNamesFromIds(bill.theme_ids);
   const pct =
     bill.final_score != null ? Math.round(bill.final_score * 100) : null;
 
@@ -109,6 +111,18 @@ export default function BillDetailPage({
                   {bill.ementa}
                 </p>
               </div>
+              {themes.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {themes.map((name) => (
+                    <span
+                      key={name}
+                      className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground"
+                    >
+                      {name}
+                    </span>
+                  ))}
+                </div>
+              )}
             </section>
 
             {pct != null && (

@@ -95,4 +95,15 @@ describe("BillDetailPage", () => {
       expect(screen.getByText("Dep. João Silva")).toBeInTheDocument();
     });
   });
+
+  it("shows the theme below the ementa", async () => {
+    mockGetBill.mockResolvedValue(FAVORABLE_BILL);
+    await renderBill("abc-123");
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("Meio Ambiente e Desenvolvimento Sustentável"),
+      ).toBeInTheDocument();
+    });
+  });
 });
