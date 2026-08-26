@@ -9,8 +9,10 @@ import re
 from dataclasses import dataclass, field
 
 from backend.keywords.taxonomy import (
+    NEGATING_VERBS,
     NEGATIVE_KEYWORDS,
     POSITIVE_KEYWORDS,
+    PROHIBITING_VERBS,
     negative_patterns,
     positive_patterns,
 )
@@ -40,6 +42,10 @@ def classify_keywords(ementa: str) -> ClassificationResult:
     Scoring logic:
       - Positive keywords / patterns push score DOWN (toward 0).
       - Negative keywords / patterns push score UP (toward 1).
+      - A signal preceded by a negating verb (e.g. "revoga a proteção
+        ambiental") is flipped to the opposite stance, and likewise a
+        negative signal preceded by a prohibiting verb (e.g. "proíbe a
+        mineração em terra indígena").
 
     Classification thresholds:
       score < 0.30  → favorable
@@ -48,24 +54,56 @@ def classify_keywords(ementa: str) -> ClassificationResult:
     """
     text = ementa.lower()
 
-    pos_hits = sum(1 for kw in POSITIVE_KEYWORDS if kw in text)
-    neg_hits = sum(1 for kw in NEGATIVE_KEYWORDS if kw in text)
+    pos_hits = 0
+    neg_hits = 0
+    pos_patterns = 0
+    neg_patterns = 0
+    positive_evidence: list[str] = []
+    negative_evidence: list[str] = []
 
-    pos_patterns = sum(
-        1 for p in positive_patterns() if re.search(p, text, re.IGNORECASE)
-    )
-    neg_patterns = sum(
-        1 for p in negative_patterns() if re.search(p, text, re.IGNORECASE)
-    )
+    for kw in POSITIVE_KEYWORDS:
+        idx = text.find(kw)
+        if idx < 0:
+            continue
+        if _is_preceded_by(text, idx, NEGATING_VERBS):
+            neg_patterns += 1
+            negative_evidence.append(kw)
+        else:
+            pos_hits += 1
+            positive_evidence.append(kw)
 
-    evidence: list[str] = []
+    for kw in NEGATIVE_KEYWORDS:
+        idx = text.find(kw)
+        if idx < 0:
+            continue
+        if _is_preceded_by(text, idx, PROHIBITING_VERBS):
+            pos_patterns += 1
+            positive_evidence.append(kw)
+        else:
+            neg_hits += 1
+            negative_evidence.append(kw)
 
-    if pos_hits > 0:
-        found_pos = [kw for kw in POSITIVE_KEYWORDS if kw in text]
-        evidence.extend(found_pos[:3])
-    if neg_hits > 0:
-        found_neg = [kw for kw in NEGATIVE_KEYWORDS if kw in text]
-        evidence.extend(f"-{kw}" for kw in found_neg[:3])
+    for pattern in positive_patterns():
+        match = re.search(pattern, text, re.IGNORECASE)
+        if match is None:
+            continue
+        if _is_preceded_by(text, match.start(), NEGATING_VERBS):
+            neg_patterns += 1
+            negative_evidence.append(pattern)
+        else:
+            pos_patterns += 1
+            positive_evidence.append(pattern)
+
+    for pattern in negative_patterns():
+        match = re.search(pattern, text, re.IGNORECASE)
+        if match is None:
+            continue
+        if _is_preceded_by(text, match.start(), PROHIBITING_VERBS):
+            pos_patterns += 1
+            positive_evidence.append(pattern)
+        else:
+            neg_patterns += 1
+            negative_evidence.append(pattern)
 
     score = _compute_score(pos_hits, neg_hits, pos_patterns, neg_patterns)
 
@@ -76,6 +114,8 @@ def classify_keywords(ementa: str) -> ClassificationResult:
     else:
         classification = "needs_review"
 
+    evidence = positive_evidence[:3] + [f"-{e}" for e in negative_evidence[:3]]
+
     return ClassificationResult(
         score=score,
         classification=classification,
@@ -85,6 +125,19 @@ def classify_keywords(ementa: str) -> ClassificationResult:
         positive_pattern_matches=pos_patterns,
         negative_pattern_matches=neg_patterns,
     )
+
+
+_NEGATION_WINDOW = 80
+
+
+def _is_preceded_by(text: str, start: int, verbs: list[str]) -> bool:
+    """True when any verb appears shortly before the given position."""
+    window = text[max(0, start - _NEGATION_WINDOW):start]
+    return _contains_any(window, verbs)
+
+
+def _contains_any(window: str, verbs: list[str]) -> bool:
+    return any(v in window for v in verbs)
 
 
 def _compute_score(

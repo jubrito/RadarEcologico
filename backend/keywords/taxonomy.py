@@ -1,9 +1,10 @@
 """
 Climate keyword taxonomy for Brazilian legislative bills.
 
-Two tiers of signals:
+Three tiers of signals:
   Tier 1 — Keywords: high-confidence terms indicating climate stance
   Tier 2 — Patterns: regex patterns that capture legislative intent
+  Tier 3 — Valence verbs: verbs that flip a keyword's stance (negating/prohibiting)
 
 All keywords in Portuguese (target language for Brazilian bills).
 """
@@ -139,6 +140,60 @@ def negative_patterns() -> list[str]:
         r"(autoriza|permite).*(cultivo|criação).*(transgênico|organismo.*geneticamente).*indígena",
         r"(reduz|extingue|elimina).*(reserva legal|área.*preservação|app).*percentual",
     ]
+
+
+# Verbs that flip a POSITIVE keyword into a negative signal
+# (e.g. "revoga a política de combate ao desmatamento" is harmful).
+NEGATING_VERBS: list[str] = [
+    "revoga",
+    "revogar",
+    "revogação",
+    "extingue",
+    "extinguir",
+    "extinção",
+    "derruba",
+    "derrubar",
+    "elimina",
+    "eliminar",
+    "suspende",
+    "suspender",
+    "suspensão",
+    "cancela",
+    "cancelar",
+    "anula",
+    "anular",
+    "isenta",
+    "isentar",
+    "dispensa",
+    "dispensar",
+    "flexibiliza",
+    "flexibilizar",
+    "enfraquece",
+    "enfraquecer",
+    "acaba com",
+]
+
+# Verbs that flip a NEGATIVE keyword into a positive signal
+# (e.g. "proíbe a mineração em terra indígena" is beneficial).
+PROHIBITING_VERBS: list[str] = [
+    "proíbe",
+    "proibir",
+    "proibição",
+    "veda",
+    "vedar",
+    "restringe",
+    "restringir",
+    "impede",
+    "impedir",
+    "combate",
+    "combater",
+    "pune",
+    "punir",
+    "criminaliza",
+    "criminalizar",
+    "coíbe",
+    "coibir",
+]
 
 
 def ementa_matches_climate(ementa: str) -> bool:

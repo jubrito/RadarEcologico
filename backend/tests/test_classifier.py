@@ -140,6 +140,45 @@ def test_parametrized_classification(ementa: str, expected_label: str):
     )
 
 
+# --- Valence (negation) tests ---
+
+
+@pytest.mark.parametrize(
+    "ementa",
+    [
+        "Revoga a Política Nacional de Mudanças Climáticas.",
+        "Extingue o fundo de combate ao desmatamento.",
+        "Revoga a lei de proteção dos biomas.",
+    ],
+)
+def test_negated_positive_signal_is_unfavorable(ementa):
+    """Repealing/ending a climate-positive measure is harmful."""
+    result = classify_keywords(ementa)
+    assert result.classification == "unfavorable"
+
+
+@pytest.mark.parametrize(
+    "ementa",
+    [
+        "Proíbe a mineração em terra indígena.",
+        "Veda o garimpo em áreas protegidas.",
+        "Proíbe a mineração em unidades de conservação.",
+    ],
+)
+def test_prohibited_negative_signal_is_favorable(ementa):
+    """Prohibiting/combating a climate-harmful activity is beneficial."""
+    result = classify_keywords(ementa)
+    assert result.classification == "favorable"
+
+
+def test_prohibiting_does_not_flip_positive_signals():
+    """A positive signal next to a prohibiting verb stays positive."""
+    result = classify_keywords(
+        "Institui o combate ao desmatamento e proíbe a pesca predatória."
+    )
+    assert result.classification == "favorable"
+
+
 # --- Ensemble tests ---
 
 
