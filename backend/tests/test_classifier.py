@@ -277,6 +277,14 @@ def test_score_trend():
     )
 
 
+def test_green_economy_keywords_are_favorable():
+    result = classify_keywords(
+        "Institui a política de transição justa e fomento ao hidrogênio "
+        "verde e à economia de baixo carbono."
+    )
+    assert result.classification == "favorable"
+
+
 def test_classify_ensemble_with_bert():
     from backend.classifiers.ensemble import classify_ensemble_with_bert
 

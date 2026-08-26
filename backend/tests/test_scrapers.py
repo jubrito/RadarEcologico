@@ -144,6 +144,22 @@ def test_ementa_matches_fossil_fuel_bill():
     ) is True
 
 
+def test_ementa_matches_transition_and_adaptation():
+    """Climate-transition, adaptation and impact topics should pass the filter."""
+    assert ementa_matches_climate(
+        "Institui a política de transição justa para uma economia de baixo carbono."
+    ) is True
+    assert ementa_matches_climate(
+        "Cria o programa de fomento ao hidrogênio verde."
+    ) is True
+    assert ementa_matches_climate(
+        "Institui o Programa Nacional de Prevenção de Enchentes e Convivência com a Seca."
+    ) is True
+    assert ementa_matches_climate(
+        "Dispõe sobre a resposta a desastres naturais e eventos climáticos extremos."
+    ) is True
+
+
 def test_ementa_matches_wealth_tax_bill():
     """Wealth-tax bills (climate-justice framing) should pass the climate filter."""
     assert ementa_matches_climate(

@@ -75,6 +75,20 @@ POSITIVE_KEYWORDS: list[str] = [
     "manejo sustentável",
     "uso sustentável",
     "desenvolvimento sustentável",
+    # Climate transition & green economy
+    "transição climática",
+    "transição justa",
+    "hidrogênio verde",
+    "hidrogênio de baixo carbono",
+    "economia de baixo carbono",
+    "economia verde",
+    "empregos verdes",
+    "financiamento climático",
+    "finanças sustentáveis",
+    "compensação de emissões",
+    "infraestrutura verde",
+    "agricultura de baixo carbono",
+    "cidades resilientes",
 ]
 
 NEGATIVE_KEYWORDS: list[str] = [
@@ -203,7 +217,7 @@ PROHIBITING_VERBS: list[str] = [
 
 
 # Broad terms that mark a bill as about indigenous/traditional peoples. Used by
-# ``is_indigenous`` to tag bills with the "povos_indigenas" theme and to let
+# ``is_comunidade_tradicional`` to tag bills with the "povos_indigenas" theme and to let
 # such bills through the climate pre-filter, regardless of the other keywords.
 COMUNIDADES_TRADICIONAIS_KEYWORDS: tuple[str, ...] = (
     "indígena",
@@ -247,6 +261,22 @@ CLIMATE_SIGNAL_KEYWORDS: tuple[str, ...] = (
     "efeito estufa",
     "gases de efeito estufa",
     "grandes fortunas",
+    # Climate impacts (neutral: adaptation or emergency bills)
+    "desastres naturais",
+    "eventos climáticos extremos",
+    "eventos extremos",
+    "seca",
+    "estiagem",
+    "escassez hídrica",
+    "enchentes",
+    "inundações",
+    "alagamentos",
+    "ondas de calor",
+    "elevação do nível do mar",
+    "nível do mar",
+    "acidificação dos oceanos",
+    "ecossistemas",
+    "mudança do clima",
 )
 
 
