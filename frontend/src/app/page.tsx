@@ -81,27 +81,6 @@ export default function DashboardPage() {
               desc="Ex: incentivo a combustíveis fósseis, desmatamento, poluição, flexibilização da legislação ambiental."
               variant="unfavorable"
             />
-            {/* <StatCard
-              prefix="PLs potencialmente responsáveis por "
-              tema="combater a crise climática"
-              value={stats.by_classification.favorable || 0}
-              desc="Ex: preservação ambiental, transição energética, sustentabilidade, proteção dos povos tradicionais."
-              variant="favorable"
-            />
-            <StatCard
-              prefix="PLs sem classificação automática e com "
-              tema="revisão humana pendente"
-              value={stats.by_classification.needs_review || 0}
-              desc="PLs sem informações claras ou suficientes para serem classificadas com precisão por inteligência artificial."
-              variant="needs_review"
-            />
-            <StatCard
-              prefix="PLs potencialmente responsáveis por "
-              tema="agravar a crise climática"
-              value={stats.by_classification.unfavorable || 0}
-              desc="Ex: incentivo a combustíveis fósseis, desmatamento, poluição, flexibilização da legislação ambiental."
-              variant="unfavorable"
-            /> */}
           </>
         )}
         {!stats && (
