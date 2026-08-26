@@ -28,7 +28,7 @@ Scope: Brazil. Current sources: Chamber of Deputies and Federal Senate APIs.
 - **Green software principles**: Always prioritize following green software principles (carbon efficiency, energy efficiency, carbon awareness, hardware efficiency).
 - **Efficient AI**: minimize token usage, be objective in responses, use tokens strategically to spend less energy/time.
 - Batch > real-time: pipeline runs 1x/day via cron, not on every request.
-- Use Chamber API pre-filters (`temas=40|41|42`) to reduce requests by ~90%.
+- Use Chamber API pre-filters (`codTema=<climate theme codes>`) to reduce requests by ~90%.
 - Single process: the Python FastAPI backend serves API, classification, and scraping.
 - Dark mode as default (saves energy on OLED).
 - ISR in Next.js: revalidate pages only when data changes.
@@ -49,7 +49,7 @@ Scope: Brazil. Current sources: Chamber of Deputies and Federal Senate APIs.
 - **Every classification function must have tests** (keyword classifier, ensemble, BERT wrapper).
 - **Every scraper must have tests** with mocks of external APIs (pytest + httpx).
 - **Every API route must have tests** (FastAPI TestClient + pytest-asyncio).
-- **Frontend**: tests with vitest + testing-library (not yet configured — TODO Sprint 1).
+- **Frontend**: tests with vitest + testing-library (configured; query by role/label).
 - Desired coverage: 80%. Doesn't block PR, but write tests for new features.
 - Use `pytest.mark.parametrize` to test multiple bill-summary variations.
 
@@ -67,7 +67,7 @@ Scope: Brazil. Current sources: Chamber of Deputies and Federal Senate APIs.
 
 - **Pagination on every list**: never return more than 100 items without pagination.
 - **PostgreSQL indexes**: create indexes for columns used in filters and sorting (`classification`, `year`, `source`, `final_score`).
-- **Idempotency in scrapers**: running the pipeline twice in a row must not duplicate data. Use `ON CONFLICT (source, external_id) DO UPDATE`.
+- **Idempotency in scrapers**: running the pipeline twice in a row must not duplicate data. Enforced by `UniqueConstraint(source, external_id)` plus an existence check in the pipeline.
 - **Connection pooling**: use the SQLAlchemy pool (default 5 connections, sufficient)
 
 ### 6. Maintainability
@@ -121,7 +121,7 @@ Scope: Brazil. Current sources: Chamber of Deputies and Federal Senate APIs.
 # Backend — always activate the venv first (from the project root)
 source backend/.venv/bin/activate
 uvicorn backend.main:app --reload          # API at http://localhost:8000
-pytest backend/tests -v                    # Tests (20 passing)
+pytest backend/tests -v                    # Tests (69 passing)
 python -m backend.pipeline                 # Manual pipeline (classifies + populates database)
 
 # Frontend
@@ -129,6 +129,7 @@ cd frontend
 npm run dev                                # http://localhost:3000
 npm run build && npm start                 # Production
 npm run lint                               # ESLint
+npm test                                   # Vitest (132 passing)
 
 # Local database (SQLite — zero setup)
 # Just configure backend/.env with: DATABASE_URL=sqlite:///./radar.db
@@ -161,20 +162,33 @@ radar-ecologico/
 │   ├── database.py               # SQLAlchemy engine + session
 │   ├── models.py                 # ORM: Bill, BillSnapshot
 │   ├── pipeline.py               # Daily orchestrator
+│   ├── types.py                  # Shared Pydantic types (ScrapedBill, etc.)
 │   ├── pyproject.toml
 │   ├── requirements.txt
 │   └── tests/
-│       ├── test_classifier.py    # 11 tests (parametrized)
-│       └── test_scrapers.py      # 4 tests (keyword matching)
+│       ├── test_api.py           # 30 tests (routes, filters, stats)
+│       ├── test_classifier.py    # 17 tests (parametrized)
+│       ├── test_pipeline.py      # 5 tests (backfill/idempotency)
+│       └── test_scrapers.py      # 17 tests (keyword + status extraction)
 ├── frontend/
 │   ├── src/app/                  # Next.js App Router
 │   │   ├── page.tsx              # Dashboard (stats + recent bills)
 │   │   └── bills/                # List + detail [id]
-│   ├── src/components/           # BillCard, ClassificationBadge, StatCard, ui/
+│   ├── src/components/           # BillCard, ClassificationBadge, StatCard, Header, MainNav, ui/
+│   ├── src/components/bill-metadata/    # Author/party/state/date metadata
+│   ├── src/components/status-callout/   # Tramitação status explanation
 │   ├── src/lib/api.ts            # TypeScript client (getBills, getStats, etc.)
-│   ├── src/lib/utils.ts          # cn(), formatDate(), formatSource(), colors
+│   ├── src/lib/types.ts          # Classification types, source labels, query params
+│   ├── src/lib/content.ts        # Site copy + state names
+│   ├── src/lib/style.ts          # Per-classification Tailwind styles + labels
+│   ├── src/lib/themes.ts         # Climate theme code → name map (mirrors backend)
+│   ├── src/lib/status.ts         # Bill status → phase/explanation
+│   ├── src/lib/bill-helpers.ts   # Author parsing
+│   ├── src/lib/utils/            # utils.ts (formatting), classifications.ts (labels)
+│   ├── src/lib/hooks/use-bill.ts # Fetch single bill hook
 │   ├── components.json           # shadcn/ui v4 config (base-nova)
 │   ├── eslint.config.mjs         # ESLint v9 flat config
+│   ├── vitest.config.mts         # Vitest config (@ alias)
 │   └── next.config.ts
 ├── data/                         # Labeled bills (CSV) — still empty
 ├── notebooks/                    # BERT fine-tuning (phase 2) — still empty
@@ -189,7 +203,7 @@ radar-ecologico/
 ### APIs (phase 1 — federal)
 
 - **Chamber**: `https://dadosabertos.camara.leg.br/api/v2/proposicoes`
-  - Filters: `siglaTipo=PL|PLP|PEC|MPV`, `ano`, `temas=41|44|48|51|54|61|64|70`
+  - Filters: `siglaTipo=PL|PLP|PEC|MPV`, `ano`, `codTema=40|41|44|48|51|54|55|56|61|62|64|66|68|70|76`
   - Full list: `https://dadosabertos.camara.leg.br/api/v2/referencias/proposicoes/codTema`
 - **Senate**: `https://legis.senado.leg.br/dadosabertos/materia/pesquisa/lista`
   - This service may be discontinued. Prepare fallbacks.
@@ -206,4 +220,4 @@ radar-ecologico/
 
 The current ensemble (phase 1) uses 100% keyword classifier. Phase 2 will add BERTimbau with weights: keyword 0.40 + BERT 0.60.
 
-Pipeline order: scrape APIs → filter by climate keywords → deduplicate against DB (`ON CONFLICT (source, external_id) DO UPDATE`) → classify → save.
+Pipeline order: scrape APIs → filter by climate keywords → deduplicate against DB (`UniqueConstraint(source, external_id)` + existence check) → classify → save.
