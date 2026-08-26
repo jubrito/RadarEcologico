@@ -5,7 +5,7 @@
 
 ## Last updated
 
-2026-08-25
+2026-08-26
 
 ## Current phase
 
@@ -15,7 +15,7 @@
 
 - [x] Sprint 0: backend, frontend, CI/CD, tests, docs
 - [x] Pipeline running: scrape Câmara + Senado → classify → save
-- [x] `CLIMATE_THEME_MAP` with 15 theme codes verified against the API
+- [x] `THEME_NAMES` with 15 canonical climate themes verified against the API
 - [x] Câmara `codTema` pre-filter (cuts requests ~90%)
 - [x] Theme filter on the frontend (dropdown next to Classification and Source)
 - [x] `Bill` model with `theme_ids` and `theme_names`
@@ -29,6 +29,7 @@
 - [x] Centralized classification/source/theme labels (single source of truth)
 - [x] Migrated Senado scraper to the `/processo` API (the `/materia/*` endpoints were deprecated); maps Senado `Classificações Temáticas` to Câmara themes via `SENADO_CLASS_TO_THEME`
 - [x] Canonical theme taxonomy (`THEME_NAMES` shared by Câmara + Senado): merged `Direito Constitucional` (68) into `Direito e Justiça` (76); split `Povos Indígenas e Comunidades Tradicionais` out of `Direitos Humanos e Minorias` (renamed to `Direitos Humanos`), detected via ementa keywords
+- [x] Broadened climate keywords: indigenous/traditional terms (`is_comunidade_tradicional`) and neutral climate topics (`CLIMATE_SIGNAL_KEYWORDS`: fossil fuels, `petróleo`, `gás natural`, `carvão`, `fracking`, `efeito estufa`, `grandes fortunas`) so the pre-filter catches them
 
 ## Sprint 1 — Infrastructure & data (complete)
 

@@ -121,7 +121,7 @@ Scope: Brazil. Current sources: Chamber of Deputies and Federal Senate APIs.
 # Backend — always activate the venv first (from the project root)
 source backend/.venv/bin/activate
 uvicorn backend.main:app --reload          # API at http://localhost:8000
-pytest backend/tests -v                    # Tests (69 passing)
+pytest backend/tests -v                    # Tests (90 passing)
 python -m backend.pipeline                 # Manual pipeline (classifies + populates database)
 
 # Frontend
@@ -129,7 +129,7 @@ cd frontend
 npm run dev                                # http://localhost:3000
 npm run build && npm start                 # Production
 npm run lint                               # ESLint
-npm test                                   # Vitest (132 passing)
+npm test                                   # Vitest (146 passing)
 
 # Local database (SQLite — zero setup)
 # Just configure backend/.env with: DATABASE_URL=sqlite:///./radar.db

@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from backend.keywords.taxonomy import ementa_matches_climate
+from backend.keywords.taxonomy import ementa_matches_climate, is_comunidade_tradicional
 from backend.scrapers.camara import fetch_camara_bills, fetch_camara_bill_details
 from backend.scrapers.senado import fetch_senado_bills
 
@@ -132,6 +132,38 @@ def test_ementa_matches_indigenous_bill():
         "Institui a Política Nacional de Proteção Territorial das "
         "Comunidades Quilombolas."
     ) is True
+
+
+def test_ementa_matches_fossil_fuel_bill():
+    """Bills about fossil fuels should pass the climate filter even without a valence keyword."""
+    assert ementa_matches_climate(
+        "Regulamenta a exploração e o uso de combustíveis fósseis."
+    ) is True
+    assert ementa_matches_climate(
+        "Dispõe sobre a extração de gás natural no pré-sal."
+    ) is True
+
+
+def test_ementa_matches_wealth_tax_bill():
+    """Wealth-tax bills (climate-justice framing) should pass the climate filter."""
+    assert ementa_matches_climate(
+        "Institui o imposto sobre grandes fortunas."
+    ) is True
+
+
+def test_is_comunidade_tradicional():
+    assert is_comunidade_tradicional(
+        "Proteção aos povos indígenas isolados."
+    ) is True
+    assert is_comunidade_tradicional(
+        "Direitos das comunidades quilombolas e ribeirinhas."
+    ) is True
+    assert is_comunidade_tradicional(
+        "Regulamenta o Estatuto do Índio."
+    ) is True
+    assert is_comunidade_tradicional(
+        "Institui o Dia do Professor."
+    ) is False
 
 
 def test_ementa_no_match():

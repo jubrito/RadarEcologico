@@ -17,7 +17,7 @@ from typing import Optional
 
 import requests
 
-from backend.keywords.taxonomy import ementa_matches_climate, is_indigenous
+from backend.keywords.taxonomy import ementa_matches_climate, is_comunidade_tradicional
 from backend.scrapers.camara import THEME_NAMES
 from backend.types import ScrapedBill
 
@@ -107,7 +107,7 @@ def _map_themes(
         if theme_id is None or theme_id in ids:
             continue
         ids.append(theme_id)
-    if is_indigenous(ementa) and "povos_indigenas" not in ids:
+    if is_comunidade_tradicional(ementa) and "povos_indigenas" not in ids:
         ids.append("povos_indigenas")
     return (
         ",".join(ids) if ids else None,

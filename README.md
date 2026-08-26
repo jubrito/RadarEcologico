@@ -57,13 +57,14 @@ source backend/.venv/bin/activate
 # Backend
 uvicorn backend.main:app --reload       # API em http://localhost:8000
 python -m backend.pipeline              # Pipeline manual (classifica + popula)
-pytest backend/tests -v                 # Testes (20 passando)
+pytest backend/tests -v                 # Testes
 
 # Frontend (outro terminal)
 cd frontend
 npm run dev                             # http://localhost:3000
 npm run build && npm start              # Produção
 npm run lint                            # ESLint
+npm test                                # Vitest
 
 # CI: rodar pipeline manualmente via GitHub
 # gh workflow run "Daily Climate Radar Pipeline"

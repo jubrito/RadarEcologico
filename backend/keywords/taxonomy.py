@@ -205,31 +205,54 @@ PROHIBITING_VERBS: list[str] = [
 # Broad terms that mark a bill as about indigenous/traditional peoples. Used by
 # ``is_indigenous`` to tag bills with the "povos_indigenas" theme and to let
 # such bills through the climate pre-filter, regardless of the other keywords.
-INDIGENOUS_KEYWORDS: tuple[str, ...] = (
+COMUNIDADES_TRADICIONAIS_KEYWORDS: tuple[str, ...] = (
     "indígena",
     "índio",
     "índios",
     "quilombola",
     "quilombo",
     "ribeirinho",
+    "ribeirinha",
+    "ribeirinhos",
+    "ribeirinhas",
     "seringueiro",
     "povos tradicionais",
     "comunidades tradicionais",
     "povos originários",
     "populações tradicionais",
     "terras indígenas",
+    "povos indígenas"
 )
 
 
-def is_indigenous(ementa: str) -> bool:
-    """True when the ementa mentions indigenous/traditional peoples."""
+def is_comunidade_tradicional(ementa: str) -> bool:
+    """True when the ementa mentions indigenous/traditional communities."""
     text = ementa.lower()
-    return any(kw in text for kw in INDIGENOUS_KEYWORDS)
+    return any(kw in text for kw in COMUNIDADES_TRADICIONAIS_KEYWORDS)
+
+
+# Neutral climate topics: high-precision terms that make a bill climate-relevant
+# regardless of whether it fights or intensifies the crisis. Used only by
+# ``ementa_matches_climate`` to widen the pre-filter's recall (not for scoring).
+CLIMATE_SIGNAL_KEYWORDS: tuple[str, ...] = (
+    "combustíveis fósseis",
+    "combustível fóssil",
+    "petróleo",
+    "gás natural",
+    "carvão",
+    "fraturamento hidráulico",
+    "fracking",
+    "gasoduto",
+    "termelétrica",
+    "efeito estufa",
+    "gases de efeito estufa",
+    "grandes fortunas",
+)
 
 
 def ementa_matches_climate(ementa: str) -> bool:
     text = ementa.lower()
-    for kw in POSITIVE_KEYWORDS + NEGATIVE_KEYWORDS:
+    for kw in POSITIVE_KEYWORDS + NEGATIVE_KEYWORDS + list(CLIMATE_SIGNAL_KEYWORDS):
         if kw in text:
             return True
-    return is_indigenous(text)
+    return is_comunidade_tradicional(text)

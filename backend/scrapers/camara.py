@@ -54,7 +54,7 @@ CAMARA_THEME_TO_ID: dict[int, str] = {
     76: "76",
 }
 
-from backend.keywords.taxonomy import ementa_matches_climate, is_indigenous
+from backend.keywords.taxonomy import ementa_matches_climate, is_comunidade_tradicional
 from backend.types import ScrapedBill
 
 
@@ -75,7 +75,7 @@ def _fetch_themes(external_id: str, ementa: str) -> tuple[str | None, str | None
                 theme_id = None
             if theme_id and theme_id not in ids:
                 ids.append(theme_id)
-        if is_indigenous(ementa) and "povos_indigenas" not in ids:
+        if is_comunidade_tradicional(ementa) and "povos_indigenas" not in ids:
             ids.append("povos_indigenas")
         return (
             ",".join(ids) if ids else None,
