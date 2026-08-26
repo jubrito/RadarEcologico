@@ -23,6 +23,9 @@
 - [x] Campo `presentation_date` no schema Pydantic serializado como ISO 8601
 - [x] UX da barra de classificação com labels e explicação contextual
 - [x] Label `favorable` (não `transforming`) em todo o código
+- [x] Classificador com detecção de valência: verbo negador ("revoga a proteção ambiental") flips para desfavorável; verbo proibitivo ("proíbe a mineração") flips para favorável
+- [x] Removido `Bill.full_text` (campo morto, nunca populado pelo pipeline) — reintroduzir com semântica clara quando houver consumidor (Sprint 3 / fase 2 BERT)
+- [x] Limpeza: dependências não usadas (alembic, pydantic-settings, httpx duplicado), código morto (modifiers), docstrings desatualizadas
 
 ## Próximos passos
 
