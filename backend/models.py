@@ -28,7 +28,6 @@ class Bill(Base):
     number: Mapped[int] = mapped_column(Integer, nullable=False)
     year: Mapped[int] = mapped_column(Integer, nullable=False)
     ementa: Mapped[str] = mapped_column(Text, nullable=False)
-    full_text: Mapped[str | None] = mapped_column(Text, nullable=True)
     author: Mapped[str | None] = mapped_column(String(255), nullable=True)
     author_party: Mapped[str | None] = mapped_column(String(50), nullable=True)
     author_state: Mapped[str | None] = mapped_column(String(2), nullable=True)

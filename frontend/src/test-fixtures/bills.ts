@@ -9,7 +9,6 @@ export function createBill(overrides: Partial<Bill> = {}): Bill {
     number: 456,
     year: 2026,
     ementa: "Institui política de combate ao desmatamento na Amazônia.",
-    full_text: null,
     author: "Dep. João Silva",
     author_party: "PT",
     author_state: "SP",

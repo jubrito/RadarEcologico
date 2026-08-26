@@ -29,7 +29,6 @@ class BillOut(BaseModel):
     number: int
     year: int
     ementa: str
-    full_text: Optional[str] = None
     author: Optional[str] = None
     author_party: Optional[str] = None
     author_state: Optional[str] = None

@@ -24,7 +24,6 @@ def _bill_row(**overrides) -> MagicMock:
         "number": 123,
         "year": 2026,
         "ementa": "Institui política de combate ao desmatamento.",
-        "full_text": None,
         "author": "Dep. João Silva",
         "author_party": "PT",
         "author_state": "SP",

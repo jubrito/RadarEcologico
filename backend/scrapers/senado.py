@@ -120,7 +120,6 @@ def fetch_senado_bill_details(codigo: str) -> Optional[dict[str, object]]:
 
         return {
             "external_id": codigo,
-            "full_text": materia.get("ExplicacaoEmenta", ""),
             "ementa": dados.get("EmentaMateria", ""),
             "author": dados.get("Autor", ""),
             "status": status,

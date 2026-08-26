@@ -15,7 +15,6 @@ export interface Bill {
   number: number;
   year: number;
   ementa: string;
-  full_text?: string | null;
   author?: string | null;
   author_party?: string | null;
   author_state?: string | null;

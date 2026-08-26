@@ -189,7 +189,6 @@ def fetch_camara_bill_details(external_id: str) -> Optional[dict[str, object]]:
 
         return {
             "external_id": external_id,
-            "full_text": prop.get("textoIntegral", ""),
             "author": author_name,
             "author_party": author_party,
             "author_state": author_state,
