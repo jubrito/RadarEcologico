@@ -79,6 +79,7 @@ Create the human-review interface:
 
 - [ ] **Word-boundary matching**: `kw in text` is substring matching and can false-positive on short terms (a keyword matching inside a longer word). Switch to word-boundary/tokenized matching.
 - [ ] **Score calibration**: the scoring constants (`base_score = 0.35`, per-pattern `+0.20`, per-keyword `±0.04`, etc.) are hand-tuned guesses. Validate and tune them against labeled data (see "Calibration plan" below).
+- [ ] **Pre-filter misses pattern-only bills**: `ementa_matches_climate()` only checks keywords, not regex patterns, so bills that match a pattern but contain no keyword are dropped at scrape time. Make the pre-filter pattern-aware or accept the conservative filter.
 - [ ] **Classification summary**: a short phrase (3–5 words) explaining why a bill got its classification, based on the matched keywords/patterns.
 
 ## Sprint 7 — Collaborative review (public voting)
