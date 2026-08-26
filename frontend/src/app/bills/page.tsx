@@ -6,12 +6,12 @@ export default function BillsPage() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       <h1 className="text-5xl font-bold">Projetos de Lei</h1>
-      <p className={`text-foreground/80 my-2 ${"text-xl max-w-4xl"}`}>
+      <p className="text-foreground/80 my-2 text-xl max-w-4xl">
         PLs da Câmara dos Deputados e do Senado Federal
       </p>
       <p className="text-muted-foreground max-w-3xl mb-6">
         Dashboard de projetos de 2026: encontre um PL ao buscar o seu conteúdo
-        ou filtrá-lo por classificacão, fonte ou tema.
+        ou filtrá-lo por classificação, fonte ou tema.
       </p>
       <Suspense
         fallback={
