@@ -13,6 +13,12 @@ export function isValidClassification(value: string): value is Classification {
   return VALID_CLASSIFICATIONS.has(value);
 }
 
+export const CLASSIFICATION_LABELS: Record<KnownClassification, string> = {
+  favorable: "Combate à crise",
+  needs_review: "Requer revisão",
+  unfavorable: "Agravamento",
+};
+
 export const CLASSIFICATION_DESCRIPTIONS: Record<KnownClassification, string> = {
   favorable:
     "Baixo potencial de dano climático — a proposta tende a contribuir para o combate à crise do clima.",

@@ -19,7 +19,12 @@ import {
   type BillsResponse,
   type StatsResponse,
 } from "@/lib/api";
-import { isValidClassification } from "@/lib/utils/classifications";
+import {
+  CLASSIFICATION_LABELS,
+  isValidClassification,
+} from "@/lib/utils/classifications";
+import { SOURCE_LABELS, type KnownClassification } from "@/lib/types";
+import { THEME_MAP } from "@/lib/themes";
 import { MultiSelect } from "@/components/ui/multiselect";
 
 export function withCounts(
@@ -41,36 +46,22 @@ export function renderLabel(
   return options.find((o) => o.value === value)?.label || fallback;
 }
 
-const CLASSIFICATION_OPTIONS = [
+const CLASSIFICATION_OPTIONS: { value: string; label: string }[] = [
   { value: "all", label: "Todas as classificações" },
-  { value: "favorable", label: "Combate à crise" },
-  { value: "needs_review", label: "Requer revisão" },
-  { value: "unfavorable", label: "Agravamento" },
+  ...(Object.keys(CLASSIFICATION_LABELS) as KnownClassification[]).map(
+    (value) => ({ value, label: CLASSIFICATION_LABELS[value] }),
+  ),
 ];
 
-const SOURCE_OPTIONS = [
+const SOURCE_OPTIONS: { value: string; label: string }[] = [
   { value: "all", label: "Todas as fontes" },
-  { value: "camara", label: "Câmara dos Deputados" },
-  { value: "senado", label: "Senado Federal" },
+  { value: "camara", label: SOURCE_LABELS.camara },
+  { value: "senado", label: SOURCE_LABELS.senado },
 ];
 
-const THEME_OPTIONS = [
+const THEME_OPTIONS: { value: string; label: string }[] = [
   { value: "all", label: "Todos os temas" },
-  { value: "48", label: "Meio Ambiente" },
-  { value: "54", label: "Energia, Água e Mineração" },
-  { value: "64", label: "Agricultura e Pecuária" },
-  { value: "51", label: "Estrutura Fundiária" },
-  { value: "61", label: "Transporte e Mobilidade" },
-  { value: "44", label: "Direitos Humanos e Minorias" },
-  { value: "70", label: "Orçamento Público" },
-  { value: "41", label: "Cidades e Des. Urbano" },
-  { value: "40", label: "Economia" },
-  { value: "55", label: "Relações Internacionais" },
-  { value: "56", label: "Saúde" },
-  { value: "62", label: "Ciência e Tecnologia" },
-  { value: "66", label: "Indústria e Comércio" },
-  { value: "68", label: "Direito Constitucional" },
-  { value: "76", label: "Direito e Justiça" },
+  ...Object.entries(THEME_MAP).map(([value, label]) => ({ value, label })),
 ];
 
 export function BillsContent() {
