@@ -48,4 +48,28 @@ describe("BillCard", () => {
     render(<BillCard bill={FAVORABLE_BILL} />);
     expect(screen.getByRole("link")).toHaveAttribute("href", "/bills/abc-123");
   });
+
+  it("renders the theme name from theme_ids", () => {
+    render(<BillCard bill={FAVORABLE_BILL} />);
+    expect(
+      screen.getByText("Meio Ambiente e Desenvolvimento Sustentável"),
+    ).toBeInTheDocument();
+  });
+
+  it("renders multiple themes", () => {
+    render(<BillCard bill={createBill({ theme_ids: "48,54" })} />);
+    expect(
+      screen.getByText("Meio Ambiente e Desenvolvimento Sustentável"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Energia, Recursos Hídricos e Minerais"),
+    ).toBeInTheDocument();
+  });
+
+  it("does not render themes when theme_ids is absent", () => {
+    render(<BillCard bill={createBill({ theme_ids: null })} />);
+    expect(
+      screen.queryByText("Meio Ambiente e Desenvolvimento Sustentável"),
+    ).not.toBeInTheDocument();
+  });
 });

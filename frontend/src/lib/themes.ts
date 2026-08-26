@@ -15,3 +15,18 @@ export const THEME_MAP: Record<string, string> = {
   "70": "Finanças Públicas e Orçamento",
   "76": "Direito e Justiça",
 };
+
+/**
+ * Map a comma-separated list of theme codes (e.g. "48,54") to display names.
+ * Unknown/empty codes are dropped.
+ */
+export function themeNamesFromIds(
+  themeIds: string | null | undefined,
+): string[] {
+  if (!themeIds) return [];
+  return themeIds
+    .split(",")
+    .map((id) => id.trim())
+    .map((id) => THEME_MAP[id])
+    .filter((name): name is string => Boolean(name));
+}

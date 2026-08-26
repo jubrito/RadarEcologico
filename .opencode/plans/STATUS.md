@@ -44,7 +44,7 @@
 - [x] Theme multiselect (selecting any theme clears "All themes", clearing all restores it)
 - [x] Review/update the frontend types
 - [x] Centralize repeated labels (classification/source/theme)
-- [ ] Show the theme on each `BillCard` (from `theme_names`)
+- [x] Show the theme on each `BillCard` (from `theme_ids` → `THEME_MAP`)
 - [ ] Important milestones: timeline of tramitação events (e.g. "Apresentada em 12/05/2026", "Aprovada na Comissão…", "Aguardando votação no Plenário")
 - [ ] Voting: if a vote happened (committee/plenary), show a per-party tally (for/against). Data from the Câmara Votações API.
 - [ ] Evaluate replacing elements with React accessible components (pros/cons)

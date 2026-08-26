@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { THEME_MAP } from "./themes";
+import { THEME_MAP, themeNamesFromIds } from "./themes";
 
 const BACKEND_THEME_CODES = [
   "40",
@@ -28,5 +28,39 @@ describe("THEME_MAP", () => {
     for (const label of Object.values(THEME_MAP)) {
       expect(label.trim()).not.toBe("");
     }
+  });
+});
+
+describe("themeNamesFromIds", () => {
+  it("maps a single code to its name", () => {
+    expect(themeNamesFromIds("48")).toEqual([
+      "Meio Ambiente e Desenvolvimento Sustentável",
+    ]);
+  });
+
+  it("maps multiple codes in order", () => {
+    expect(themeNamesFromIds("48,54")).toEqual([
+      "Meio Ambiente e Desenvolvimento Sustentável",
+      "Energia, Recursos Hídricos e Minerais",
+    ]);
+  });
+
+  it("trims whitespace around codes", () => {
+    expect(themeNamesFromIds(" 48 , 54 ")).toEqual([
+      "Meio Ambiente e Desenvolvimento Sustentável",
+      "Energia, Recursos Hídricos e Minerais",
+    ]);
+  });
+
+  it("drops unknown codes", () => {
+    expect(themeNamesFromIds("48,999")).toEqual([
+      "Meio Ambiente e Desenvolvimento Sustentável",
+    ]);
+  });
+
+  it("returns empty array for null/undefined/empty", () => {
+    expect(themeNamesFromIds(null)).toEqual([]);
+    expect(themeNamesFromIds(undefined)).toEqual([]);
+    expect(themeNamesFromIds("")).toEqual([]);
   });
 });
