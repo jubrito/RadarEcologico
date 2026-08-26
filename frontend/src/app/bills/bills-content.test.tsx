@@ -44,6 +44,13 @@ describe("BillsContent", () => {
     });
   });
 
+  it("renders party filter", async () => {
+    render(<BillsContent />);
+    await waitFor(() => {
+      expect(screen.getByLabelText("Filtrar por partido")).toBeInTheDocument();
+    });
+  });
+
   it("renders multiselect theme filter", async () => {
     render(<BillsContent />);
     await waitFor(() => {

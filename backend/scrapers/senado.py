@@ -84,6 +84,21 @@ def _parse_identificacao(identificacao: str) -> Optional[tuple[str, int, int]]:
     return sigla, int(numero), int(ano)
 
 
+_AUTORIA_RE = re.compile(r"^(.*?)\s*\(([^)]+)\)\s*$")
+
+
+def _parse_autoria(autoria: str) -> tuple[str, str, str]:
+    """Parse "Senador Jader Barbalho (MDB/PA)" into (name, party, state)."""
+    match = _AUTORIA_RE.match(autoria.strip())
+    if not match:
+        return autoria.strip(), "", ""
+    name = match.group(1).strip()
+    parts = match.group(2).split("/")
+    party = parts[0].strip() if parts else ""
+    state = parts[1].strip() if len(parts) > 1 else ""
+    return name, party, state
+
+
 def _build_status(tramitando: str, situacao: str) -> Optional[str]:
     """Combine the tramitação indicator and the current situation into a status."""
     if tramitando == "Sim":
@@ -182,6 +197,8 @@ def fetch_senado_bills(
 
         theme_ids, theme_names = _fetch_themes(str(item.get("id", "")), ementa)
 
+        author, author_party, author_state = _parse_autoria(item.get("autoria", ""))
+
         bills.append(
             {
                 "external_id": codigo,
@@ -190,7 +207,9 @@ def fetch_senado_bills(
                 "number": numero,
                 "year": ano,
                 "ementa": ementa,
-                "author": item.get("autoria", ""),
+                "author": author,
+                "author_party": author_party,
+                "author_state": author_state,
                 "presentation_date": item.get("dataApresentacao", ""),
                 "status": _build_status(
                     item.get("tramitando", ""), item.get("situacaoAtual", "")

@@ -34,6 +34,7 @@ export type BillQueryParams = {
   year?: number;
   search?: string;
   theme?: string;
+  party?: string;
 };
 
 export type ClassifyComponents = {

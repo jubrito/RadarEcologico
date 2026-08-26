@@ -83,6 +83,7 @@ export function BillsContent() {
   const classification = searchParams.get("classification") || "all";
   const source = searchParams.get("source") || "all";
   const themeParam = searchParams.get("theme") || "";
+  const party = searchParams.get("party") || "all";
 
   useEffect(() => {
     let cancelled = false;
@@ -104,6 +105,7 @@ export function BillsContent() {
         }
         if (source !== "all") params.source = source;
         if (themeParam) params.theme = themeParam;
+        if (party !== "all") params.party = party;
         if (search) params.search = search;
         const result = await getBills(params);
         if (!cancelled) {
@@ -122,7 +124,7 @@ export function BillsContent() {
     return () => {
       cancelled = true;
     };
-  }, [page, classification, source, themeParam, search]);
+  }, [page, classification, source, themeParam, party, search]);
 
   const updateParam = (key: string, value: string | null) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -146,6 +148,15 @@ export function BillsContent() {
   const themeOpts = stats
     ? withCounts(THEME_OPTIONS, stats.by_theme)
     : THEME_OPTIONS;
+  const partyOptions: { value: string; label: string }[] = stats
+    ? [
+        { value: "all", label: "Todos os partidos" },
+        ...Object.keys(stats.by_party)
+          .sort()
+          .map((p) => ({ value: p, label: p })),
+      ]
+    : [{ value: "all", label: "Todos os partidos" }];
+  const partyOpts = stats ? withCounts(partyOptions, stats.by_party) : partyOptions;
 
   return (
     <>
@@ -207,6 +218,24 @@ export function BillsContent() {
           </SelectTrigger>
           <SelectContent>
             {sourceOpts.map((opt) => (
+              <SelectItem key={opt.value} value={opt.value}>
+                {opt.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={party} onValueChange={(v) => updateParam("party", v)}>
+          <SelectTrigger
+            className="w-full sm:w-48"
+            aria-label="Filtrar por partido"
+          >
+            <SelectValue>
+              {renderLabel(partyOpts, party, "Todos os partidos")}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {partyOpts.map((opt) => (
               <SelectItem key={opt.value} value={opt.value}>
                 {opt.label}
               </SelectItem>

@@ -111,6 +111,17 @@ class TestListBills:
         assert response.status_code == 200
         assert response.json()["total"] == 1
 
+    def test_filters_by_party(self):
+        bills = [_bill_row(author_party="PT")]
+        session = _make_session(bills=bills, total=1)
+
+        app.dependency_overrides[get_session] = lambda: session
+        client = TestClient(app)
+
+        response = client.get("/api/bills?party=PT")
+        assert response.status_code == 200
+        assert response.json()["total"] == 1
+
     def test_filters_by_theme(self):
         bills = [_bill_row(theme_ids="48,64")]
         session = _make_session(bills=bills, total=1)
@@ -229,6 +240,7 @@ class TestGetStats:
         classification_rows = [("favorable", 4), ("unfavorable", 3), ("needs_review", 3)]
         source_rows = [("camara", 7), ("senado", 3)]
         year_rows = [(2026, 8), (2025, 2)]
+        party_rows = [("PT", 3), ("PL", 2)]
 
         theme_result = MagicMock()
         theme_result.scalar.return_value = 1
@@ -238,7 +250,7 @@ class TestGetStats:
             MagicMock(all=lambda: classification_rows),
             MagicMock(all=lambda: source_rows),
             MagicMock(all=lambda: year_rows),
-        ] + [theme_result] * 15
+        ] + [theme_result] * 15 + [MagicMock(all=lambda: party_rows)]
 
         app.dependency_overrides[get_session] = lambda: session
         client = TestClient(app)
@@ -251,6 +263,7 @@ class TestGetStats:
         assert data["by_source"]["camara"] == 7
         assert data["by_year"]["2026"] == 8
         assert data["by_theme"]["48"] == 1
+        assert data["by_party"]["PT"] == 3
 
     def test_handles_empty_db(self):
         session = MagicMock(spec=Session)
@@ -266,7 +279,7 @@ class TestGetStats:
             MagicMock(all=lambda: []),
             MagicMock(all=lambda: []),
             MagicMock(all=lambda: []),
-        ] + [empty_theme] * 15
+        ] + [empty_theme] * 15 + [MagicMock(all=lambda: [])]
 
         app.dependency_overrides[get_session] = lambda: session
         client = TestClient(app)
@@ -291,7 +304,7 @@ class TestGetStats:
             MagicMock(all=lambda: []),
             MagicMock(all=lambda: []),
             MagicMock(all=lambda: []),
-        ] + [theme_result] * 15
+        ] + [theme_result] * 15 + [MagicMock(all=lambda: [])]
 
         app.dependency_overrides[get_session] = lambda: session
         client = TestClient(app)

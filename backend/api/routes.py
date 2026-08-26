@@ -86,6 +86,7 @@ class StatsResponse(BaseModel):
     by_source: dict[str, int]
     by_year: dict[str, int]
     by_theme: dict[str, int]
+    by_party: dict[str, int]
 
 
 class TramitacaoEventOut(BaseModel):
@@ -106,6 +107,7 @@ def list_bills(
     year: Optional[int] = None,
     search: Optional[str] = None,
     theme: Optional[str] = None,
+    party: Optional[str] = None,
     session: Session = Depends(get_session),
 ) -> BillsResponse:
     """List classified bills with filters and pagination."""
@@ -117,6 +119,8 @@ def list_bills(
         query = query.where(Bill.source == source)
     if year:
         query = query.where(Bill.year == year)
+    if party:
+        query = query.where(Bill.author_party == party)
     if search:
         search_term = f"%{search}%"
         query = query.where(
@@ -215,12 +219,21 @@ def get_stats(session: Session = Depends(get_session)) -> StatsResponse:
         ).scalar() or 0
         by_theme[theme_id] = count
 
+    by_party: dict[str, int] = {}
+    rows = session.execute(
+        select(Bill.author_party, func.count(Bill.id)).group_by(Bill.author_party)
+    ).all()
+    for party, count in rows:
+        if party:
+            by_party[party] = count
+
     return StatsResponse(
         total_bills=total,
         by_classification=by_class,
         by_source=by_source,
         by_year=by_year,
         by_theme=by_theme,
+        by_party=by_party,
     )
 
 

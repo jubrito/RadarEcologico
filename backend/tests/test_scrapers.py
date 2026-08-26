@@ -380,7 +380,9 @@ def test_senado_fetch_bills_builds_status_and_metadata():
     bills = _fetch_senado(SENADO_PROCESSO_LIST, {"9012932": SENADO_PROCESSO_DETAIL})
 
     assert bills[0]["status"] == "Em tramitação — AGUARDANDO DESIGNAÇÃO DO RELATOR"
-    assert bills[0]["author"] == "Senador Jader Barbalho (MDB/PA)"
+    assert bills[0]["author"] == "Senador Jader Barbalho"
+    assert bills[0]["author_party"] == "MDB"
+    assert bills[0]["author_state"] == "PA"
     assert bills[0]["presentation_date"] == "2026-03-17"
 
 

@@ -46,6 +46,7 @@ export function createStats(overrides: Partial<StatsResponse> = {}): StatsRespon
     by_source: { camara: 7, senado: 3 },
     by_year: { "2026": 10 },
     by_theme: { "48": 3, "54": 2 },
+    by_party: { PT: 3, PL: 2 },
     ...overrides,
   };
 }

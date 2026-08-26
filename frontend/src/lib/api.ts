@@ -44,6 +44,7 @@ export interface StatsResponse {
   by_source: Record<string, number>;
   by_year: Record<string, number>;
   by_theme: Record<string, number>;
+  by_party: Record<string, number>;
 }
 
 export interface ClassifyResponse {
@@ -99,6 +100,7 @@ export async function getBills(
   if (params?.year) searchParams.set("year", String(params.year));
   if (params?.search) searchParams.set("search", params.search);
   if (params?.theme) searchParams.set("theme", params.theme);
+  if (params?.party) searchParams.set("party", params.party);
   const data = await fetchAPI<BillsResponse>("/bills", searchParams);
   data.items = data.items.map(normalizeBill);
   return data;
