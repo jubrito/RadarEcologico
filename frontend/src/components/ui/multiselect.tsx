@@ -123,7 +123,7 @@ export function MultiSelect({
         <span
           className={mergeStyles(
             "truncate text-left",
-            selected.length === 0 && "text-muted-foreground",
+            selected.length === 0 && "text-foreground",
           )}
         >
           {displayLabel}
