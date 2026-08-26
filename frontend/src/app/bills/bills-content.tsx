@@ -156,7 +156,9 @@ export function BillsContent() {
           .map((p) => ({ value: p, label: p })),
       ]
     : [{ value: "all", label: "Todos os partidos" }];
-  const partyOpts = stats ? withCounts(partyOptions, stats.by_party) : partyOptions;
+  const partyOpts = stats
+    ? withCounts(partyOptions, stats.by_party)
+    : partyOptions;
 
   return (
     <>
@@ -187,7 +189,7 @@ export function BillsContent() {
           onValueChange={(v) => updateParam("classification", v)}
         >
           <SelectTrigger
-            className="w-full sm:w-52"
+            className="w-full sm:w-50"
             aria-label="Filtrar por classificação"
           >
             <SelectValue>
@@ -209,7 +211,7 @@ export function BillsContent() {
 
         <Select value={source} onValueChange={(v) => updateParam("source", v)}>
           <SelectTrigger
-            className="w-full sm:w-58"
+            className="w-full sm:w-49"
             aria-label="Filtrar por fonte"
           >
             <SelectValue>
@@ -227,7 +229,7 @@ export function BillsContent() {
 
         <Select value={party} onValueChange={(v) => updateParam("party", v)}>
           <SelectTrigger
-            className="w-full sm:w-48"
+            className="w-full sm:w-49"
             aria-label="Filtrar por partido"
           >
             <SelectValue>
@@ -257,7 +259,7 @@ export function BillsContent() {
             router.push(`/bills?${params.toString()}`);
           }}
           placeholder="Todos os temas"
-          className="w-full sm:w-70"
+          className="w-full sm:w-49"
         />
       </section>
 
