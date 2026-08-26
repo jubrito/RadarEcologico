@@ -228,6 +228,7 @@ def fetch_camara_bill_details(external_id: str) -> Optional[dict[str, object]]:
 CAMARA_ORGAO_NAMES: dict[str, str] = {
     "MESA": "Mesa Diretora da Câmara dos Deputados",
     "PLEN": "Plenário",
+    "CCP": "Coordenação de Comissões Permanentes",
     "CCJC": "Comissão de Constituição e Justiça e de Cidadania",
     "CMADS": "Comissão de Meio Ambiente e Desenvolvimento Sustentável",
     "CME": "Comissão de Minas e Energia",

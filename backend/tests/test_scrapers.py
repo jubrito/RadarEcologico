@@ -508,6 +508,18 @@ def test_camara_fetch_tramitacoes_keeps_unknown_sigla():
     assert eventos[0]["orgao"] == "XYZ"
 
 
+def test_camara_fetch_tramitacoes_maps_ccp():
+    """The CCP sigla should map to its full name."""
+    response = _build_mock_response(
+        {"dados": [{"dataHora": "2026-02-02T09:27", "descricaoTramitacao": "Encaminhado", "siglaOrgao": "CCP"}]}
+    )
+
+    with patch("backend.scrapers.camara.requests.get", return_value=response):
+        eventos = fetch_camara_tramitacoes("12345")
+
+    assert eventos[0]["orgao"] == "Coordenação de Comissões Permanentes"
+
+
 def test_camara_fetch_tramitacoes_returns_empty_on_error():
     """A network error should return an empty list."""
     with patch("backend.scrapers.camara.requests.get",

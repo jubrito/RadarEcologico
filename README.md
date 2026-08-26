@@ -10,6 +10,8 @@ Monitora automaticamente projetos de lei brasileiros relacionados à crise clim�
 
 Fontes atuais: Câmara dos Deputados e Senado Federal (APIs públicas). Expansão para estados e municípios em fases futuras.
 
+Na página de detalhes de cada PL você vê a classificação, os temas, o autor e a **linha do tempo da tramitação** (com a situação atual destacada).
+
 ---
 
 ## Como a classificação funciona
@@ -17,7 +19,7 @@ Fontes atuais: Câmara dos Deputados e Senado Federal (APIs públicas). Expansã
 O classificador usa palavras-chave em três níveis (além de padrões regex e verbos de negação/proibição):
 
 - **Combate** (`FIGHTING_KEYWORDS`): ação climática genuína — proteção, restauração, renováveis, transição justa, povos indígenas e tradicionais. Empurra fortemente para `favorable`.
-- **Mercado** (`MARKET_KEYWORDS`): mecanismos de mercado propensos a greenwashing — crédito/mecado de carbono, hidrogênio verde, "baixo carbono", compensação de emissões. Empurra fracamente, então sozinhos caem em `needs_review` (não pioram, mas não resolvem).
+- **Mercado** (`MARKET_KEYWORDS`): mecanismos de mercado propensos a greenwashing — crédito/mercado de carbono, hidrogênio verde, "baixo carbono", compensação de emissões. Empurra fracamente, então sozinhos caem em `needs_review` (não pioram, mas não resolvem).
 - **Intensifica** (`NEGATIVE_KEYWORDS`): termos que agravam a crise — flexibilização de licenciamento, mineração em terra indígena, subsídios a combustíveis fósseis. Empurra para `unfavorable`.
 
 Verbos de negação ("revoga a proteção ambiental") e proibição ("proíbe a mineração") invertem o sinal do termo.
@@ -97,6 +99,7 @@ Para testar manualmente: `python -m backend.pipeline` (da raiz, com venv ativa).
 - **Acessibilidade WCAG 2.1 AA**: semântica HTML, navegação por teclado, contraste, labels, screen readers
 - **KISS**: sem abstração prematura, sem patterns desnecessários, código direto
 - **Testabilidade**: testes para classificador, scrapers e rotas (pytest + vitest)
+- **Open Source**: prioriza projetos, ferramentas e tecnologias de código livre
 
 Leia `AGENTS.md` para os princípios completos.
 
@@ -110,7 +113,7 @@ radar-ecologico/
 ├── README.md
 ├── backend/                    # FastAPI + AI + scrapers
 │   ├── main.py                 # Entrypoint
-│   ├── api/routes.py           # /api/bills, /api/stats, /api/classify
+│   ├── api/routes.py           # /api/bills, /api/bills/{id}/tramitacoes, /api/stats, /api/classify
 │   ├── classifiers/            # keywords + ensemble (BERT na fase 2)
 │   ├── scrapers/               # Câmara + Senado
 │   ├── keywords/taxonomy.py    # Taxonomia de termos climáticos
