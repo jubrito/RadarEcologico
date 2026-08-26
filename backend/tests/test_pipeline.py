@@ -90,7 +90,7 @@ class TestPipelineBackfill:
         assert existing.author_party == "PSOL"
         assert existing.author_state == "RJ"
 
-    def test_backfills_missing_author_via_senado_detail(self):
+    def test_backfills_missing_author_via_senado_data(self):
         existing = MagicMock(spec=Bill)
         existing.external_id = "67890"
         existing.source = "senado"
@@ -103,17 +103,17 @@ class TestPipelineBackfill:
         session = MagicMock()
         session.query.return_value.filter_by.return_value.first.return_value = existing
 
-        senado_bill = _bill_data(source="senado", external_id="67890")
-        senado_detail = {"author": "Sen. Carlos", "status": "Em tramitação"}
+        senado_bill = _bill_data(
+            source="senado",
+            external_id="67890",
+            author="Sen. Carlos",
+            status="Em tramitação",
+        )
 
         with (
             patch("backend.pipeline.SessionLocal", return_value=session),
             patch("backend.pipeline.fetch_camara_bills", return_value=[]),
             patch("backend.pipeline.fetch_senado_bills", return_value=[senado_bill]),
-            patch(
-                "backend.pipeline.fetch_senado_bill_details",
-                return_value=senado_detail,
-            ),
         ):
             run_pipeline()
 

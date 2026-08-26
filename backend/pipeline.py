@@ -20,7 +20,7 @@ from backend.database import SessionLocal
 from backend.models import Bill
 from backend.types import PipelineSummary
 from backend.scrapers.camara import fetch_camara_bills, fetch_camara_bill_details
-from backend.scrapers.senado import fetch_senado_bills, fetch_senado_bill_details
+from backend.scrapers.senado import fetch_senado_bills
 
 load_dotenv()
 
@@ -100,14 +100,12 @@ def run_pipeline() -> PipelineSummary:
                                 existing.status = details["status"]
                                 updated = True
                     elif source == "senado":
-                        details = fetch_senado_bill_details(external_id)
-                        if details:
-                            if not existing.author and details.get("author"):
-                                existing.author = details["author"]
-                                updated = True
-                            if not existing.status and details.get("status"):
-                                existing.status = details["status"]
-                                updated = True
+                        if not existing.author and bill_data.get("author"):
+                            existing.author = bill_data["author"]
+                            updated = True
+                        if not existing.status and bill_data.get("status"):
+                            existing.status = bill_data["status"]
+                            updated = True
 
                 if updated:
                     summary.setdefault("updated", 0)
@@ -123,11 +121,6 @@ def run_pipeline() -> PipelineSummary:
                     bill_data["author"] = bill_data.get("author") or details.get("author", "")
                     bill_data["author_party"] = details.get("author_party", "")
                     bill_data["author_state"] = details.get("author_state", "")
-            elif source == "senado":
-                details = fetch_senado_bill_details(external_id)
-                if details:
-                    bill_data["author"] = bill_data.get("author") or details.get("author", "")
-                    bill_data["status"] = bill_data.get("status") or details.get("status", "")
 
             # Classify using keyword ensemble
             result = classify_ensemble(bill_data["ementa"])

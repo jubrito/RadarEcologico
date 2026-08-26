@@ -205,8 +205,10 @@ radar-ecologico/
 - **Chamber**: `https://dadosabertos.camara.leg.br/api/v2/proposicoes`
   - Filters: `siglaTipo=PL|PLP|PEC|MPV`, `ano`, `codTema=40|41|44|48|51|54|55|56|61|62|64|66|68|70|76`
   - Full list: `https://dadosabertos.camara.leg.br/api/v2/referencias/proposicoes/codTema`
-- **Senate**: `https://legis.senado.leg.br/dadosabertos/materia/pesquisa/lista`
-  - This service may be discontinued. Prepare fallbacks.
+- **Senate**: `https://legis.senado.leg.br/dadosabertos/processo`
+  - List by year: `/processo?ano=YYYY`; detail: `/processo/{idProcesso}` (returns `classificacoes`, `documento.autoria`, `situacaoAtual`, `tramitando`).
+  - The old `/materia/*` endpoints (list, detail, classes) were deprecated (deactivation 2026-02-01) and replaced by `/processo/*`. Do NOT use `/materia/*`.
+  - Senado "Classificação Temática Unificada" is a hierarchical tree (10 top-level categories). We map its climate-relevant leaf classes to Câmara `codTema` via `SENADO_CLASS_TO_THEME` in `backend/scrapers/senado.py`.
 
 ### Labeled Data (training/validation)
 

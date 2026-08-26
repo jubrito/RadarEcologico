@@ -8,7 +8,7 @@ import pytest
 
 from backend.keywords.taxonomy import ementa_matches_climate
 from backend.scrapers.camara import fetch_camara_bills, fetch_camara_bill_details
-from backend.scrapers.senado import fetch_senado_bill_details, fetch_senado_bills
+from backend.scrapers.senado import fetch_senado_bills
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -41,76 +41,72 @@ CAMARA_DETAIL_FIXTURE = {
     }
 }
 
-SENADO_DETAIL_FIXTURE = {
-    "DetalheMateria": {
-        "Materia": {
-            "DadosBasicosMateria": {
-                "EmentaMateria": "Institui política nacional de pagamento por serviços ambientais.",
-                "Autor": "Sen. João Silva",
-            },
-            "DecisaoEDestino": {
-                "Decisao": {
-                    "Descricao": "Aprovado pelo Plenário"
-                }
-            },
-            "IdentificacaoMateria": {
-                "IndicadorTramitando": "Sim"
-            },
-            "ExplicacaoEmenta": "Explicação detalhada..."
-        }
-    }
+SENADO_PROCESSO_LIST = [
+    {
+        "id": 9012932,
+        "codigoMateria": 173091,
+        "identificacao": "PL 1222/2026",
+        "ementa": "Institui política de combate ao desmatamento na Amazônia.",
+        "dataApresentacao": "2026-03-17",
+        "autoria": "Senador Jader Barbalho (MDB/PA)",
+        "situacaoAtual": "AGUARDANDO DESIGNAÇÃO DO RELATOR",
+        "tramitando": "Sim",
+    },
+    {
+        "id": 9999999,
+        "codigoMateria": 999999,
+        "identificacao": "REQ 100/2026",
+        "ementa": "Institui política de combate ao desmatamento na Amazônia.",
+        "autoria": "Senador Fulano",
+        "tramitando": "Sim",
+    },
+    {
+        "id": 8888888,
+        "codigoMateria": 888888,
+        "identificacao": "PL 300/2026",
+        "ementa": "Institui o Dia do Professor de Educação Física.",
+        "autoria": "Senador Beltrano",
+        "tramitando": "Sim",
+    },
+]
+
+SENADO_PROCESSO_DETAIL = {
+    "id": 9012932,
+    "codigoMateria": 173091,
+    "classificacoes": [
+        {"codigo": 33805242, "descricao": "Energia",
+         "descricaoHierarquia": "Infraestrutura / Minas e Energia / Energia"},
+        {"codigo": 33809769, "descricao": "Desenvolvimento Sustentável",
+         "descricaoHierarquia": "Meio Ambiente / Desenvolvimento Sustentável"},
+    ],
 }
 
 
-def _build_camara_list_response(dados: list[dict]) -> MagicMock:
-    """Build a mock Response for the Câmara proposicoes list endpoint."""
+def _make_senado_mock(processo_list: list[dict], detail_map: dict) -> MagicMock:
+    """Mock requests.get: list endpoint returns processo_list, detail returns detail_map."""
+    def side_effect(url, *args, **kwargs):
+        if url.endswith("/processo"):
+            return _build_mock_response(processo_list)
+        process_id = url.rsplit("/", 1)[-1]
+        return _build_mock_response(detail_map.get(process_id, {}))
+
     mock = MagicMock()
-    mock.json.return_value = {"dados": dados}
-    mock.raise_for_status.return_value = None
+    mock.side_effect = side_effect
     return mock
-
-
-SENADO_LIST_FIXTURE = {
-    "PesquisaBasicaMateria": {
-        "Materias": {
-            "Materia": [
-                {
-                    "Sigla": "PL",
-                    "Numero": 100,
-                    "Ano": 2026,
-                    "Ementa": "Institui política de combate ao desmatamento na Amazônia.",
-                    "Codigo": "12345",
-                    "Autor": "Sen. João Silva",
-                    "Data": "2026-01-15",
-                },
-                {
-                    "Sigla": "REQ",
-                    "Numero": 200,
-                    "Ano": 2026,
-                    "Ementa": "Institui política de combate ao desmatamento na Amazônia.",
-                    "Codigo": "99999",
-                    "Autor": "Sen. Maria",
-                    "Data": "2026-01-16",
-                },
-                {
-                    "Sigla": "PL",
-                    "Numero": 300,
-                    "Ano": 2026,
-                    "Ementa": "Institui o Dia do Professor de Educação Física.",
-                    "Codigo": "77777",
-                    "Autor": "Sen. José",
-                    "Data": "2026-01-17",
-                },
-            ]
-        }
-    }
-}
 
 
 def _build_mock_response(json_data: dict) -> MagicMock:
     """Build a mock Response for any endpoint."""
     mock = MagicMock()
     mock.json.return_value = json_data
+    mock.raise_for_status.return_value = None
+    return mock
+
+
+def _build_camara_list_response(dados: list[dict]) -> MagicMock:
+    """Build a mock Response for the Câmara proposicoes list endpoint."""
+    mock = MagicMock()
+    mock.json.return_value = {"dados": dados}
     mock.raise_for_status.return_value = None
     return mock
 
@@ -247,133 +243,91 @@ def test_camara_fetch_bill_details_extracts_author_party_state():
     assert details["author_state"] == "SP"
 
 
-# ── Senado status extraction tests ───────────────────────────────────────────
+# ── Senado list + theme mapping tests ────────────────────────────────────────
 
 
-def test_senado_fetch_bill_details_builds_status_tramitando():
-    """Senado status should combine tramitação indicator and decision text."""
-    detail_response = _build_mock_response(SENADO_DETAIL_FIXTURE)
-
-    with patch("backend.scrapers.senado.requests.get", return_value=detail_response):
-        details = fetch_senado_bill_details("12345")
-
-    assert details is not None
-    assert details["status"] == "Em tramitação — Aprovado pelo Plenário"
-
-
-def test_senado_fetch_bill_details_status_encerrada():
-    """When IndicadorTramitando is 'Não', status should say tramitação encerrada."""
-    fixture = {
-        "DetalheMateria": {
-            "Materia": {
-                "DadosBasicosMateria": {
-                    "EmentaMateria": "Teste.",
-                    "Autor": "Sen. Maria",
-                },
-                "DecisaoEDestino": {
-                    "Decisao": {"Descricao": "Arquivado"}
-                },
-                "IdentificacaoMateria": {
-                    "IndicadorTramitando": "Não"
-                },
-                "ExplicacaoEmenta": "",
-            }
-        }
-    }
-
-    detail_response = _build_mock_response(fixture)
-
-    with patch("backend.scrapers.senado.requests.get", return_value=detail_response):
-        details = fetch_senado_bill_details("67890")
-
-    assert details is not None
-    assert details["status"] == "Tramitação encerrada — Arquivado"
-
-
-def test_senado_fetch_bill_details_status_none_when_empty():
-    """Status should be None when both tramitação and decisão are empty."""
-    fixture = {
-        "DetalheMateria": {
-            "Materia": {
-                "DadosBasicosMateria": {
-                    "EmentaMateria": "Teste.",
-                    "Autor": "Sen. José",
-                },
-                "DecisaoEDestino": {
-                    "Decisao": {"Descricao": ""}
-                },
-                "IdentificacaoMateria": {
-                    "IndicadorTramitando": ""
-                },
-                "ExplicacaoEmenta": "",
-            }
-        }
-    }
-
-    detail_response = _build_mock_response(fixture)
-
-    with patch("backend.scrapers.senado.requests.get", return_value=detail_response):
-        details = fetch_senado_bill_details("11111")
-
-    assert details is not None
-    assert details["status"] is None
-
-
-# ── Senado list tests ────────────────────────────────────────────────────────
+def _fetch_senado(processo_list, detail_map):
+    with patch("backend.scrapers.senado.requests.get",
+               _make_senado_mock(processo_list, detail_map)):
+        return fetch_senado_bills(2026, limit=10)
 
 
 def test_senado_fetch_bills_filters_sigla_and_keywords():
-    """Only PL/PLC/PLS/PLP matérias with climate keywords should be returned."""
-    with patch("backend.scrapers.senado.requests.get",
-               return_value=_build_mock_response(SENADO_LIST_FIXTURE)):
-        bills = fetch_senado_bills(2026, limit=10)
+    """Only PL/PLS/PLC/PLP processos with climate keywords should be returned."""
+    bills = _fetch_senado(SENADO_PROCESSO_LIST, {"9012932": SENADO_PROCESSO_DETAIL})
 
     assert len(bills) == 1
-    assert bills[0]["external_id"] == "12345"
+    assert bills[0]["external_id"] == "173091"
     assert bills[0]["source"] == "senado"
     assert bills[0]["bill_type"] == "PL"
-    assert bills[0]["number"] == 100
+    assert bills[0]["number"] == 1222
+    assert bills[0]["year"] == 2026
 
 
-def test_senado_fetch_bills_handles_single_materia_dict():
-    """A single matière returned as a dict (not a list) should still parse."""
-    materia = SENADO_LIST_FIXTURE["PesquisaBasicaMateria"]["Materias"]["Materia"][0]
-    fixture = {"PesquisaBasicaMateria": {"Materias": {"Materia": materia}}}
+def test_senado_fetch_bills_maps_themes():
+    """Classifications should be mapped to Câmara theme codes."""
+    bills = _fetch_senado(SENADO_PROCESSO_LIST, {"9012932": SENADO_PROCESSO_DETAIL})
 
-    with patch("backend.scrapers.senado.requests.get",
-               return_value=_build_mock_response(fixture)):
-        bills = fetch_senado_bills(2026, limit=10)
+    assert bills[0]["theme_ids"] == "54,48"
+    assert bills[0]["theme_names"] == (
+        "Energia, Recursos Hídricos e Minerais,"
+        "Meio Ambiente e Desenvolvimento Sustentável"
+    )
 
-    assert len(bills) == 1
-    assert bills[0]["external_id"] == "12345"
+
+def test_senado_fetch_bills_builds_status_and_metadata():
+    """Status, author and date should come from the processo list item."""
+    bills = _fetch_senado(SENADO_PROCESSO_LIST, {"9012932": SENADO_PROCESSO_DETAIL})
+
+    assert bills[0]["status"] == "Em tramitação — AGUARDANDO DESIGNAÇÃO DO RELATOR"
+    assert bills[0]["author"] == "Senador Jader Barbalho (MDB/PA)"
+    assert bills[0]["presentation_date"] == "2026-03-17"
+
+
+def test_senado_fetch_bills_no_themes_when_classificacoes_empty():
+    """Bills without mapped classifications should have no themes."""
+    detail = {"id": 9012932, "codigoMateria": 173091, "classificacoes": []}
+    bills = _fetch_senado([SENADO_PROCESSO_LIST[0]], {"9012932": detail})
+
+    assert bills[0]["theme_ids"] is None
+    assert bills[0]["theme_names"] is None
+
+
+def test_senado_fetch_bills_deduplicates_theme_codes():
+    """Two classes mapping to the same Câmara theme should be deduplicated."""
+    detail = {
+        "id": 9012932,
+        "codigoMateria": 173091,
+        "classificacoes": [
+            {"codigo": 1, "descricao": "Mudanças Climáticas"},
+            {"codigo": 2, "descricao": "Desenvolvimento Sustentável"},
+        ],
+    }
+    bills = _fetch_senado([SENADO_PROCESSO_LIST[0]], {"9012932": detail})
+
+    assert bills[0]["theme_ids"] == "48"
 
 
 def test_senado_fetch_bills_deduplicates_by_codigo():
-    """Duplicate matérias (same Codigo) should be kept only once."""
-    materia = SENADO_LIST_FIXTURE["PesquisaBasicaMateria"]["Materias"]["Materia"][0]
-    fixture = {
-        "PesquisaBasicaMateria": {
-            "Materias": {"Materia": [materia, dict(materia)]}
-        }
-    }
-
-    with patch("backend.scrapers.senado.requests.get",
-               return_value=_build_mock_response(fixture)):
-        bills = fetch_senado_bills(2026, limit=10)
+    """Duplicate processos (same codigoMateria) should be kept only once."""
+    duplicate = [SENADO_PROCESSO_LIST[0], dict(SENADO_PROCESSO_LIST[0])]
+    bills = _fetch_senado(duplicate, {"9012932": SENADO_PROCESSO_DETAIL})
 
     assert len(bills) == 1
 
 
 def test_senado_fetch_bills_respects_limit():
     """fetch_senado_bills should stop once the limit is reached."""
-    materia = SENADO_LIST_FIXTURE["PesquisaBasicaMateria"]["Materias"]["Materia"][0]
     many = [
-        {**materia, "Codigo": str(1000 + i), "Numero": 100 + i} for i in range(5)
+        {**SENADO_PROCESSO_LIST[0],
+         "id": 1000 + i, "codigoMateria": 2000 + i,
+         "identificacao": f"PL {100 + i}/2026"}
+        for i in range(5)
     ]
-    fixture = {"PesquisaBasicaMateria": {"Materias": {"Materia": many}}}
+    detail_map = {str(1000 + i): SENADO_PROCESSO_DETAIL for i in range(5)}
 
     with patch("backend.scrapers.senado.requests.get",
-               return_value=_build_mock_response(fixture)):
+               _make_senado_mock(many, detail_map)):
         bills = fetch_senado_bills(2026, limit=2)
 
     assert len(bills) == 2
