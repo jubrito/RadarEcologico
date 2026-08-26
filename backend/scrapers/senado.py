@@ -252,7 +252,7 @@ def fetch_senado_tramitacoes(codigo_materia: str) -> list[TramitacaoEvent]:
                 {
                     "date": (informe.get("data") or "")[:10],
                     "description": informe.get("descricao", ""),
-                    "orgao": (informe.get("colegiado") or {}).get("sigla", ""),
+                    "orgao": (informe.get("colegiado") or {}).get("nome", ""),
                 }
             )
     eventos.sort(key=lambda e: e["date"])

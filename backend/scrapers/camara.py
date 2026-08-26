@@ -223,6 +223,25 @@ def fetch_camara_bill_details(external_id: str) -> Optional[dict[str, object]]:
         return None
 
 
+# Common Câmara órgão siglas → human-readable names. The tramitações endpoint
+# only returns the sigla; this maps the frequent ones (unknown ones keep the sigla).
+CAMARA_ORGAO_NAMES: dict[str, str] = {
+    "MESA": "Mesa Diretora da Câmara dos Deputados",
+    "PLEN": "Plenário",
+    "CCJC": "Comissão de Constituição e Justiça e de Cidadania",
+    "CMADS": "Comissão de Meio Ambiente e Desenvolvimento Sustentável",
+    "CME": "Comissão de Minas e Energia",
+    "CVT": "Comissão de Viação e Transportes",
+    "CAPADR": "Comissão de Agricultura, Pecuária, Abastecimento e Desenvolvimento Rural",
+    "CFT": "Comissão de Finanças e Tributação",
+    "CDEICS": "Comissão de Desenvolvimento Econômico",
+    "CCTCI": "Comissão de Ciência, Tecnologia, Comunicação e Informática",
+    "CSSF": "Comissão de Seguridade Social e Família",
+    "CDU": "Comissão de Desenvolvimento Urbano",
+    "CREDN": "Comissão de Relações Exteriores e de Defesa Nacional",
+}
+
+
 def fetch_camara_tramitacoes(external_id: str) -> list[TramitacaoEvent]:
     """Fetch the tramitação (milestone) events for a Câmara bill."""
     try:
@@ -237,11 +256,12 @@ def fetch_camara_tramitacoes(external_id: str) -> list[TramitacaoEvent]:
 
     eventos: list[TramitacaoEvent] = []
     for t in data.get("dados", []):
+        sigla = t.get("siglaOrgao", "")
         eventos.append(
             {
                 "date": (t.get("dataHora") or "")[:10],
                 "description": t.get("descricaoTramitacao", ""),
-                "orgao": t.get("siglaOrgao", ""),
+                "orgao": CAMARA_ORGAO_NAMES.get(sigla, sigla),
             }
         )
     eventos.sort(key=lambda e: e["date"])

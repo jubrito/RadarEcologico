@@ -475,7 +475,7 @@ def test_senado_fetch_bills_returns_empty_on_request_error():
 
 
 def test_camara_fetch_tramitacoes_extracts_events():
-    """Câmara tramitações should map to dated events sorted ascending."""
+    """Câmara tramitações should map to dated events sorted ascending, with full órgão names."""
     response = _build_mock_response(
         {
             "dados": [
@@ -491,8 +491,21 @@ def test_camara_fetch_tramitacoes_extracts_events():
     assert len(eventos) == 2
     assert eventos[0]["date"] == "2026-02-02"
     assert eventos[0]["description"] == "Apresentação de Proposição"
-    assert eventos[0]["orgao"] == "MESA"
+    assert eventos[0]["orgao"] == "Mesa Diretora da Câmara dos Deputados"
     assert eventos[1]["date"] == "2026-03-10"
+    assert eventos[1]["orgao"] == "Comissão de Meio Ambiente e Desenvolvimento Sustentável"
+
+
+def test_camara_fetch_tramitacoes_keeps_unknown_sigla():
+    """Unknown órgão siglas should be kept as-is (not dropped)."""
+    response = _build_mock_response(
+        {"dados": [{"dataHora": "2026-02-02T09:27", "descricaoTramitacao": "X", "siglaOrgao": "XYZ"}]}
+    )
+
+    with patch("backend.scrapers.camara.requests.get", return_value=response):
+        eventos = fetch_camara_tramitacoes("12345")
+
+    assert eventos[0]["orgao"] == "XYZ"
 
 
 def test_camara_fetch_tramitacoes_returns_empty_on_error():
@@ -512,8 +525,8 @@ def test_senado_fetch_tramitacoes_resolves_and_extracts():
             "autuacoes": [
                 {
                     "informesLegislativos": [
-                        {"data": "2026-05-19 08:40:59", "descricao": "Encerrado o prazo regimental.", "colegiado": {"sigla": "CAE"}},
-                        {"data": "2026-03-17 16:37:16", "descricao": "Autuado o Projeto de Lei nº 1222/2026.", "colegiado": {"sigla": "PLEN"}},
+                        {"data": "2026-05-19 08:40:59", "descricao": "Encerrado o prazo regimental.", "colegiado": {"nome": "Comissão de Assuntos Econômicos"}},
+                        {"data": "2026-03-17 16:37:16", "descricao": "Autuado o Projeto de Lei nº 1222/2026.", "colegiado": {"nome": "Plenário do Senado Federal"}},
                     ]
                 }
             ]
@@ -527,8 +540,8 @@ def test_senado_fetch_tramitacoes_resolves_and_extracts():
     assert len(eventos) == 2
     assert eventos[0]["date"] == "2026-03-17"
     assert eventos[0]["description"] == "Autuado o Projeto de Lei nº 1222/2026."
-    assert eventos[0]["orgao"] == "PLEN"
-    assert eventos[1]["orgao"] == "CAE"
+    assert eventos[0]["orgao"] == "Plenário do Senado Federal"
+    assert eventos[1]["orgao"] == "Comissão de Assuntos Econômicos"
 
 
 def test_senado_fetch_tramitacoes_returns_empty_when_unresolvable():
