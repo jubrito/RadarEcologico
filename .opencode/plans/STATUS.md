@@ -1,124 +1,121 @@
-# Radar Legislativo Ecológico — Status do Projeto
+# Ecological Legislative Radar — Project Status
 
-- Keep this file in english
-- Go through the items iteratively, try to avoid doing too many unrelated things at the same time to allow me to commit what is really connected
+- Keep this file in English (except code identifiers like variables/constants/functions).
+- Go through the items iteratively; avoid too many unrelated things at once so commits stay cohesive.
 
-## Última atualização
+## Last updated
 
-2026-08-02
+2026-08-25
 
-## Fase atual
+## Current phase
 
-**Sprint 1 — Infraestrutura e Dados (em andamento)**
+**Sprint 2 — Bill details (in progress)**
 
-## O que foi feito
+## Done
 
-- [x] Sprint 0: Backend, Frontend, CI/CD, Testes, Docs
-- [x] Pipeline rodando: scrape Câmara (18 PLs) + Senado (8 PLs) → classificar → salvar
-- [x] Mapa de temas climáticos (`CLIMATE_THEME_MAP`) com 15 códigos verificados contra API
-- [x] Pré-filtro `codTema` na API da Câmara (reduz requisições)
-- [x] Filtro por tema no frontend (dropdown ao lado de Classificação e Fonte)
-- [x] Modelo Bill com campos `theme_ids` e `theme_names`
-- [x] Correção de datas no Senado (string → datetime)
-- [x] Campo `presentation_date` no schema Pydantic serializado como ISO 8601
-- [x] UX da barra de classificação com labels e explicação contextual
-- [x] Label `favorable` (não `transforming`) em todo o código
-- [x] Classificador com detecção de valência: verbo negador ("revoga a proteção ambiental") flips para desfavorável; verbo proibitivo ("proíbe a mineração") flips para favorável
-- [x] Removido `Bill.full_text` (campo morto, nunca populado pelo pipeline) — reintroduzir com semântica clara quando houver consumidor (Sprint 3 / fase 2 BERT)
-- [x] Limpeza: dependências não usadas (alembic, pydantic-settings, httpx duplicado), código morto (modifiers), docstrings desatualizadas
+- [x] Sprint 0: backend, frontend, CI/CD, tests, docs
+- [x] Pipeline running: scrape Câmara + Senado → classify → save
+- [x] `CLIMATE_THEME_MAP` with 15 theme codes verified against the API
+- [x] Câmara `codTema` pre-filter (cuts requests ~90%)
+- [x] Theme filter on the frontend (dropdown next to Classification and Source)
+- [x] `Bill` model with `theme_ids` and `theme_names`
+- [x] Senado date fix (string → datetime)
+- [x] `presentation_date` serialized as ISO 8601
+- [x] Classification bar UX (labels + contextual explanation)
+- [x] `favorable` label everywhere (not `transforming`)
+- [x] Valence detection in the classifier: `NEGATING_VERBS` ("revoga a proteção ambiental" → unfavorable) and `PROHIBITING_VERBS` ("proíbe a mineração" → favorable)
+- [x] Removed `Bill.full_text` (dead field, never populated) — reintroduce with clear semantics when a consumer exists (Sprint 3 / phase 2 BERT)
+- [x] Cleanup: unused deps (alembic, pydantic-settings, duplicate httpx), dead code (`POSITIVE_MODIFIERS`/`NEGATIVE_MODIFIERS`), stale docstrings
+- [x] Centralized classification/source/theme labels (single source of truth)
 
-## Próximos passos
+## Sprint 1 — Infrastructure & data (complete)
 
-### Sprint 1 — Infraestrutura e Dados (em andamento)
+- [x] Simplify the bill details page (single responsibility, extract components)
+- [x] Tests for all changes
+- [x] GitHub link + icon in the nav
+- [x] Extract reusable types/constants (labels, colors, strings)
+- [x] Remove unnecessary comments
+- [x] Review AGENTS.md against current code
 
-**Pendente:**
+## Sprint 2 — Bill details (in progress)
 
-- [x] Simplify bill details page logic because it's too complex inside the component, it must follow the single responsibility principle, extract functions, be simple and not complex, ensure maintainability, etc
-- [x] Add tests for all that was changed (check the missing tests and implement them)
-- [x] Add github link and icon to the nav
-- [x] Revisar tipos/constantes e extrair valores reutilizáveis (evitar duplicação de strings, cores, labels)
-- [x] Remover comentários desnecessários do código
-- [x] Revisar AGENTS.md e verificar se as boas práticas estão sendo aplicadas no código atual
-
-### Sprint 2 — Detalhes da PL
-
-Melhorar a página de detalhes (`/bills/[id]`) e consistência do frontend:
-
-- [x] **Autor e partido**: mostrar nome do parlamentar + sigla do partido + UF
-
-3. **Marcos importantes**: timeline com eventos da tramitação (ex: "Apresentada em 12/05/2026", "Aprovada na Comissão de Meio Ambiente", "Aguardando votação no Plenário")
-4. **Votação**: se houve votação em algum âmbito (comissão, plenário), mostrar placar por partido (quantos votaram a favor/contra). Dados disponíveis na API de Votações da Câmara.
-5. **Refatorar labels repetidos**: "Combate à crise climática", "Requer revisão humana", etc. estão espalhados em `utils.ts`, `bills-content.tsx`, `page.tsx`. Centralizar em constantes reutilizáveis e buscar outras repetições similares.
-6. **Mostrar tema no card**: cada `BillCard` deve exibir o tema da proposta (ex: "Meio Ambiente", "Energia") baseado no campo `theme_names`.
-
-- [x] **Contagem nos filtros**: dropdowns de Classificação, Fonte e Tema devem mostrar `Nome (N)` indicando quantos projetos existem em cada categoria. Ex: "Meio Ambiente (12)".
-- [x] **Multiselect de temas**: substituir o Select simples de tema por um multiselect. Regra: ao selecionar qualquer tema, "Todos os temas" é desmarcado; ao desmarcar todos, "Todos os temas" volta automaticamente.
-- [x] Review current project to determine if we need to add more types / update the existing ones
-- [ ] Check to see if it's worth it to replace current elements with React Accessible components (pros and cons)
-- [ ] Ask to review the sprint to see if there's anything we're missing, if the order is correct. Review the plan.
+- [x] Author + party + UF in the metadata
+- [x] Filter counts: `Name (N)` in the classification/source/theme dropdowns
+- [x] Theme multiselect (selecting any theme clears "All themes", clearing all restores it)
+- [x] Review/update the frontend types
+- [x] Centralize repeated labels (classification/source/theme)
+- [ ] Show the theme on each `BillCard` (from `theme_names`)
+- [ ] Important milestones: timeline of tramitação events (e.g. "Apresentada em 12/05/2026", "Aprovada na Comissão…", "Aguardando votação no Plenário")
+- [ ] Voting: if a vote happened (committee/plenary), show a per-party tally (for/against). Data from the Câmara Votações API.
+- [ ] Evaluate replacing elements with React accessible components (pros/cons)
 - [ ] Code review
-- [ ] Review the AI algoritm
+- [ ] Review the AI algorithm
 
-### Sprint 3 — Área de Revisão (Admin)
+## Sprint 3 — Review area (admin)
 
-Criar interface para revisores humanos:
+Create the human-review interface:
 
-1. **Lista de PLs `needs_review`**: dashboard com PLs que requerem revisão humana
-2. **Formulário de review**: permitir ao revisor confirmar ou alterar a classificação (`favorable` / `unfavorable` / `needs_review`)
-3. **Campo de anotações**: o revisor pode adicionar notas explicando a decisão
-4. **Autenticação simples**: senha compartilhada ou magic link (KISS — sem OAuth complexo)
-5. **Endpoint `PATCH /api/bills/{id}/review`**: salva `reviewer_classification`, `reviewer_notes`, `reviewed_by`, `reviewed_at`
-6. **Novos campos no modelo `Bill`**: `reviewer_classification`, `reviewer_notes`, `reviewed_by`, `reviewed_at`
+1. List of `needs_review` bills
+2. Review form: confirm/change classification (`favorable` / `unfavorable` / `needs_review`)
+3. Notes field
+4. Simple auth (shared password or magic link — no complex OAuth)
+5. `PATCH /api/bills/{id}/review` → `reviewer_classification`, `reviewer_notes`, `reviewed_by`, `reviewed_at`
+6. New `Bill` fields: `reviewer_classification`, `reviewer_notes`, `reviewed_by`, `reviewed_at`
 
-### Sprint 4 — Infraestrutura (PostgreSQL)
+## Sprint 4 — Infrastructure (PostgreSQL)
 
-Migrar de SQLite para PostgreSQL no Supabase:
+1. Create Supabase project (free tier)
+2. Get `DATABASE_URL`
+3. Set it in `.env`
+4. Tables auto-created via `Base.metadata.create_all`
+5. Run the pipeline to populate
 
-1. Criar projeto no Supabase (free tier)
-2. Obter `DATABASE_URL`
-3. Configurar `.env` com DATABASE_URL
-4. Tabelas criadas automaticamente via `Base.metadata.create_all`
-5. Rodar pipeline para popular banco
+## Sprint 5 — Party dashboard
 
-### Sprint 5 — Dashboard pra analisar partidos
+- [ ] Show parties and compare how each votes
+- [ ] Analyses to extract the data
 
-- [ ] Mostrar os partidos e comparar como cada um vota
-- [ ] Fazer análises pra extrair dados
+## Sprint 6 — AI improvements
 
-### Sprint 6 - Melhorias
+- [ ] **Word-boundary matching**: `kw in text` is substring matching and can false-positive on short terms (a keyword matching inside a longer word). Switch to word-boundary/tokenized matching.
+- [ ] **Score calibration**: the scoring constants (`base_score = 0.35`, per-pattern `+0.20`, per-keyword `±0.04`, etc.) are hand-tuned guesses. Validate and tune them against labeled data (see "Calibration plan" below).
+- [ ] **Classification summary**: a short phrase (3–5 words) explaining why a bill got its classification, based on the matched keywords/patterns.
 
-- [ ] _Review AI logic_: improve how we classify blls
-- [ ] **Resumo da classificação**: uma frase curta (3-5 palavras) explicando porque a PL recebeu aquela classificação, baseada nas keywords/patterns que deram match
+## Sprint 7 — Collaborative review (public voting)
 
-### Sprint 5 — Revisão Colaborativa (Votação Pública)
+1. Vote per bill (agree/disagree with the classification)
+2. Vote counters per category (e.g. "12 favorable, 3 unfavorable, 5 review")
+3. `POST /api/bills/{id}/vote` → `{"vote": "favorable"|"unfavorable"|"needs_review"}`
+4. `BillVote` model: `bill_id`, `vote`, `voted_at`, `fingerprint` (IP+user-agent hash)
+5. Anti-duplication: one vote per fingerprint per bill
+6. UI with 3 vote buttons + proportion bars
 
-Permitir que usuários votem nas classificações para auxiliar os revisores:
+## Calibration plan (AI)
 
-1. **Voto por PL**: qualquer visitante pode votar se concorda/discorda da classificação
-2. **Contador de votos**: cada PL mostra quantos votos recebeu por categoria (ex: "12 favorável, 3 desfavorável, 5 revisão")
-3. **Endpoint `POST /api/bills/{id}/vote`**: recebe `{"vote": "favorable"|"unfavorable"|"needs_review"}`
-4. **Modelo `BillVote`**: `bill_id`, `vote`, `voted_at`, `fingerprint` (hash IP+user-agent, evita duplicata sem login)
-5. **Anti-duplicação**: mesmo fingerprint vota 1x por PL
-6. **UI no detalhe da PL**: seção com 3 botões de voto + barras de proporção
+- **When**: Sprint 6 (or sooner, once `data/` has labeled bills).
+- **Why**: the scoring constants are unvalidated guesses; without a labeled eval we can't measure precision/recall or tune the thresholds.
+- **How**:
+  1. Load labeled CSVs into `data/` (`external_id, source, ementa, manual_classification`).
+  2. Run `classify_keywords()` over each labeled ementa and compare to `manual_classification`.
+  3. Build a confusion matrix and precision/recall/F1 per label.
+  4. Sweep the scoring constants (base score, per-pattern/per-keyword weights) and the thresholds (`FAVORABLE_MAX`, `UNFAVORABLE_MIN`) to maximize F1.
+  5. Add a repeatable script (`backend/scripts/evaluate.py`) or a notebook.
 
-## Sprint 6
+## Blockers
 
-- Review status summary to see if map needs to be updated
+None.
 
-## Bloqueios atuais
-
-- Nenhum.
-
-## Comandos rápidos
+## Quick commands
 
 ```bash
-# Backend
-source backend/.venv/bin/activate         # a partir da raiz
-uvicorn backend.main:app --reload         # API em http://localhost:8000
-pytest backend/tests -v                   # Testes
-python -m backend.pipeline                # Pipeline manual
+# Backend (from the project root)
+source backend/.venv/bin/activate
+uvicorn backend.main:app --reload         # API at http://localhost:8000
+pytest backend/tests -v                   # Tests
+python -m backend.pipeline                # Manual pipeline
 
 # Frontend
 cd frontend && npm run dev                # http://localhost:3000
 cd frontend && npm run lint               # ESLint
+cd frontend && npm test                   # Vitest
 ```
