@@ -4,6 +4,7 @@ import { type VariantProps } from "class-variance-authority";
 import { Badge, badgeVariants } from "@/components/ui/badge";
 import { getScoreColor } from "@/lib/utils/utils";
 import { STYLE_MAP } from "@/lib/style";
+import { getSuperficialLabel } from "@/lib/utils/classifications";
 import type { Classification } from "@/lib/api";
 
 interface ClassificationBadgeProps extends VariantProps<typeof badgeVariants> {
@@ -17,6 +18,7 @@ export function ClassificationBadge({
   ...props
 }: ClassificationBadgeProps) {
   const style = STYLE_MAP[classification];
+  const superficial = getSuperficialLabel(classification, score);
 
   return (
     <span className="flex flex-col gap-2">
@@ -34,6 +36,9 @@ export function ClassificationBadge({
             {(score * 100).toFixed(0)}%
           </span>
         </span>
+      )}
+      {superficial && (
+        <span className="text-sm text-muted-foreground">{superficial}</span>
       )}
     </span>
   );

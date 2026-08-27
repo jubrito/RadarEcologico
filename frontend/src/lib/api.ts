@@ -86,6 +86,7 @@ const KNOWN_CLASSIFICATIONS: ReadonlySet<string> = new Set([
   CLASSIFICATION.favorable,
   CLASSIFICATION.needs_review,
   CLASSIFICATION.unfavorable,
+  CLASSIFICATION.neutral,
 ]);
 
 /** Ensures classification is always a known value, defaulting to "unknown". */

@@ -7,10 +7,10 @@ and common data shapes used across scrapers, classifiers, and API.
 
 from typing import Literal, TypedDict
 
-ClassificationLabel = Literal["favorable", "needs_review", "unfavorable"]
+ClassificationLabel = Literal["favorable", "needs_review", "unfavorable", "neutral"]
 
 ClassificationLabelWithUnknown = Literal[
-    "favorable", "needs_review", "unfavorable", "unknown"
+    "favorable", "needs_review", "unfavorable", "neutral", "unknown"
 ]
 
 FAVORABLE_MAX = 0.30

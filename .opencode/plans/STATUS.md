@@ -45,6 +45,7 @@
 - [x] Migrated Senado scraper to the `/processo` API (the `/materia/*` endpoints were deprecated); maps Senado `Classificações Temáticas` to Câmara themes via `SENADO_CLASS_TO_THEME`
 - [x] Canonical theme taxonomy (`THEME_NAMES` shared by Câmara + Senado): merged `Direito Constitucional` (68) into `Direito e Justiça` (76); split `Povos Indígenas e Comunidades Tradicionais` out of `Direitos Humanos e Minorias` (renamed to `Direitos Humanos`), detected via ementa keywords
 - [x] Broadened climate keywords: indigenous/traditional terms (`is_comunidade_tradicional`), green-transition terms (`transição justa`, `hidrogênio verde`, `economia de baixo carbono`, …) and neutral climate topics (`CLIMATE_SIGNAL_KEYWORDS`: fossil fuels, `petróleo`, `gás natural`, `carvão`, `fracking`, `efeito estufa`, `seca`, `enchentes`, `desastres naturais`, `nível do mar`, `grandes fortunas`) so the pre-filter catches them
+- [x] New `neutral` classification (grey, "Não se relaciona com questões climáticas") — bills with no climate signal; plus a score-based "superficial" nuance on the bill detail page ("Ajudando superficialmente" / "Prejudicando superficialmente") for weakly favorable/unfavorable bills
 
 ## Sprint 1 — Infrastructure & data (complete)
 

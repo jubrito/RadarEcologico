@@ -14,6 +14,7 @@ Automatically classify Brazilian Bills related to the climate crisis:
 | `favorable`    | < 0.30      | Potentially helps combat the climate crisis |
 | `needs_review` | 0.30 - 0.60 | Requires human review                       |
 | `unfavorable`  | ≥ 0.60      | Potentially intensifies the climate crisis  |
+| `neutral`      | (no signal) | Not related to climate issues               |
 
 **Attention:** the code and the API use `favorable`. If you generate code with the label `transforming`, it will be wrong.
 

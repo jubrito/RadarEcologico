@@ -37,6 +37,18 @@ export const STYLE_MAP: Record<Classification, ClassificationStyle> = {
     bgSolid: "bg-red-500",
     label: "Intensifica a crise climática",
   },
+  neutral: {
+    gradient: "from-slate-500 to-slate-300",
+    badge: "bg-slate-500/20 text-slate-400",
+    border: "border-slate-500/30",
+    fadedBg: "bg-slate-950/30",
+    hoverFadedBg: "hover:bg-slate-950/30",
+    hoverSolidBg: "hover:bg-slate-500",
+    hoverSolidBorder: "hover:border-slate-500",
+    textAccent: "text-slate-400",
+    bgSolid: "bg-slate-500",
+    label: "Neutro",
+  },
   unknown: {
     gradient: "from-gray-500 to-gray-300",
     badge: "bg-gray-500/20 text-gray-400",

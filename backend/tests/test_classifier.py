@@ -45,12 +45,12 @@ def test_mining_indigenous_land_is_unfavorable():
     assert result.score >= 0.60
 
 
-def test_neutral_bill_is_review():
-    """Text with no climate keywords defaults to needs_review."""
+def test_no_climate_signal_is_neutral():
+    """Text with no climate keywords is neutral (not related to climate)."""
     result = classify_keywords(
         "Institui o Dia Nacional da Abobrinha."
     )
-    assert result.classification == "needs_review"
+    assert result.classification == "neutral"
     assert 0.30 <= result.score < 0.60
 
 
@@ -127,12 +127,12 @@ def test_score_bounds():
         ),
         (
             "Institui o Dia do Engenheiro Civil.",
-            "needs_review",
+            "neutral",
         ),
     ],
 )
 def test_parametrized_classification(ementa: str, expected_label: str):
-    """Multiple scenarios covering all three labels."""
+    """Multiple scenarios covering all labels."""
     result = classify_keywords(ementa)
     assert result.classification == expected_label, (
         f"Expected {expected_label} but got {result.classification} "
@@ -213,7 +213,7 @@ def test_ensemble_confidence_levels():
 
 def test_empty_ementa_is_neutral():
     result = classify_keywords("")
-    assert result.classification == "needs_review"
+    assert result.classification == "neutral"
     assert 0.30 <= result.score < 0.60
     assert result.positive_hits == 0
     assert result.negative_hits == 0

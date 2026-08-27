@@ -19,7 +19,7 @@ from backend.types import ClassificationLabelWithUnknown, ComponentsDict
 
 router = APIRouter(prefix="/api")
 
-_VALID_CLASSIFICATIONS = frozenset({"favorable", "needs_review", "unfavorable"})
+_VALID_CLASSIFICATIONS = frozenset({"favorable", "needs_review", "unfavorable", "neutral"})
 
 
 class BillOut(BaseModel):

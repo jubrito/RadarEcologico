@@ -56,7 +56,7 @@ export default function DashboardPage() {
 
       <section
         aria-label="Estatísticas"
-        className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10"
       >
         {stats && (
           <>
@@ -81,10 +81,18 @@ export default function DashboardPage() {
               desc="Ex: incentivo a combustíveis fósseis, desmatamento, poluição, flexibilização da legislação ambiental."
               variant="unfavorable"
             />
+            <StatCard
+              prefix="PLs "
+              tema="não relacionadas ao clima"
+              value={stats.by_classification.neutral || 0}
+              desc="Propostas sem relação direta com a crise climática."
+              variant="neutral"
+            />
           </>
         )}
         {!stats && (
           <>
+            <Skeleton className="h-28 rounded-xl" />
             <Skeleton className="h-28 rounded-xl" />
             <Skeleton className="h-28 rounded-xl" />
             <Skeleton className="h-28 rounded-xl" />

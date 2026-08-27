@@ -54,6 +54,7 @@ def classify_keywords(ementa: str) -> ClassificationResult:
         mineração em terra indígena").
 
     Classification thresholds:
+      no climate signal → neutral (not related to climate issues)
       score < 0.30  → favorable
       0.30 ≤ score < 0.60 → needs_review
       score ≥ 0.60 → unfavorable
@@ -127,7 +128,16 @@ def classify_keywords(ementa: str) -> ClassificationResult:
         fighting_hits, market_hits, neg_hits, pos_patterns, neg_patterns
     )
 
-    if score >= UNFAVORABLE_MIN:
+    has_signal = (
+        fighting_hits > 0
+        or market_hits > 0
+        or neg_hits > 0
+        or pos_patterns > 0
+        or neg_patterns > 0
+    )
+    if not has_signal:
+        classification = "neutral"
+    elif score >= UNFAVORABLE_MIN:
         classification = "unfavorable"
     elif score < FAVORABLE_MAX:
         classification = "favorable"
