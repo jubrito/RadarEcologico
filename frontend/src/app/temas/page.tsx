@@ -3,7 +3,7 @@ import {
   CAMARA_TEMA_REFERENCE_URL,
   SENADO_CLASSES_URL,
   THEME_DESCRIPTIONS,
-  THEME_MAP,
+  sortedThemeEntries,
 } from "@/lib/themes";
 
 export default function TemasPage() {
@@ -15,31 +15,20 @@ export default function TemasPage() {
       </p>
       <p className="text-muted-foreground max-w-3xl mb-6">
         Cada PL é associado a um ou mais temas climáticos. Os temas são uma
-        reconciliação entre a taxonomia da Câmara dos Deputados e a
-        &ldquo;Classificação Temática Unificada&rdquo; do Senado Federal.
-      </p>
-
-      <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm mb-8">
+        reconciliação entre a
         <a
           href={CAMARA_TEMA_REFERENCE_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-muted-foreground hover:text-foreground underline underline-offset-2"
+          className="mr-1 text-muted-foreground hover:text-foreground underline underline-offset-2"
         >
-          Referência de temas da Câmara ↗
+          referência de temas da Câmara dos Deputados ↗
         </a>
-        <a
-          href={SENADO_CLASSES_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-muted-foreground hover:text-foreground underline underline-offset-2"
-        >
-          Classificação temática do Senado ↗
-        </a>
-      </div>
+        e a &ldquo;Classificação Temática Unificada&rdquo; do Senado Federal.
+      </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {Object.entries(THEME_MAP).map(([id, name]) => (
+        {sortedThemeEntries().map(([id, name]) => (
           <Link
             key={id}
             href={`/bills?theme=${id}`}

@@ -1,14 +1,20 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import TemasPage from "./page";
+import { CAMARA_TEMA_REFERENCE_URL, SENADO_CLASSES_URL } from "@/lib/themes";
 
 describe("TemasPage", () => {
   it("renders the heading and source taxonomy links", () => {
     render(<TemasPage />);
 
     expect(screen.getByText("Temas climáticos")).toBeInTheDocument();
-    expect(screen.getByText(/Referência de temas da Câmara/)).toBeInTheDocument();
-    expect(screen.getByText(/Classificação temática do Senado/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Classificação temática do Senado/),
+    ).toBeInTheDocument();
+
+    const hrefs = screen.getAllByRole("link").map((el) => el.getAttribute("href"));
+    expect(hrefs).toContain(CAMARA_TEMA_REFERENCE_URL);
+    expect(hrefs).toContain(SENADO_CLASSES_URL);
   });
 
   it("renders every theme with its description", () => {

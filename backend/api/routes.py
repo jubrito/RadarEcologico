@@ -154,7 +154,7 @@ def list_bills(
     count_query = select(func.count()).select_from(query.subquery())
     total = session.execute(count_query).scalar() or 0
 
-    query = query.order_by(desc(Bill.created_at))
+    query = query.order_by(desc(Bill.presentation_date).nullslast())
     query = query.offset((page - 1) * limit).limit(limit)
 
     bills = session.execute(query).scalars().all()

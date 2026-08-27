@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { THEME_MAP, themeNamesFromIds } from "./themes";
+import { THEME_MAP, sortedThemeEntries, themeNamesFromIds } from "./themes";
 
 const BACKEND_THEME_CODES = [
   "40",
@@ -36,6 +36,13 @@ describe("themeNamesFromIds", () => {
     expect(themeNamesFromIds("48")).toEqual([
       "Meio Ambiente e Desenvolvimento Sustentável",
     ]);
+  });
+
+  it("sorts theme entries alphabetically by name", () => {
+    const entries = sortedThemeEntries();
+    const names = entries.map(([, name]) => name);
+    const sorted = [...names].sort((a, b) => a.localeCompare(b, "pt-BR"));
+    expect(names).toEqual(sorted);
   });
 
   it("maps multiple codes in order", () => {

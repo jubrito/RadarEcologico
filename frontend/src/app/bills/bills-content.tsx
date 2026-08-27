@@ -24,7 +24,7 @@ import {
   isValidClassification,
 } from "@/lib/utils/classifications";
 import { SOURCE_LABELS, type KnownClassification } from "@/lib/types";
-import { THEME_MAP } from "@/lib/themes";
+import { sortedThemeEntries } from "@/lib/themes";
 import { MultiSelect } from "@/components/ui/multiselect";
 
 export function withCounts(
@@ -48,20 +48,22 @@ export function renderLabel(
 
 const CLASSIFICATION_OPTIONS: { value: string; label: string }[] = [
   { value: "all", label: "Todas as classificações" },
-  ...(Object.keys(CLASSIFICATION_LABELS) as KnownClassification[]).map(
-    (value) => ({ value, label: CLASSIFICATION_LABELS[value] }),
-  ),
+  ...(Object.keys(CLASSIFICATION_LABELS) as KnownClassification[])
+    .map((value) => ({ value, label: CLASSIFICATION_LABELS[value] }))
+    .sort((a, b) => a.label.localeCompare(b.label, "pt-BR")),
 ];
 
 const SOURCE_OPTIONS: { value: string; label: string }[] = [
   { value: "all", label: "Todas as fontes" },
-  { value: "camara", label: SOURCE_LABELS.camara },
-  { value: "senado", label: SOURCE_LABELS.senado },
+  ...[
+    { value: "camara", label: SOURCE_LABELS.camara },
+    { value: "senado", label: SOURCE_LABELS.senado },
+  ].sort((a, b) => a.label.localeCompare(b.label, "pt-BR")),
 ];
 
 const THEME_OPTIONS: { value: string; label: string }[] = [
   { value: "all", label: "Todos os temas" },
-  ...Object.entries(THEME_MAP).map(([value, label]) => ({ value, label })),
+  ...sortedThemeEntries().map(([value, label]) => ({ value, label })),
 ];
 
 export function BillsContent() {

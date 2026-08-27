@@ -56,3 +56,10 @@ export function themeNamesFromIds(
     .map((id) => THEME_MAP[id])
     .filter((name): name is string => Boolean(name));
 }
+
+/** Theme entries `[id, name]` sorted alphabetically by name. */
+export function sortedThemeEntries(): [string, string][] {
+  return Object.entries(THEME_MAP).sort((a, b) =>
+    a[1].localeCompare(b[1], "pt-BR"),
+  );
+}
