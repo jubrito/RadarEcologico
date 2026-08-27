@@ -16,6 +16,10 @@ describe("MainNav", () => {
     const billsLink = screen.getByText("Projetos de Lei");
     expect(billsLink).toBeInTheDocument();
     expect(billsLink.closest("a")).toHaveAttribute("href", "/bills");
+
+    const temasLink = screen.getByText("Temas");
+    expect(temasLink).toBeInTheDocument();
+    expect(temasLink.closest("a")).toHaveAttribute("href", "/temas");
   });
 
   it("renders the GitHub link with correct attributes", () => {

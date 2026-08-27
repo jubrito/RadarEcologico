@@ -38,6 +38,7 @@
 - [x] Tramitação timeline on the bill detail page: `GET /api/bills/{id}/tramitacoes` (Câmara `/tramitacoes`, Senado `/processo` "informes legislativos") + `Timeline` component
 - [x] Party filter on the bills dashboard: `party` param on `GET /api/bills`, `by_party` in `/stats`; Senado now parses `author_party`/`author_state` from the autoria string (both sources filterable)
 - [x] Votações on the bill detail page: `GET /api/bills/{id}/votacoes` (Câmara `/votacoes` + `/orientacoes`) + `Votacoes` component with per-party orientations
+- [x] Themes page (`/temas`, linked in the nav): every theme with a climate-relevant description + links to the Câmara `codTema` reference and Senado class tree
 - [x] Removed `Bill.full_text` (dead field, never populated) — reintroduce with clear semantics when a consumer exists (Sprint 3 / phase 2 BERT)
 - [x] Cleanup: unused deps (alembic, pydantic-settings, duplicate httpx), dead code (`POSITIVE_MODIFIERS`/`NEGATIVE_MODIFIERS`), stale docstrings
 - [x] Centralized classification/source/theme labels (single source of truth)
@@ -66,7 +67,7 @@
 - [x] Add filter by party to the bills dashboard
 - [x] Voting: if a vote happened (committee/plenary), show a per-party tally (for/against). Data from the Câmara Votações API.
 - [ ] Code review
-- [ ] Themes page: a page listing every theme with its name, a short climate-relevant description, and links to the source taxonomies (Câmara `codTema` reference / Senado "Classificação Temática Unificada" tree)
+- [x] Themes page: a page listing every theme with its name, a short climate-relevant description, and links to the source taxonomies (Câmara `codTema` reference / Senado "Classificação Temática Unificada" tree)
 
 ## Sprint 3 — Review area (admin)
 

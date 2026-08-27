@@ -7,6 +7,7 @@ import { SITE_TITLE } from "@/lib/content";
 const links = [
   { href: "/", label: "Início" },
   { href: "/bills", label: "Projetos de Lei" },
+  { href: "/temas", label: "Temas" },
 ];
 
 export function MainNav() {
