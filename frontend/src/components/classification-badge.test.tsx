@@ -30,15 +30,20 @@ describe("ClassificationBadge", () => {
     expect(screen.getByText("Neutro")).toBeInTheDocument();
   });
 
-  it("shows superficial label for a weakly favorable bill", () => {
-    render(<ClassificationBadge classification="favorable" score={0.25} />);
+  it("shows superficial label for a needs_review bill leaning positive", () => {
+    render(<ClassificationBadge classification="needs_review" score={0.33} />);
     expect(screen.getByText("Ajudando superficialmente")).toBeInTheDocument();
   });
 
-  it("does not show superficial label for a strongly favorable bill", () => {
+  it("shows superficial label for a needs_review bill leaning negative", () => {
+    render(<ClassificationBadge classification="needs_review" score={0.52} />);
+    expect(screen.getByText("Prejudicando superficialmente")).toBeInTheDocument();
+  });
+
+  it("does not show superficial label for a favorable bill", () => {
     render(<ClassificationBadge classification="favorable" score={0.05} />);
     expect(
-      screen.queryByText("Ajudando superficialmente"),
+      screen.queryByText(/superficialmente/),
     ).not.toBeInTheDocument();
   });
 

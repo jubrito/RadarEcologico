@@ -32,24 +32,22 @@ export const CLASSIFICATION_DESCRIPTIONS: Record<KnownClassification, string> = 
     "Não se relaciona com questões climáticas.",
 };
 
-const SUPERFICIAL_FAVORABLE_MIN = 0.2;
-const SUPERFICIAL_UNFAVORABLE_MAX = 0.7;
+const NEEDS_REVIEW_MIDPOINT = 0.45;
 
 /**
- * A nuance shown only on the bill detail page: when a bill leans favorable or
- * unfavorable but only weakly (score close to the boundary), flag it as
- * "superficial" so reviewers can tell it doesn't address the root cause.
+ * A nuance shown only on the bill detail page: within `needs_review` (the
+ * "Requer revisão" band), flag which way the bill leans. A bill closer to the
+ * favorable edge "helps superficially" (doesn't address the root cause); one
+ * closer to the unfavorable edge "harms superficially".
  */
 export function getSuperficialLabel(
   classification: Classification,
   score: number | null | undefined,
 ): string | null {
   if (score == null) return null;
-  if (classification === "favorable" && score >= SUPERFICIAL_FAVORABLE_MIN) {
+  if (classification !== "needs_review") return null;
+  if (score < NEEDS_REVIEW_MIDPOINT) {
     return "Ajudando superficialmente";
   }
-  if (classification === "unfavorable" && score < SUPERFICIAL_UNFAVORABLE_MAX) {
-    return "Prejudicando superficialmente";
-  }
-  return null;
+  return "Prejudicando superficialmente";
 }

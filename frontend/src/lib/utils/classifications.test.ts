@@ -46,33 +46,29 @@ describe("CLASSIFICATION_DESCRIPTIONS", () => {
 });
 
 describe("getSuperficialLabel", () => {
-  it("flags weakly favorable bills as helping superficially", () => {
-    expect(getSuperficialLabel("favorable", 0.25)).toBe(
+  it("flags needs_review leaning positive as helping superficially", () => {
+    expect(getSuperficialLabel("needs_review", 0.33)).toBe(
       "Ajudando superficialmente",
     );
   });
 
-  it("does not flag strongly favorable bills", () => {
-    expect(getSuperficialLabel("favorable", 0.05)).toBeNull();
-  });
-
-  it("flags weakly unfavorable bills as harming superficially", () => {
-    expect(getSuperficialLabel("unfavorable", 0.65)).toBe(
+  it("flags needs_review leaning negative as harming superficially", () => {
+    expect(getSuperficialLabel("needs_review", 0.52)).toBe(
       "Prejudicando superficialmente",
     );
   });
 
-  it("does not flag strongly unfavorable bills", () => {
-    expect(getSuperficialLabel("unfavorable", 0.9)).toBeNull();
+  it("returns null for favorable and unfavorable", () => {
+    expect(getSuperficialLabel("favorable", 0.25)).toBeNull();
+    expect(getSuperficialLabel("unfavorable", 0.65)).toBeNull();
   });
 
-  it("returns null for neutral and needs_review", () => {
+  it("returns null for neutral", () => {
     expect(getSuperficialLabel("neutral", 0.45)).toBeNull();
-    expect(getSuperficialLabel("needs_review", 0.5)).toBeNull();
   });
 
   it("returns null for a missing score", () => {
-    expect(getSuperficialLabel("favorable", null)).toBeNull();
+    expect(getSuperficialLabel("needs_review", null)).toBeNull();
   });
 });
 
