@@ -19,13 +19,13 @@ export default function TemasPage() {
           <Link
             key={id}
             href={`/bills?theme=${id}`}
-            className="group rounded-xl border border-border bg-card p-5 transition-all hover:shadow-lg hover:-translate-y-0.5"
+            className="group rounded-xl border bg-card p-5 transition-all hover:shadow-lg hover:-translate-y-0.5 border-2 border-transparent hover:border-foreground"
           >
             <h2 className="font-bold mb-2 group-hover:text-primary">{name}</h2>
             <p className="text-sm text-muted-foreground">
               {THEME_DESCRIPTIONS[id] ?? "Sem descrição."}
             </p>
-            <span className="inline-block text-xs text-muted-foreground mt-3 group-hover:text-foreground">
+            <span className="inline-block font-bold text-xs text-muted-foreground mt-3 group-hover:text-foreground group-hover:underline group-hover:underline-offset-5">
               Ver projetos →
             </span>
           </Link>
