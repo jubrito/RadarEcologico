@@ -513,3 +513,39 @@ class TestBillResponseShape:
         assert isinstance(data["created_at"], str)
         assert data["theme_ids"] == "48,54"
         assert data["theme_names"] == "Meio Ambiente,Energia"
+
+
+def test_list_bills_orders_by_presentation_date_desc():
+    """Bills should be returned most-recent-first, ordered by presentation_date."""
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+
+    from backend.api.routes import list_bills
+    from backend.models import Base, Bill
+
+    engine = create_engine("sqlite:///:memory:")
+    Base.metadata.create_all(engine)
+    Session = sessionmaker(bind=engine)
+
+    def make_bill(external_id: str, day: int) -> Bill:
+        return Bill(
+            external_id=external_id,
+            source="camara",
+            bill_type="PL",
+            number=int(external_id),
+            year=2026,
+            ementa="Ementa de teste.",
+            link=f"https://example.com/{external_id}",
+            presentation_date=datetime(2026, 1, day),
+            classification="favorable",
+        )
+
+    with Session() as session:
+        session.add_all(
+            [make_bill("1", 1), make_bill("2", 3), make_bill("3", 2)]
+        )
+        session.commit()
+
+        result = list_bills(page=1, limit=20, session=session)
+
+    assert [bill.external_id for bill in result.items] == ["2", "3", "1"]

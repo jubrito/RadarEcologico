@@ -18,29 +18,23 @@ export const THEME_MAP: Record<string, string> = {
 
 /** Short climate-relevant description for each theme (displayed on the /temas page). */
 export const THEME_DESCRIPTIONS: Record<string, string> = {
-  "40": "Instrumentos econômicos para a descarbonização: precificação de carbono, subsídios verdes e incentivos à transição produtiva.",
-  "41": "Planejamento urbano, saneamento e resiliência das cidades frente aos eventos climáticos extremos.",
-  "44": "Direitos afetados pela crise climática e proteção de populações vulneráveis.",
-  "48": "Proteção da biodiversidade, combate ao desmatamento e políticas de clima.",
-  "51": "Regularização fundiária, reforma agrária e disputas pelo uso da terra.",
-  "54": "Transição energética, gestão da água e exploração mineral.",
-  "55": "Tratados, acordos climáticos e cooperação internacional.",
-  "56": "Impactos da crise climática na saúde pública e vigilância sanitária.",
-  "61": "Transporte e mobilidade — entre as maiores fontes de emissões.",
-  "62": "Pesquisa e tecnologias limpas para a mitigação e a adaptação.",
-  "64": "Agropecuária, pesca e extrativismo — desmatamento e uso da terra.",
-  "66": "Emissões industriais e padrões de produção sustentáveis.",
-  "70": "Orçamento público e financiamento de ações climáticas.",
-  "76": "Legislação ambiental, crimes contra o meio ambiente e justiça.",
+  "40": "Políticas econômicas e instrumentos de mercado para a transição climática, do financiamento verde à precificação de carbono.",
+  "41": "Planejamento urbano, habitação e saneamento que tornam as cidades mais resilientes e menos poluentes.",
+  "44": "Direitos e populações afetados pela crise climática, da justiça climática à proteção de comunidades vulneráveis.",
+  "48": "Biodiversidade, florestas e políticas de clima, do combate ao desmatamento à conservação dos biomas.",
+  "51": "Propriedade e uso da terra: reforma agrária, regularização fundiária e disputas que impactam o desmatamento.",
+  "54": "Energia, água e mineração: da transição energética e das renováveis à gestão hídrica.",
+  "55": "Acordos, tratados e cooperação internacional, incluindo os compromissos climáticos.",
+  "56": "Saúde pública e clima: epidemias, saneamento, qualidade do ar e vigilância sanitária.",
+  "61": "Transporte, mobilidade e emissões: do transporte coletivo à mobilidade sustentável.",
+  "62": "Pesquisa, tecnologia e inovação: das tecnologias limpas à ciência do clima.",
+  "64": "Produção de alimentos e extrativismo: agropecuária, pesca e uso da terra, no centro do desmatamento.",
+  "66": "Indústria, comércio e serviços: emissões industriais, produção sustentável e consumo.",
+  "70": "Orçamento e finanças públicas: destinação de recursos e financiamento de políticas climáticas.",
+  "76": "Direito e justiça: legislação ambiental, crimes contra o meio ambiente e responsabilização.",
   povos_indigenas:
-    "Territórios indígenas e tradicionais — centrais para a conservação das florestas.",
+    "Povos indígenas e comunidades tradicionais — territórios e modos de vida centrais para a conservação das florestas.",
 };
-
-/** References to the source taxonomies (Câmara codTema / Senado class tree). */
-export const CAMARA_TEMA_REFERENCE_URL =
-  "https://dadosabertos.camara.leg.br/api/v2/referencias/proposicoes/codTema";
-export const SENADO_CLASSES_URL =
-  "https://legis.senado.leg.br/dadosabertos/processo/classes";
 
 /**
  * Map a comma-separated list of theme codes (e.g. "48,54") to display names.

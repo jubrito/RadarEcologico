@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { THEME_MAP, sortedThemeEntries, themeNamesFromIds } from "./themes";
+import {
+  THEME_DESCRIPTIONS,
+  THEME_MAP,
+  sortedThemeEntries,
+  themeNamesFromIds,
+} from "./themes";
 
 const BACKEND_THEME_CODES = [
   "40",
@@ -27,6 +32,20 @@ describe("THEME_MAP", () => {
   it("has non-empty labels for every theme", () => {
     for (const label of Object.values(THEME_MAP)) {
       expect(label.trim()).not.toBe("");
+    }
+  });
+});
+
+describe("THEME_DESCRIPTIONS", () => {
+  it("has a non-empty description for every theme", () => {
+    for (const id of Object.keys(THEME_MAP)) {
+      expect(THEME_DESCRIPTIONS[id]).toBeTruthy();
+    }
+  });
+
+  it("has no descriptions for unknown themes", () => {
+    for (const id of Object.keys(THEME_DESCRIPTIONS)) {
+      expect(THEME_MAP[id]).toBeTruthy();
     }
   });
 });

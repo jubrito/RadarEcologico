@@ -1,10 +1,5 @@
 import Link from "next/link";
-import {
-  CAMARA_TEMA_REFERENCE_URL,
-  SENADO_CLASSES_URL,
-  THEME_DESCRIPTIONS,
-  sortedThemeEntries,
-} from "@/lib/themes";
+import { THEME_DESCRIPTIONS, sortedThemeEntries } from "@/lib/themes";
 
 export default function TemasPage() {
   return (
@@ -13,18 +8,10 @@ export default function TemasPage() {
       <p className="text-foreground/80 my-2 text-xl max-w-4xl">
         Como classificamos os projetos de lei por tema
       </p>
-      <p className="text-muted-foreground max-w-3xl mb-6">
+      <p className="text-muted-foreground max-w-3xl mb-8">
         Cada PL é associado a um ou mais temas climáticos. Os temas são uma
-        reconciliação entre a
-        <a
-          href={CAMARA_TEMA_REFERENCE_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mr-1 text-muted-foreground hover:text-foreground underline underline-offset-2"
-        >
-          referência de temas da Câmara dos Deputados ↗
-        </a>
-        e a &ldquo;Classificação Temática Unificada&rdquo; do Senado Federal.
+        reconciliação entre a taxonomia da Câmara dos Deputados e a
+        &ldquo;Classificação Temática Unificada&rdquo; do Senado Federal.
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

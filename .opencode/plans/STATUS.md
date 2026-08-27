@@ -38,7 +38,7 @@
 - [x] Tramitação timeline on the bill detail page: `GET /api/bills/{id}/tramitacoes` (Câmara `/tramitacoes`, Senado `/processo` "informes legislativos") + `Timeline` component
 - [x] Party filter on the bills dashboard: `party` param on `GET /api/bills`, `by_party` in `/stats`; Senado now parses `author_party`/`author_state` from the autoria string (both sources filterable)
 - [x] Votações on the bill detail page: `GET /api/bills/{id}/votacoes` (Câmara `/votacoes` + `/orientacoes`) + `Votacoes` component with per-party orientations
-- [x] Themes page (`/temas`, linked in the nav): every theme with a climate-relevant description + links to the Câmara `codTema` reference and Senado class tree
+- [x] Themes page (`/temas`, linked in the nav): every theme with a climate-relevant description
 - [x] Removed `Bill.full_text` (dead field, never populated) — reintroduce with clear semantics when a consumer exists (Sprint 3 / phase 2 BERT)
 - [x] Cleanup: unused deps (alembic, pydantic-settings, duplicate httpx), dead code (`POSITIVE_MODIFIERS`/`NEGATIVE_MODIFIERS`), stale docstrings
 - [x] Centralized classification/source/theme labels (single source of truth)
