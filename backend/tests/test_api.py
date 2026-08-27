@@ -230,6 +230,42 @@ class TestTramitacoes:
         assert response.status_code == 404
 
 
+class TestVotacoes:
+    def test_returns_votacoes_for_camara_bill(self):
+        bill = _bill_row(id="abc-123", source="camara", external_id="12345")
+        session = _make_session(bills=[bill], total=1)
+        votacoes = [
+            {
+                "date": "2025-03-27",
+                "orgao": "Plenário",
+                "description": "Aprovação do Projeto",
+                "aprovado": True,
+                "orientacoes": [{"partido": "PL", "voto": "Sim"}],
+            }
+        ]
+
+        app.dependency_overrides[get_session] = lambda: session
+        client = TestClient(app)
+
+        with patch("backend.api.routes.fetch_camara_votacoes", return_value=votacoes):
+            response = client.get("/api/bills/abc-123/votacoes")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data) == 1
+        assert data[0]["aprovado"] is True
+        assert data[0]["orientacoes"][0]["partido"] == "PL"
+
+    def test_returns_404_for_missing_bill(self):
+        session = _make_session(bills=[], total=0)
+
+        app.dependency_overrides[get_session] = lambda: session
+        client = TestClient(app)
+
+        response = client.get("/api/bills/nonexistent/votacoes")
+        assert response.status_code == 404
+
+
 class TestGetStats:
     def test_returns_stats(self):
         session = MagicMock(spec=Session)

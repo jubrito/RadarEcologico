@@ -61,6 +61,14 @@ export interface TramitacaoEvent {
   orgao?: string | null;
 }
 
+export interface VotacaoEvent {
+  date: string;
+  orgao?: string | null;
+  description: string;
+  aprovado: boolean;
+  orientacoes: { partido: string; voto: string }[];
+}
+
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 async function fetchAPI<T>(path: string, params?: URLSearchParams): Promise<T> {
@@ -113,6 +121,10 @@ export async function getBill(id: string): Promise<Bill> {
 
 export async function getTramitacoes(id: string): Promise<TramitacaoEvent[]> {
   return fetchAPI<TramitacaoEvent[]>(`/bills/${id}/tramitacoes`);
+}
+
+export async function getVotacoes(id: string): Promise<VotacaoEvent[]> {
+  return fetchAPI<VotacaoEvent[]>(`/bills/${id}/votacoes`);
 }
 
 export async function getStats(): Promise<StatsResponse> {

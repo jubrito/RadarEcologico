@@ -55,7 +55,7 @@ CAMARA_THEME_TO_ID: dict[int, str] = {
 }
 
 from backend.keywords.taxonomy import ementa_matches_climate, is_comunidade_tradicional
-from backend.types import ScrapedBill, TramitacaoEvent
+from backend.types import ScrapedBill, TramitacaoEvent, VotacaoEvent
 
 
 def _fetch_themes(external_id: str, ementa: str) -> tuple[str | None, str | None]:
@@ -267,3 +267,52 @@ def fetch_camara_tramitacoes(external_id: str) -> list[TramitacaoEvent]:
         )
     eventos.sort(key=lambda e: e["date"])
     return eventos
+
+
+def _fetch_orientacoes(votacao_id: str) -> list[dict]:
+    """Fetch the per-party vote orientations for a votação."""
+    try:
+        response = requests.get(
+            f"{API_BASE}/votacoes/{votacao_id}/orientacoes", timeout=10
+        )
+        response.raise_for_status()
+        data = response.json()
+    except requests.RequestException:
+        return []
+
+    orientacoes: list[dict] = []
+    for o in data.get("dados", []):
+        partido = o.get("siglaPartidoBloco", "")
+        if not partido:
+            continue
+        orientacoes.append(
+            {"partido": partido, "voto": o.get("orientacaoVoto") or "Liberado"}
+        )
+    return orientacoes
+
+
+def fetch_camara_votacoes(external_id: str) -> list[VotacaoEvent]:
+    """Fetch the votations for a Câmara bill, each with per-party orientations."""
+    try:
+        response = requests.get(
+            f"{API_BASE}/proposicoes/{external_id}/votacoes", timeout=10
+        )
+        response.raise_for_status()
+        data = response.json()
+    except requests.RequestException as e:
+        print(f"  Câmara votações error (id={external_id}): {e}")
+        return []
+
+    votacoes: list[VotacaoEvent] = []
+    for v in data.get("dados", []):
+        sigla = v.get("siglaOrgao", "")
+        votacoes.append(
+            {
+                "date": v.get("data", ""),
+                "orgao": CAMARA_ORGAO_NAMES.get(sigla, sigla),
+                "description": v.get("descricao", ""),
+                "aprovado": v.get("aprovacao") == 1,
+                "orientacoes": _fetch_orientacoes(str(v.get("id", ""))),
+            }
+        )
+    return votacoes

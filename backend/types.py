@@ -55,3 +55,16 @@ class TramitacaoEvent(TypedDict):
     date: str
     description: str
     orgao: str
+
+
+class OrientacaoVoto(TypedDict):
+    partido: str
+    voto: str
+
+
+class VotacaoEvent(TypedDict):
+    date: str
+    orgao: str
+    description: str
+    aprovado: bool
+    orientacoes: list[OrientacaoVoto]

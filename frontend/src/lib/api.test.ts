@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { getBills, getBill, getStats, classifyText, getTramitacoes } from "./api";
+import { getBills, getBill, getStats, classifyText, getTramitacoes, getVotacoes } from "./api";
 import { createBillsResponse, createStats } from "@/test-fixtures/bills";
 
 beforeEach(() => {
@@ -103,6 +103,23 @@ describe("getTramitacoes", () => {
   it("throws on API error", async () => {
     mockFetch(500, {});
     await expect(getTramitacoes("abc-123")).rejects.toThrow("API error");
+  });
+});
+
+describe("getVotacoes", () => {
+  it("fetches votations with orientations", async () => {
+    mockFetch(200, [
+      { date: "2025-03-27", description: "Aprovação", aprovado: true, orientacoes: [{ partido: "PL", voto: "Sim" }] },
+    ]);
+    const result = await getVotacoes("abc-123");
+    expect(result).toHaveLength(1);
+    expect(result[0].aprovado).toBe(true);
+    expect(result[0].orientacoes[0].partido).toBe("PL");
+  });
+
+  it("throws on API error", async () => {
+    mockFetch(500, {});
+    await expect(getVotacoes("abc-123")).rejects.toThrow("API error");
   });
 });
 

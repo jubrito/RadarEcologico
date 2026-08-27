@@ -11,6 +11,7 @@ from backend.scrapers.camara import (
     fetch_camara_bill_details,
     fetch_camara_bills,
     fetch_camara_tramitacoes,
+    fetch_camara_votacoes,
 )
 from backend.scrapers.senado import fetch_senado_bills, fetch_senado_tramitacoes
 
@@ -565,3 +566,63 @@ def test_senado_fetch_tramitacoes_returns_empty_when_unresolvable():
         eventos = fetch_senado_tramitacoes("99999")
 
     assert eventos == []
+
+
+# ── Votações tests ───────────────────────────────────────────────────────────
+
+
+def test_camara_fetch_votacoes_extracts_orientations():
+    """Câmara votations should include per-party orientations."""
+    votacoes_response = _build_mock_response(
+        {"dados": [
+            {"id": "2400758-37", "data": "2025-03-27", "siglaOrgao": "PLEN",
+             "descricao": "Aprovação do Projeto", "aprovacao": 1},
+        ]}
+    )
+    orientacoes_response = _build_mock_response(
+        {"dados": [
+            {"orientacaoVoto": "Sim", "siglaPartidoBloco": "PL"},
+            {"orientacaoVoto": "Não", "siglaPartidoBloco": "PSB"},
+        ]}
+    )
+
+    with patch("backend.scrapers.camara.requests.get") as mock_get:
+        mock_get.side_effect = [votacoes_response, orientacoes_response]
+        votacoes = fetch_camara_votacoes("12345")
+
+    assert len(votacoes) == 1
+    assert votacoes[0]["aprovado"] is True
+    assert votacoes[0]["orgao"] == "Plenário"
+    assert votacoes[0]["orientacoes"] == [
+        {"partido": "PL", "voto": "Sim"},
+        {"partido": "PSB", "voto": "Não"},
+    ]
+
+
+def test_camara_fetch_votacoes_maps_empty_orientation_to_liberado():
+    """An empty orientation should be mapped to 'Liberado'."""
+    votacoes_response = _build_mock_response(
+        {"dados": [
+            {"id": "1", "data": "2025-01-01", "siglaOrgao": "PLEN",
+             "descricao": "X", "aprovacao": 0},
+        ]}
+    )
+    orientacoes_response = _build_mock_response(
+        {"dados": [{"orientacaoVoto": "", "siglaPartidoBloco": "PL"}]}
+    )
+
+    with patch("backend.scrapers.camara.requests.get") as mock_get:
+        mock_get.side_effect = [votacoes_response, orientacoes_response]
+        votacoes = fetch_camara_votacoes("12345")
+
+    assert votacoes[0]["aprovado"] is False
+    assert votacoes[0]["orientacoes"][0]["voto"] == "Liberado"
+
+
+def test_camara_fetch_votacoes_returns_empty_when_no_votes():
+    """A bill with no votations should return an empty list."""
+    with patch("backend.scrapers.camara.requests.get",
+               return_value=_build_mock_response({"dados": []})):
+        votacoes = fetch_camara_votacoes("12345")
+
+    assert votacoes == []

@@ -13,9 +13,11 @@ import { STYLE_MAP } from "@/lib/style";
 import { themeNamesFromIds } from "@/lib/themes";
 import { useBill } from "@/lib/hooks/use-bill";
 import { useTramitacoes } from "@/lib/hooks/use-tramitacoes";
+import { useVotacoes } from "@/lib/hooks/use-votacoes";
 import { BillMetadata } from "@/components/bill-metadata/bill-metadata";
 import { StatusCallout } from "@/components/status-callout/status-callout";
 import { Timeline } from "@/components/timeline";
+import { Votacoes } from "@/components/votacoes";
 
 export default function BillDetailPage({
   params,
@@ -25,6 +27,7 @@ export default function BillDetailPage({
   const { id } = use(params);
   const { bill, loading, error } = useBill(id);
   const { events, loading: tramitacoesLoading } = useTramitacoes(id);
+  const { votacoes, loading: votacoesLoading } = useVotacoes(id);
 
   if (loading || !bill) {
     return loading ? (
@@ -155,6 +158,12 @@ export default function BillDetailPage({
               <Skeleton className="h-32 w-full rounded-xl mt-7" />
             ) : (
               <Timeline events={events} />
+            )}
+
+            {votacoesLoading ? (
+              <Skeleton className="h-24 w-full rounded-xl mt-7" />
+            ) : (
+              <Votacoes votacoes={votacoes} />
             )}
           </div>
         </article>

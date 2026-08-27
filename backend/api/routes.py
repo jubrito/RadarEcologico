@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 from backend.classifiers.ensemble import EnsembleResult, classify_ensemble
 from backend.database import get_session
 from backend.models import Bill
-from backend.scrapers.camara import THEME_NAMES, fetch_camara_tramitacoes
+from backend.scrapers.camara import THEME_NAMES, fetch_camara_tramitacoes, fetch_camara_votacoes
 from backend.scrapers.senado import fetch_senado_tramitacoes
 from backend.types import ClassificationLabelWithUnknown, ComponentsDict
 
@@ -93,6 +93,19 @@ class TramitacaoEventOut(BaseModel):
     date: str
     description: str
     orgao: Optional[str] = None
+
+
+class OrientacaoVotoOut(BaseModel):
+    partido: str
+    voto: str
+
+
+class VotacaoEventOut(BaseModel):
+    date: str
+    orgao: Optional[str] = None
+    description: str
+    aprovado: bool
+    orientacoes: list[OrientacaoVotoOut]
 
 
 # --- Endpoints ---
@@ -179,6 +192,22 @@ def get_bill_tramitacoes(
     else:
         events = []
     return [TramitacaoEventOut(**event) for event in events]
+
+
+@router.get("/bills/{bill_id}/votacoes", response_model=list[VotacaoEventOut])
+def get_bill_votacoes(
+    bill_id: str, session: Session = Depends(get_session)
+) -> list[VotacaoEventOut]:
+    """Get the votations for a bill (with per-party orientations), from the source API."""
+    bill = session.get(Bill, bill_id)
+    if not bill:
+        raise HTTPException(status_code=404, detail="Bill not found")
+
+    if bill.source == "camara":
+        votacoes = fetch_camara_votacoes(bill.external_id)
+    else:
+        votacoes = []
+    return [VotacaoEventOut(**votacao) for votacao in votacoes]
 
 
 @router.get("/stats", response_model=StatsResponse)
