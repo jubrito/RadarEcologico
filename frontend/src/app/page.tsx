@@ -82,10 +82,10 @@ export default function DashboardPage() {
               variant="unfavorable"
             />
             <StatCard
-              prefix="PLs "
-              tema="não relacionadas ao clima"
+              prefix="PLs que "
+              tema="nem combatem nem agravam a crise"
               value={stats.by_classification.neutral || 0}
-              desc="Propostas sem relação direta com a crise climática."
+              desc="Ex: práticas do capitalismo verde que não necessariamente são os culpados pela catastrofe climática mas não ajudam efetivamente a combatê-lá."
               variant="neutral"
             />
           </>
