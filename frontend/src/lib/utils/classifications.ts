@@ -50,19 +50,19 @@ export function getClassificationPhrase(
   if (score == null) return null;
 
   if (classification === "favorable") {
-    return "Combatendo ativamente as causas da catástrofe climática";
+    return "Ativamente combate as causas da catástrofe climática ou a minimiza as suas consequências.";
   }
   if (classification === "unfavorable") {
-    return "Intensificando diretamente as causas da catástrofe climática";
+    return "Intensifica diretamente as causas da catástrofe climática ou piora as suas consequências.";
   }
   if (classification === "needs_review") {
     if (score < NEEDS_REVIEW_LOW_MAX) {
-      return "Ajudando superficialmente as causas climáticas";
+      return "Ajuda de alguma forma (mesmo que não significativamente) no combate às causas da catástrofe climática ou a minimização de suas consequências.";
     }
     if (score < NEEDS_REVIEW_MID_MAX) {
-      return "Neutro (nem ajudando nem atrapalhando)";
+      return "Neutro (nem ajuda nem atrapalha significativamente o combate as causas da catastrofe climática ou a minimização de suas consequências)";
     }
-    return "Atrapalhando a luta contra a crise climática";
+    return "Atrapalha de alguma forma (mesmo que não significativamente) o combate às causas da catástrofe climática ou a minimização de suas consequências.";
   }
   return null;
 }
