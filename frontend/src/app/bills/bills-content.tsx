@@ -213,7 +213,7 @@ export function BillsContent() {
 
         <Select value={source} onValueChange={(v) => updateParam("source", v)}>
           <SelectTrigger
-            className="w-full sm:w-49"
+            className="w-full sm:w-45"
             aria-label="Filtrar por fonte"
           >
             <SelectValue>
@@ -231,7 +231,7 @@ export function BillsContent() {
 
         <Select value={party} onValueChange={(v) => updateParam("party", v)}>
           <SelectTrigger
-            className="w-full sm:w-49"
+            className="w-full sm:w-45"
             aria-label="Filtrar por partido"
           >
             <SelectValue>
@@ -261,7 +261,7 @@ export function BillsContent() {
             router.push(`/bills?${params.toString()}`);
           }}
           placeholder="Todos os temas"
-          className="w-full sm:w-49"
+          className="w-full sm:w-57"
         />
       </section>
 
