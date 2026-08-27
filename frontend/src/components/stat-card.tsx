@@ -42,7 +42,7 @@ export function StatCard({
         <div className="min-w-0">
           <p className="text-lg font-bold leading-snug">
             {prefix}
-            <span className={`${style.textAccent} inline-block`}>{tema}</span>
+            <span className={`${style.textAccent}`}>{tema}</span>
           </p>
           <p className="text-sm mt-2 text-muted-foreground">{desc}</p>
         </div>

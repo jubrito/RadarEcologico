@@ -31,7 +31,7 @@ export function Timeline({ events }: TimelineProps) {
               </div>
               <div className={isLast ? "" : "pb-6"}>
                 {isCurrent && (
-                  <p className="text-xs font-bold uppercase tracking-wide text-emerald-400">
+                  <p className="text-xs font-bold uppercase tracking-wide text-blue-400">
                     Situação atual
                   </p>
                 )}
