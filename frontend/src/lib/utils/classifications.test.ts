@@ -3,7 +3,7 @@ import {
   CLASSIFICATION,
   CLASSIFICATION_DESCRIPTIONS,
   CLASSIFICATION_LABELS,
-  getNeedsReviewSubLabel,
+  getClassificationPhrase,
   isValidClassification,
 } from "./classifications";
 
@@ -45,33 +45,38 @@ describe("CLASSIFICATION_DESCRIPTIONS", () => {
   });
 });
 
-describe("getNeedsReviewSubLabel", () => {
-  it("flags a low score as helping superficially", () => {
-    expect(getNeedsReviewSubLabel("needs_review", 0.33)).toBe(
+describe("getClassificationPhrase", () => {
+  it("describes favorable bills as actively fighting", () => {
+    expect(getClassificationPhrase("favorable", 0.15)).toBe(
+      "Combatendo ativamente as causas da catástrofe climática",
+    );
+  });
+
+  it("describes unfavorable bills as intensifying", () => {
+    expect(getClassificationPhrase("unfavorable", 0.8)).toBe(
+      "Intensificando diretamente as causas da catástrofe climática",
+    );
+  });
+
+  it("splits needs_review by score", () => {
+    expect(getClassificationPhrase("needs_review", 0.33)).toBe(
       "Ajudando superficialmente as causas climáticas",
     );
-  });
-
-  it("flags a middle score as neutral", () => {
-    expect(getNeedsReviewSubLabel("needs_review", 0.45)).toBe(
-      "Neutro (não relacionado)",
+    expect(getClassificationPhrase("needs_review", 0.45)).toBe(
+      "Neutro (nem ajudando nem atrapalhando)",
     );
-  });
-
-  it("flags a high score as harming the fight", () => {
-    expect(getNeedsReviewSubLabel("needs_review", 0.55)).toBe(
+    expect(getClassificationPhrase("needs_review", 0.55)).toBe(
       "Atrapalhando a luta contra a crise climática",
     );
   });
 
-  it("returns null for favorable, unfavorable and neutral", () => {
-    expect(getNeedsReviewSubLabel("favorable", 0.25)).toBeNull();
-    expect(getNeedsReviewSubLabel("unfavorable", 0.65)).toBeNull();
-    expect(getNeedsReviewSubLabel("neutral", 0.45)).toBeNull();
+  it("returns null for neutral and unknown", () => {
+    expect(getClassificationPhrase("neutral", 0.45)).toBeNull();
+    expect(getClassificationPhrase("unknown", 0.45)).toBeNull();
   });
 
   it("returns null for a missing score", () => {
-    expect(getNeedsReviewSubLabel("needs_review", null)).toBeNull();
+    expect(getClassificationPhrase("favorable", null)).toBeNull();
   });
 });
 

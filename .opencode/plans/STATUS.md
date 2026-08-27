@@ -45,7 +45,7 @@
 - [x] Migrated Senado scraper to the `/processo` API (the `/materia/*` endpoints were deprecated); maps Senado `Classificações Temáticas` to Câmara themes via `SENADO_CLASS_TO_THEME`
 - [x] Canonical theme taxonomy (`THEME_NAMES` shared by Câmara + Senado): merged `Direito Constitucional` (68) into `Direito e Justiça` (76); split `Povos Indígenas e Comunidades Tradicionais` out of `Direitos Humanos e Minorias` (renamed to `Direitos Humanos`), detected via ementa keywords
 - [x] Broadened climate keywords: indigenous/traditional terms (`is_comunidade_tradicional`), green-transition terms (`transição justa`, `hidrogênio verde`, `economia de baixo carbono`, …) and neutral climate topics (`CLIMATE_SIGNAL_KEYWORDS`: fossil fuels, `petróleo`, `gás natural`, `carvão`, `fracking`, `efeito estufa`, `seca`, `enchentes`, `desastres naturais`, `nível do mar`, `grandes fortunas`) so the pre-filter catches them
-- [x] `neutral` label (grey) reserved for the human-review outcome (Sprint 3); ambiguous bills stay in `needs_review`, where the detail page shows a three-way sub-label by score: "Ajudando superficialmente…" (low), "Neutro (não relacionado)" (mid), "Atrapalhando a luta contra a crise climática" (high)
+- [x] Always-on classification phrase on the bill detail page ("Classificação (estimada):", to become "Classificação (revisada)" once the review feature lands): "Combatendo ativamente as causas da catástrofe climática" (favorable), "Intensificando diretamente as causas da catástrofe climática" (unfavorable), and a three-way split within `needs_review` ("Ajudando superficialmente…", "Neutro (nem ajudando nem atrapalhando)", "Atrapalhando a luta contra a crise climática"); `neutral` label (grey) reserved for the human-review outcome
 
 ## Sprint 1 — Infrastructure & data (complete)
 
@@ -81,6 +81,7 @@ Create the human-review interface:
 5. `PATCH /api/bills/{id}/review` → `reviewer_classification`, `reviewer_notes`, `reviewed_by`, `reviewed_at`
 6. New `Bill` fields: `reviewer_classification`, `reviewer_notes`, `reviewed_by`, `reviewed_at`
 7. Add a label that indicates how many were reviewed by a human (in the summary of the main page, in each bill card and in the bill details page)
+8. After classification, update the bill from "Classificação (estimada):" to "Classificação (revisada)"
 
 ## Sprint 4 — Infrastructure (PostgreSQL)
 

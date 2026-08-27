@@ -30,30 +30,46 @@ describe("ClassificationBadge", () => {
     expect(screen.getByText("Neutro")).toBeInTheDocument();
   });
 
-  it("shows the sub-label for a needs_review bill leaning positive", () => {
+  it("shows the phrase for a favorable bill", () => {
+    render(<ClassificationBadge classification="favorable" score={0.15} />);
+    expect(
+      screen.getByText("Combatendo ativamente as causas da catástrofe climática"),
+    ).toBeInTheDocument();
+  });
+
+  it("shows the phrase for an unfavorable bill", () => {
+    render(<ClassificationBadge classification="unfavorable" score={0.8} />);
+    expect(
+      screen.getByText(
+        "Intensificando diretamente as causas da catástrofe climática",
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("shows the phrase for a needs_review bill leaning positive", () => {
     render(<ClassificationBadge classification="needs_review" score={0.33} />);
     expect(
       screen.getByText("Ajudando superficialmente as causas climáticas"),
     ).toBeInTheDocument();
   });
 
-  it("shows the sub-label for a needs_review bill in the middle", () => {
+  it("shows the phrase for a needs_review bill in the middle", () => {
     render(<ClassificationBadge classification="needs_review" score={0.45} />);
-    expect(screen.getByText("Neutro (não relacionado)")).toBeInTheDocument();
+    expect(
+      screen.getByText("Neutro (nem ajudando nem atrapalhando)"),
+    ).toBeInTheDocument();
   });
 
-  it("shows the sub-label for a needs_review bill leaning negative", () => {
+  it("shows the phrase for a needs_review bill leaning negative", () => {
     render(<ClassificationBadge classification="needs_review" score={0.55} />);
     expect(
       screen.getByText("Atrapalhando a luta contra a crise climática"),
     ).toBeInTheDocument();
   });
 
-  it("does not show the sub-label for a favorable bill", () => {
-    render(<ClassificationBadge classification="favorable" score={0.05} />);
-    expect(
-      screen.queryByText("Ajudando superficialmente"),
-    ).not.toBeInTheDocument();
+  it("labels the phrase as an estimated classification", () => {
+    render(<ClassificationBadge classification="favorable" score={0.15} />);
+    expect(screen.getByText("Classificação (estimada):")).toBeInTheDocument();
   });
 
   it("shows score percentage when provided", () => {

@@ -36,23 +36,33 @@ const NEEDS_REVIEW_LOW_MAX = 0.4;
 const NEEDS_REVIEW_MID_MAX = 0.5;
 
 /**
- * A nuance shown only on the bill detail page: within `needs_review` (the
- * "Requer revisão" band), the score tells which way the bill leans.
- *   - low  → "Ajudando superficialmente" (leaning favorable, doesn't attack the root cause)
- *   - mid  → "Neutro (não relacionado)" (in the middle)
- *   - high → "Atrapalhando a luta contra a crise climática" (leaning unfavorable)
+ * Descriptive phrase for a bill's stance, always shown on the detail page.
+ *   - favorable   → "Combatendo ativamente as causas da catástrofe climática"
+ *   - unfavorable → "Intensificando diretamente as causas da catástrofe climática"
+ *   - needs_review → split by score: "Ajudando superficialmente…" (low),
+ *                    "Neutro (não relacionado)" (mid), "Atrapalhando a luta…" (high)
+ *   - neutral / unknown → null
  */
-export function getNeedsReviewSubLabel(
+export function getClassificationPhrase(
   classification: Classification,
   score: number | null | undefined,
 ): string | null {
   if (score == null) return null;
-  if (classification !== "needs_review") return null;
-  if (score < NEEDS_REVIEW_LOW_MAX) {
-    return "Ajudando superficialmente as causas climáticas";
+
+  if (classification === "favorable") {
+    return "Combatendo ativamente as causas da catástrofe climática";
   }
-  if (score < NEEDS_REVIEW_MID_MAX) {
-    return "Neutro (não relacionado)";
+  if (classification === "unfavorable") {
+    return "Intensificando diretamente as causas da catástrofe climática";
   }
-  return "Atrapalhando a luta contra a crise climática";
+  if (classification === "needs_review") {
+    if (score < NEEDS_REVIEW_LOW_MAX) {
+      return "Ajudando superficialmente as causas climáticas";
+    }
+    if (score < NEEDS_REVIEW_MID_MAX) {
+      return "Neutro (nem ajudando nem atrapalhando)";
+    }
+    return "Atrapalhando a luta contra a crise climática";
+  }
+  return null;
 }
