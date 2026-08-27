@@ -3,7 +3,7 @@ import {
   CLASSIFICATION,
   CLASSIFICATION_DESCRIPTIONS,
   CLASSIFICATION_LABELS,
-  getSuperficialLabel,
+  getNeedsReviewSubLabel,
   isValidClassification,
 } from "./classifications";
 
@@ -45,30 +45,33 @@ describe("CLASSIFICATION_DESCRIPTIONS", () => {
   });
 });
 
-describe("getSuperficialLabel", () => {
-  it("flags needs_review leaning positive as helping superficially", () => {
-    expect(getSuperficialLabel("needs_review", 0.33)).toBe(
-      "Ajudando superficialmente",
+describe("getNeedsReviewSubLabel", () => {
+  it("flags a low score as helping superficially", () => {
+    expect(getNeedsReviewSubLabel("needs_review", 0.33)).toBe(
+      "Ajudando superficialmente as causas climáticas",
     );
   });
 
-  it("flags needs_review leaning negative as harming superficially", () => {
-    expect(getSuperficialLabel("needs_review", 0.52)).toBe(
-      "Prejudicando superficialmente",
+  it("flags a middle score as neutral", () => {
+    expect(getNeedsReviewSubLabel("needs_review", 0.45)).toBe(
+      "Neutro (não relacionado)",
     );
   });
 
-  it("returns null for favorable and unfavorable", () => {
-    expect(getSuperficialLabel("favorable", 0.25)).toBeNull();
-    expect(getSuperficialLabel("unfavorable", 0.65)).toBeNull();
+  it("flags a high score as harming the fight", () => {
+    expect(getNeedsReviewSubLabel("needs_review", 0.55)).toBe(
+      "Atrapalhando a luta contra a crise climática",
+    );
   });
 
-  it("returns null for neutral", () => {
-    expect(getSuperficialLabel("neutral", 0.45)).toBeNull();
+  it("returns null for favorable, unfavorable and neutral", () => {
+    expect(getNeedsReviewSubLabel("favorable", 0.25)).toBeNull();
+    expect(getNeedsReviewSubLabel("unfavorable", 0.65)).toBeNull();
+    expect(getNeedsReviewSubLabel("neutral", 0.45)).toBeNull();
   });
 
   it("returns null for a missing score", () => {
-    expect(getSuperficialLabel("needs_review", null)).toBeNull();
+    expect(getNeedsReviewSubLabel("needs_review", null)).toBeNull();
   });
 });
 

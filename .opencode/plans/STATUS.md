@@ -45,7 +45,7 @@
 - [x] Migrated Senado scraper to the `/processo` API (the `/materia/*` endpoints were deprecated); maps Senado `Classificações Temáticas` to Câmara themes via `SENADO_CLASS_TO_THEME`
 - [x] Canonical theme taxonomy (`THEME_NAMES` shared by Câmara + Senado): merged `Direito Constitucional` (68) into `Direito e Justiça` (76); split `Povos Indígenas e Comunidades Tradicionais` out of `Direitos Humanos e Minorias` (renamed to `Direitos Humanos`), detected via ementa keywords
 - [x] Broadened climate keywords: indigenous/traditional terms (`is_comunidade_tradicional`), green-transition terms (`transição justa`, `hidrogênio verde`, `economia de baixo carbono`, …) and neutral climate topics (`CLIMATE_SIGNAL_KEYWORDS`: fossil fuels, `petróleo`, `gás natural`, `carvão`, `fracking`, `efeito estufa`, `seca`, `enchentes`, `desastres naturais`, `nível do mar`, `grandes fortunas`) so the pre-filter catches them
-- [x] New `neutral` classification (grey, "Não se relaciona com questões climáticas") — bills with no climate signal; plus a score-based "superficial" nuance on the bill detail page within the `needs_review` band ("Ajudando superficialmente" when leaning favorable, "Prejudicando superficialmente" when leaning unfavorable)
+- [x] `neutral` label (grey) reserved for the human-review outcome (Sprint 3); ambiguous bills stay in `needs_review`, where the detail page shows a three-way sub-label by score: "Ajudando superficialmente…" (low), "Neutro (não relacionado)" (mid), "Atrapalhando a luta contra a crise climática" (high)
 
 ## Sprint 1 — Infrastructure & data (complete)
 
@@ -111,7 +111,7 @@ Create the human-review interface:
 5. Anti-duplication: one vote per fingerprint per bill
 6. UI with 3 vote buttons + proportion bars
 
-## Calibration plan (AI)
+## Sprint 8 - Calibration plan (AI)
 
 - **When**: Sprint 6 (or sooner, once `data/` has labeled bills).
 - **Why**: the scoring constants are unvalidated guesses; without a labeled eval we can't measure precision/recall or tune the thresholds.
@@ -121,6 +121,11 @@ Create the human-review interface:
   3. Build a confusion matrix and precision/recall/F1 per label.
   4. Sweep the scoring constants (base score, per-pattern/per-keyword weights) and the thresholds (`FAVORABLE_MAX`, `UNFAVORABLE_MIN`) to maximize F1.
   5. Add a repeatable script (`backend/scripts/evaluate.py`) or a notebook.
+
+## Sprint 9 - Improvements
+
+- [ ] Improve accessibility scores
+- [ ] Review "neutral" logic and the sublabels on bill details pages to ensure that reviewers can categorize bills as neutral while seeing the three types of sublabels on the % block
 
 ## Blockers
 

@@ -30,20 +30,29 @@ describe("ClassificationBadge", () => {
     expect(screen.getByText("Neutro")).toBeInTheDocument();
   });
 
-  it("shows superficial label for a needs_review bill leaning positive", () => {
+  it("shows the sub-label for a needs_review bill leaning positive", () => {
     render(<ClassificationBadge classification="needs_review" score={0.33} />);
-    expect(screen.getByText("Ajudando superficialmente")).toBeInTheDocument();
+    expect(
+      screen.getByText("Ajudando superficialmente as causas climáticas"),
+    ).toBeInTheDocument();
   });
 
-  it("shows superficial label for a needs_review bill leaning negative", () => {
-    render(<ClassificationBadge classification="needs_review" score={0.52} />);
-    expect(screen.getByText("Prejudicando superficialmente")).toBeInTheDocument();
+  it("shows the sub-label for a needs_review bill in the middle", () => {
+    render(<ClassificationBadge classification="needs_review" score={0.45} />);
+    expect(screen.getByText("Neutro (não relacionado)")).toBeInTheDocument();
   });
 
-  it("does not show superficial label for a favorable bill", () => {
+  it("shows the sub-label for a needs_review bill leaning negative", () => {
+    render(<ClassificationBadge classification="needs_review" score={0.55} />);
+    expect(
+      screen.getByText("Atrapalhando a luta contra a crise climática"),
+    ).toBeInTheDocument();
+  });
+
+  it("does not show the sub-label for a favorable bill", () => {
     render(<ClassificationBadge classification="favorable" score={0.05} />);
     expect(
-      screen.queryByText(/superficialmente/),
+      screen.queryByText("Ajudando superficialmente"),
     ).not.toBeInTheDocument();
   });
 

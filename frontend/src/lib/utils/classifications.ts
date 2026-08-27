@@ -21,33 +21,38 @@ export const CLASSIFICATION_LABELS: Record<KnownClassification, string> = {
   neutral: "Neutro",
 };
 
-export const CLASSIFICATION_DESCRIPTIONS: Record<KnownClassification, string> = {
-  favorable:
-    "Baixo potencial de dano climático — a proposta tende a contribuir para o combate à crise do clima.",
-  unfavorable:
-    "Alto potencial de dano climático — a proposta tende a intensificar a crise do clima.",
-  needs_review:
-    "Impacto climático incerto — requer análise humana para determinar o efeito da proposta.",
-  neutral:
-    "Não se relaciona com questões climáticas.",
-};
+export const CLASSIFICATION_DESCRIPTIONS: Record<KnownClassification, string> =
+  {
+    favorable:
+      "Baixo potencial de dano climático — a proposta tende a contribuir para o combate à crise do clima.",
+    unfavorable:
+      "Alto potencial de dano climático — a proposta tende a intensificar a crise do clima.",
+    needs_review:
+      "Impacto climático incerto — requer análise humana para determinar o efeito da proposta.",
+    neutral: "Não se relaciona com questões climáticas.",
+  };
 
-const NEEDS_REVIEW_MIDPOINT = 0.45;
+const NEEDS_REVIEW_LOW_MAX = 0.4;
+const NEEDS_REVIEW_MID_MAX = 0.5;
 
 /**
  * A nuance shown only on the bill detail page: within `needs_review` (the
- * "Requer revisão" band), flag which way the bill leans. A bill closer to the
- * favorable edge "helps superficially" (doesn't address the root cause); one
- * closer to the unfavorable edge "harms superficially".
+ * "Requer revisão" band), the score tells which way the bill leans.
+ *   - low  → "Ajudando superficialmente" (leaning favorable, doesn't attack the root cause)
+ *   - mid  → "Neutro (não relacionado)" (in the middle)
+ *   - high → "Atrapalhando a luta contra a crise climática" (leaning unfavorable)
  */
-export function getSuperficialLabel(
+export function getNeedsReviewSubLabel(
   classification: Classification,
   score: number | null | undefined,
 ): string | null {
   if (score == null) return null;
   if (classification !== "needs_review") return null;
-  if (score < NEEDS_REVIEW_MIDPOINT) {
-    return "Ajudando superficialmente";
+  if (score < NEEDS_REVIEW_LOW_MAX) {
+    return "Ajudando superficialmente as causas climáticas";
   }
-  return "Prejudicando superficialmente";
+  if (score < NEEDS_REVIEW_MID_MAX) {
+    return "Neutro (não relacionado)";
+  }
+  return "Atrapalhando a luta contra a crise climática";
 }
