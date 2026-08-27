@@ -46,27 +46,37 @@ describe("CLASSIFICATION_DESCRIPTIONS", () => {
 });
 
 describe("getClassificationPhrase", () => {
-  it("describes favorable bills as actively fighting", () => {
+  it("describes favorable bills", () => {
     expect(getClassificationPhrase("favorable", 0.15)).toBe(
-      "Combatendo ativamente as causas da catástrofe climática",
+      "Ativamente combate as causas da catástrofe climática ou minimiza as suas consequências.",
     );
   });
 
-  it("describes unfavorable bills as intensifying", () => {
+  it("describes unfavorable bills", () => {
     expect(getClassificationPhrase("unfavorable", 0.8)).toBe(
-      "Intensificando diretamente as causas da catástrofe climática",
+      "Intensifica diretamente as causas da catástrofe climática ou piora as suas consequências.",
     );
   });
 
   it("splits needs_review by score", () => {
     expect(getClassificationPhrase("needs_review", 0.33)).toBe(
-      "Ajudando superficialmente as causas climáticas",
+      "Ajuda de alguma forma (mesmo que não significativamente) no combate às causas da catástrofe climática ou a minimização de suas consequências.",
     );
     expect(getClassificationPhrase("needs_review", 0.45)).toBe(
-      "Neutro (nem ajudando nem atrapalhando)",
+      "Neutro (nem ajuda nem atrapalha significativamente o combate às causas da catástrofe climática ou a minimização de suas consequências)",
     );
     expect(getClassificationPhrase("needs_review", 0.55)).toBe(
-      "Atrapalhando a luta contra a crise climática",
+      "Atrapalha de alguma forma (mesmo que não significativamente) o combate às causas da catástrofe climática ou a minimização de suas consequências.",
+    );
+  });
+
+  it("respects the needs_review band boundaries", () => {
+    expect(getClassificationPhrase("needs_review", 0.3)).not.toBeNull();
+    expect(getClassificationPhrase("needs_review", 0.4)).toBe(
+      "Neutro (nem ajuda nem atrapalha significativamente o combate às causas da catástrofe climática ou a minimização de suas consequências)",
+    );
+    expect(getClassificationPhrase("needs_review", 0.5)).toBe(
+      "Atrapalha de alguma forma (mesmo que não significativamente) o combate às causas da catástrofe climática ou a minimização de suas consequências.",
     );
   });
 

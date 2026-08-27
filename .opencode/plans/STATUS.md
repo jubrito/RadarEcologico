@@ -15,7 +15,7 @@
 
 ## Last updated
 
-2026-08-26
+2026-08-27
 
 ## Current phase
 
@@ -45,7 +45,8 @@
 - [x] Migrated Senado scraper to the `/processo` API (the `/materia/*` endpoints were deprecated); maps Senado `Classificações Temáticas` to Câmara themes via `SENADO_CLASS_TO_THEME`
 - [x] Canonical theme taxonomy (`THEME_NAMES` shared by Câmara + Senado): merged `Direito Constitucional` (68) into `Direito e Justiça` (76); split `Povos Indígenas e Comunidades Tradicionais` out of `Direitos Humanos e Minorias` (renamed to `Direitos Humanos`), detected via ementa keywords
 - [x] Broadened climate keywords: indigenous/traditional terms (`is_comunidade_tradicional`), green-transition terms (`transição justa`, `hidrogênio verde`, `economia de baixo carbono`, …) and neutral climate topics (`CLIMATE_SIGNAL_KEYWORDS`: fossil fuels, `petróleo`, `gás natural`, `carvão`, `fracking`, `efeito estufa`, `seca`, `enchentes`, `desastres naturais`, `nível do mar`, `grandes fortunas`) so the pre-filter catches them
-- [x] Always-on classification phrase on the bill detail page ("Classificação (estimada):", to become "Classificação (revisada)" once the review feature lands): "Combatendo ativamente as causas da catástrofe climática" (favorable), "Intensificando diretamente as causas da catástrofe climática" (unfavorable), and a three-way split within `needs_review` ("Ajudando superficialmente…", "Neutro (nem ajudando nem atrapalhando)", "Atrapalhando a luta contra a crise climática"); `neutral` label (grey) reserved for the human-review outcome
+- [x] Always-on classification phrase on the bill detail page ("Classificação (estimada):", to become "Classificação (revisada)" once the review feature lands): a fixed stance sentence for `favorable` ("Ativamente combate as causas da catástrofe climática…") and `unfavorable` ("Intensifica diretamente as causas da catástrofe climática…"), and a three-way split within `needs_review` (helps superficially / neutral / harms superficially); `neutral` label (grey) reserved for the human-review outcome
+- [x] Review pass: fixed phrase grammar/accents, removed dead `scoreToClassification()`, added boundary tests for the `needs_review` sub-label
 
 ## Sprint 1 — Infrastructure & data (complete)
 

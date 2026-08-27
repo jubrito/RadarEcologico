@@ -1,11 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  mergeStyles,
-  getScoreColor,
-  scoreToClassification,
-  formatDate,
-  formatSource,
-} from "./utils";
+import { mergeStyles, getScoreColor, formatDate, formatSource } from "./utils";
 
 describe("mergeStyles", () => {
   it("merges class names", () => {
@@ -42,26 +36,6 @@ describe("getScoreColor", () => {
     expect(getScoreColor(0.3)).toContain("amber");
     expect(getScoreColor(0.45)).toContain("amber");
     expect(getScoreColor(0.59)).toContain("amber");
-  });
-});
-
-describe("scoreToClassification", () => {
-  it('returns "favorable" for scores < 0.30', () => {
-    expect(scoreToClassification(0)).toBe("favorable");
-    expect(scoreToClassification(0.1)).toBe("favorable");
-    expect(scoreToClassification(0.29)).toBe("favorable");
-  });
-
-  it('returns "unfavorable" for scores >= 0.60', () => {
-    expect(scoreToClassification(0.6)).toBe("unfavorable");
-    expect(scoreToClassification(0.8)).toBe("unfavorable");
-    expect(scoreToClassification(1)).toBe("unfavorable");
-  });
-
-  it('returns "needs_review" for scores between 0.30 and 0.60', () => {
-    expect(scoreToClassification(0.3)).toBe("needs_review");
-    expect(scoreToClassification(0.45)).toBe("needs_review");
-    expect(scoreToClassification(0.59)).toBe("needs_review");
   });
 });
 

@@ -37,11 +37,9 @@ const NEEDS_REVIEW_MID_MAX = 0.5;
 
 /**
  * Descriptive phrase for a bill's stance, always shown on the detail page.
- *   - favorable   → "Combatendo ativamente as causas da catástrofe climática"
- *   - unfavorable → "Intensificando diretamente as causas da catástrofe climática"
- *   - needs_review → split by score: "Ajudando superficialmente…" (low),
- *                    "Neutro (não relacionado)" (mid), "Atrapalhando a luta…" (high)
- *   - neutral / unknown → null
+ *   - favorable / unfavorable → a fixed stance sentence.
+ *   - needs_review → split by score (low / mid / high).
+ *   - neutral / unknown → null (no phrase).
  */
 export function getClassificationPhrase(
   classification: Classification,
@@ -50,7 +48,7 @@ export function getClassificationPhrase(
   if (score == null) return null;
 
   if (classification === "favorable") {
-    return "Ativamente combate as causas da catástrofe climática ou a minimiza as suas consequências.";
+    return "Ativamente combate as causas da catástrofe climática ou minimiza as suas consequências.";
   }
   if (classification === "unfavorable") {
     return "Intensifica diretamente as causas da catástrofe climática ou piora as suas consequências.";
@@ -60,7 +58,7 @@ export function getClassificationPhrase(
       return "Ajuda de alguma forma (mesmo que não significativamente) no combate às causas da catástrofe climática ou a minimização de suas consequências.";
     }
     if (score < NEEDS_REVIEW_MID_MAX) {
-      return "Neutro (nem ajuda nem atrapalha significativamente o combate as causas da catastrofe climática ou a minimização de suas consequências)";
+      return "Neutro (nem ajuda nem atrapalha significativamente o combate às causas da catástrofe climática ou a minimização de suas consequências)";
     }
     return "Atrapalha de alguma forma (mesmo que não significativamente) o combate às causas da catástrofe climática ou a minimização de suas consequências.";
   }

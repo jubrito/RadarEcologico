@@ -33,7 +33,9 @@ describe("ClassificationBadge", () => {
   it("shows the phrase for a favorable bill", () => {
     render(<ClassificationBadge classification="favorable" score={0.15} />);
     expect(
-      screen.getByText("Combatendo ativamente as causas da catástrofe climática"),
+      screen.getByText(
+        "Ativamente combate as causas da catástrofe climática ou minimiza as suas consequências.",
+      ),
     ).toBeInTheDocument();
   });
 
@@ -41,7 +43,7 @@ describe("ClassificationBadge", () => {
     render(<ClassificationBadge classification="unfavorable" score={0.8} />);
     expect(
       screen.getByText(
-        "Intensificando diretamente as causas da catástrofe climática",
+        "Intensifica diretamente as causas da catástrofe climática ou piora as suas consequências.",
       ),
     ).toBeInTheDocument();
   });
@@ -49,21 +51,27 @@ describe("ClassificationBadge", () => {
   it("shows the phrase for a needs_review bill leaning positive", () => {
     render(<ClassificationBadge classification="needs_review" score={0.33} />);
     expect(
-      screen.getByText("Ajudando superficialmente as causas climáticas"),
+      screen.getByText(
+        "Ajuda de alguma forma (mesmo que não significativamente) no combate às causas da catástrofe climática ou a minimização de suas consequências.",
+      ),
     ).toBeInTheDocument();
   });
 
   it("shows the phrase for a needs_review bill in the middle", () => {
     render(<ClassificationBadge classification="needs_review" score={0.45} />);
     expect(
-      screen.getByText("Neutro (nem ajudando nem atrapalhando)"),
+      screen.getByText(
+        "Neutro (nem ajuda nem atrapalha significativamente o combate às causas da catástrofe climática ou a minimização de suas consequências)",
+      ),
     ).toBeInTheDocument();
   });
 
   it("shows the phrase for a needs_review bill leaning negative", () => {
     render(<ClassificationBadge classification="needs_review" score={0.55} />);
     expect(
-      screen.getByText("Atrapalhando a luta contra a crise climática"),
+      screen.getByText(
+        "Atrapalha de alguma forma (mesmo que não significativamente) o combate às causas da catástrofe climática ou a minimização de suas consequências.",
+      ),
     ).toBeInTheDocument();
   });
 
