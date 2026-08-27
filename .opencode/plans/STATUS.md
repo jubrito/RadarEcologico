@@ -70,11 +70,15 @@
 - [x] Code review
 - [x] Themes page: a page listing every theme with its name, a short climate-relevant description, and links to the source taxonomies (Câmara `codTema` reference / Senado "Classificação Temática Unificada" tree)
 
-## Sprint 3 – Login/Auth (enable admin page)
+## Sprint 3 - Deploy
+
+- [ ] Deploy do projeto na plataforma do github para que seja acessivel lá (sem pagar nada). Documentar processo pra rodar e atualizar a pagina. Atualizar o github repo.
+
+## Sprint 4 – Login/Auth (enable admin page)
 
 For the next sprint review admin page, we need to add support to login, authentication, etc. Focus on a safe solution (following security best practices like having safe passwords and storing them safely in the db), but in the way that would cost me the most (is there a free way?). Do everything necessary for us to be able to have an admin area where the user can log in.
 
-## Sprint 4 — Review area (admin)
+## Sprint 5 — Review area (admin)
 
 Create the human-review interface:
 
@@ -87,7 +91,7 @@ Create the human-review interface:
 7. Add a label that indicates if a bill was already reviewed by a human and how many (in the summary of the main page we should show a number, but in each bill card and in the bill details page we should show a label or something)
 8. After classification, update the bill from "Classificação (estimada):" to "Classificação (revisada)"
 
-## Sprint 5 — Infrastructure (PostgreSQL)
+## Sprint 6 — Infrastructure (PostgreSQL)
 
 1. Create Supabase project (free tier)
 2. Get `DATABASE_URL`
@@ -95,19 +99,19 @@ Create the human-review interface:
 4. Tables auto-created via `Base.metadata.create_all`
 5. Run the pipeline to populate
 
-## Sprint 6 — Party dashboard
+## Sprint 7 — Party dashboard
 
 - [ ] Show parties and compare how each votes
 - [ ] Analyses to extract the data
 
-## Sprint 7 — AI improvements
+## Sprint 8 — AI improvements
 
 - [ ] **Word-boundary matching**: `kw in text` is substring matching and can false-positive on short terms (a keyword matching inside a longer word). Switch to word-boundary/tokenized matching.
 - [ ] **Score calibration**: the scoring constants (`base_score = 0.35`, per-pattern `+0.20`, per-keyword `±0.04`, etc.) are hand-tuned guesses. Validate and tune them against labeled data (see "Calibration plan" below).
 - [ ] **Pre-filter misses pattern-only bills**: `ementa_matches_climate()` only checks keywords, not regex patterns, so bills that match a pattern but contain no keyword are dropped at scrape time. Make the pre-filter pattern-aware or accept the conservative filter.
 - [ ] **Classification summary**: a short phrase (3–5 words) explaining why a bill got its classification, based on the matched keywords/patterns.
 
-## Sprint 8 — Collaborative review (public voting)
+## Sprint 9 — Collaborative review (public voting)
 
 1. Vote per bill (agree/disagree with the classification)
 2. Vote counters per category (e.g. "12 favorable, 3 unfavorable, 5 review")
@@ -116,7 +120,7 @@ Create the human-review interface:
 5. Anti-duplication: one vote per fingerprint per bill
 6. UI with 3 vote buttons + proportion bars
 
-## Sprint 9 - Calibration plan (AI)
+## Sprint 10 - Calibration plan (AI)
 
 - **When**: Sprint 6 (or sooner, once `data/` has labeled bills).
 - **Why**: the scoring constants are unvalidated guesses; without a labeled eval we can't measure precision/recall or tune the thresholds.
@@ -127,7 +131,7 @@ Create the human-review interface:
   4. Sweep the scoring constants (base score, per-pattern/per-keyword weights) and the thresholds (`FAVORABLE_MAX`, `UNFAVORABLE_MIN`) to maximize F1.
   5. Add a repeatable script (`backend/scripts/evaluate.py`) or a notebook.
 
-## Sprint 10 - Improvements
+## Sprint 11 - Improvements
 
 - [ ] Improve accessibility scores
 - [ ] Review "neutral" logic and the sublabels on bill details pages to ensure that reviewers can categorize bills as neutral while seeing the three types of sublabels on the % block
