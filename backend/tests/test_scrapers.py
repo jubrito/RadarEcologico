@@ -4,8 +4,6 @@ Tests for scraper modules using mocked HTTP responses.
 
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 from backend.keywords.taxonomy import ementa_matches_climate, is_comunidade_tradicional
 from backend.scrapers.camara import (
     fetch_camara_bill_details,

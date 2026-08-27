@@ -66,7 +66,7 @@
 - [x] Important milestones: timeline of tramitação events (e.g. "Apresentada em 12/05/2026", "Aprovada na Comissão…", "Aguardando votação no Plenário")
 - [x] Add filter by party to the bills dashboard
 - [x] Voting: if a vote happened (committee/plenary), show a per-party tally (for/against). Data from the Câmara Votações API.
-- [ ] Code review
+- [x] Code review
 - [x] Themes page: a page listing every theme with its name, a short climate-relevant description, and links to the source taxonomies (Câmara `codTema` reference / Senado "Classificação Temática Unificada" tree)
 
 ## Sprint 3 — Review area (admin)
