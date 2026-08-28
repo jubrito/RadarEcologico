@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useId } from "react";
 import { ChevronDownIcon, XIcon } from "lucide-react";
 import { mergeStyles } from "@/lib/utils/utils";
 import type { SelectOption } from "@/lib/types";
@@ -11,6 +11,8 @@ interface MultiSelectProps {
   onChange: (values: string[]) => void;
   placeholder?: string;
   className?: string;
+  id?: string;
+  "aria-label"?: string;
 }
 
 export function MultiSelect({
@@ -19,12 +21,15 @@ export function MultiSelect({
   onChange,
   placeholder = "Selecionar...",
   className,
+  id,
+  "aria-label": ariaLabel,
 }: MultiSelectProps) {
   const [open, setOpen] = useState(false);
   const [focusIdx, setFocusIdx] = useState(-1);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const optionRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const listboxId = useId();
 
   const items = options.filter((o) => o.value !== "all");
 
@@ -103,54 +108,49 @@ export function MultiSelect({
 
   return (
     <div className={mergeStyles("relative", className)}>
-      <button
-        ref={triggerRef}
-        type="button"
-        role="combobox"
-        aria-expanded={open}
-        aria-haspopup="listbox"
-        aria-controls="theme-listbox"
-        aria-label="Filtrar por tema"
-        onClick={() => setOpen(!open)}
+      <div
         className={mergeStyles(
-          "flex w-full items-center text-left justify-between gap-1.5 rounded-lg border border-input",
-          "bg-transparent px-2.5 py-2 text-sm select-none",
-          "transition-colors outline-none",
-          "focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50",
-          "h-8 dark:bg-input/30 dark:hover:bg-input/50",
+          "flex h-8 items-stretch overflow-hidden rounded-lg border border-input bg-transparent text-sm transition-colors",
+          "focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50",
+          "dark:bg-input/30 dark:hover:bg-input/50",
         )}
       >
-        <span
-          className={mergeStyles(
-            "truncate text-left",
-            selected.length === 0 && "text-foreground",
-          )}
+        <button
+          ref={triggerRef}
+          id={id}
+          type="button"
+          role="combobox"
+          aria-expanded={open}
+          aria-haspopup="listbox"
+          aria-controls={listboxId}
+          aria-label={ariaLabel}
+          onClick={() => setOpen((value) => !value)}
+          className="flex min-w-0 flex-1 items-center justify-between gap-1.5 pl-2.5 pr-1.5 text-left select-none outline-none"
         >
-          {displayLabel}
-        </span>
-        {selected.length > 0 ? (
-          <XIcon
-            className="size-3.5 shrink-0 text-muted-foreground hover:text-foreground cursor-pointer"
-            aria-label="Limpar filtro de temas"
-            onClick={(e) => {
-              e.stopPropagation();
-              onChange([]);
-            }}
-          />
-        ) : (
+          <span className="truncate">{displayLabel}</span>
           <ChevronDownIcon className="pointer-events-none size-4 shrink-0 text-muted-foreground" />
+        </button>
+        {selected.length > 0 && (
+          <button
+            type="button"
+            aria-label="Limpar filtro de temas"
+            onClick={() => onChange([])}
+            className="flex shrink-0 items-center px-2 text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <XIcon className="size-3.5" />
+          </button>
         )}
-      </button>
+      </div>
 
       {open && (
         <div
           ref={listRef}
-          id="theme-listbox"
+          id={listboxId}
           role="listbox"
           aria-multiselectable="true"
           aria-label="Selecionar temas"
           className={mergeStyles(
-            "absolute z-50 mt-1 w-full min-w-56 rounded-lg border bg-popover",
+            "absolute z-50 mt-1 w-full rounded-lg border bg-popover",
             "text-popover-foreground shadow-md ring-1 ring-foreground/10",
             "max-h-64 overflow-y-auto p-1",
           )}
@@ -170,7 +170,7 @@ export function MultiSelect({
                 onClick={() => toggle(opt.value)}
                 onMouseEnter={() => setFocusIdx(idx)}
                 className={mergeStyles(
-                  "flex w-full text-left  items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer",
+                  "flex w-full text-left items-center gap-2 rounded-md px-2 py-1.5 text-sm cursor-pointer",
                   "hover:bg-accent hover:text-accent-foreground",
                   focusIdx === idx && "bg-accent text-accent-foreground",
                 )}

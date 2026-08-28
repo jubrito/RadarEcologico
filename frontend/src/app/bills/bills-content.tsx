@@ -165,105 +165,135 @@ export function BillsContent() {
 
   return (
     <>
-      <section className="flex flex-col sm:flex-row gap-3 mb-6">
-        <div className="flex-1">
-          <form
-            role="search"
-            onSubmit={(e) => {
-              e.preventDefault();
-              updateParam("search", searchInput || null);
-            }}
-          >
-            <label htmlFor="search-bills" className="sr-only">
-              Buscar projetos de lei
+      <section aria-label="Filtros" className="mb-6">
+        <form
+          role="search"
+          onSubmit={(e) => {
+            e.preventDefault();
+            updateParam("search", searchInput || null);
+          }}
+        >
+          <label htmlFor="search-bills" className="sr-only">
+            Buscar projetos de lei
+          </label>
+          <Input
+            id="search-bills"
+            placeholder="Buscar PL (título, ementa, tipo, autor...)"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            className="w-full"
+          />
+        </form>
+
+        <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="flex flex-col gap-1.5">
+            <label
+              htmlFor="filter-classification"
+              className="text-sm font-medium text-foreground"
+            >
+              Classificação
             </label>
-            <Input
-              id="search-bills"
-              placeholder="Buscar PL (título, ementa, tipo, autor...)"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
+            <Select
+              value={classification}
+              onValueChange={(v) => updateParam("classification", v)}
+            >
+              <SelectTrigger id="filter-classification" className="w-full">
+                <SelectValue>
+                  {renderLabel(
+                    classOpts,
+                    classification,
+                    "Todas as classificações",
+                  )}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {classOpts.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label
+              htmlFor="filter-source"
+              className="text-sm font-medium text-foreground"
+            >
+              Fonte
+            </label>
+            <Select
+              value={source}
+              onValueChange={(v) => updateParam("source", v)}
+            >
+              <SelectTrigger id="filter-source" className="w-full">
+                <SelectValue>
+                  {renderLabel(sourceOpts, source, "Todas as fontes")}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {sourceOpts.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label
+              htmlFor="filter-party"
+              className="text-sm font-medium text-foreground"
+            >
+              Partido
+            </label>
+            <Select
+              value={party}
+              onValueChange={(v) => updateParam("party", v)}
+            >
+              <SelectTrigger id="filter-party" className="w-full">
+                <SelectValue>
+                  {renderLabel(partyOpts, party, "Todos os partidos")}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {partyOpts.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label
+              htmlFor="filter-theme"
+              className="text-sm font-medium text-foreground"
+            >
+              Tema
+            </label>
+            <MultiSelect
+              id="filter-theme"
+              options={themeOpts}
+              selected={themeParam ? themeParam.split(",").filter(Boolean) : []}
+              onChange={(vals) => {
+                const params = new URLSearchParams(searchParams.toString());
+                if (vals.length > 0) {
+                  params.set("theme", vals.join(","));
+                } else {
+                  params.delete("theme");
+                }
+                params.delete("page");
+                router.push(`/bills?${params.toString()}`);
+              }}
+              placeholder="Todos os temas"
               className="w-full"
             />
-          </form>
+          </div>
         </div>
-
-        <Select
-          value={classification}
-          onValueChange={(v) => updateParam("classification", v)}
-        >
-          <SelectTrigger
-            className="w-full sm:w-50"
-            aria-label="Filtrar por classificação"
-          >
-            <SelectValue>
-              {renderLabel(
-                classOpts,
-                classification,
-                "Todas as classificações",
-              )}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {classOpts.map((opt) => (
-              <SelectItem key={opt.value} value={opt.value}>
-                {opt.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select value={source} onValueChange={(v) => updateParam("source", v)}>
-          <SelectTrigger
-            className="w-full sm:w-45"
-            aria-label="Filtrar por fonte"
-          >
-            <SelectValue>
-              {renderLabel(sourceOpts, source, "Todas as fontes")}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {sourceOpts.map((opt) => (
-              <SelectItem key={opt.value} value={opt.value}>
-                {opt.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select value={party} onValueChange={(v) => updateParam("party", v)}>
-          <SelectTrigger
-            className="w-full sm:w-45"
-            aria-label="Filtrar por partido"
-          >
-            <SelectValue>
-              {renderLabel(partyOpts, party, "Todos os partidos")}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {partyOpts.map((opt) => (
-              <SelectItem key={opt.value} value={opt.value}>
-                {opt.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <MultiSelect
-          options={themeOpts}
-          selected={themeParam ? themeParam.split(",").filter(Boolean) : []}
-          onChange={(vals) => {
-            const params = new URLSearchParams(searchParams.toString());
-            if (vals.length > 0) {
-              params.set("theme", vals.join(","));
-            } else {
-              params.delete("theme");
-            }
-            params.delete("page");
-            router.push(`/bills?${params.toString()}`);
-          }}
-          placeholder="Todos os temas"
-          className="w-full sm:w-57"
-        />
       </section>
 
       {error && <ErrorBanner detail={error} className="mb-4" />}

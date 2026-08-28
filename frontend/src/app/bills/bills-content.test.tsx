@@ -31,23 +31,21 @@ describe("BillsContent", () => {
   it("renders classification filter", async () => {
     render(<BillsContent />);
     await waitFor(() => {
-      expect(
-        screen.getByLabelText("Filtrar por classificação"),
-      ).toBeInTheDocument();
+      expect(screen.getByLabelText("Classificação")).toBeInTheDocument();
     });
   });
 
   it("renders source filter", async () => {
     render(<BillsContent />);
     await waitFor(() => {
-      expect(screen.getByLabelText("Filtrar por fonte")).toBeInTheDocument();
+      expect(screen.getByLabelText("Fonte")).toBeInTheDocument();
     });
   });
 
   it("renders party filter", async () => {
     render(<BillsContent />);
     await waitFor(() => {
-      expect(screen.getByLabelText("Filtrar por partido")).toBeInTheDocument();
+      expect(screen.getByLabelText("Partido")).toBeInTheDocument();
     });
   });
 
@@ -55,7 +53,7 @@ describe("BillsContent", () => {
     render(<BillsContent />);
     await waitFor(() => {
       expect(
-        screen.getByRole("combobox", { name: "Filtrar por tema" }),
+        screen.getByRole("combobox", { name: "Tema" }),
       ).toBeInTheDocument();
     });
   });
