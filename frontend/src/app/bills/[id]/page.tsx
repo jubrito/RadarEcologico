@@ -9,6 +9,7 @@ import {
   CLASSIFICATION,
   CLASSIFICATION_DESCRIPTIONS,
 } from "@/lib/utils/classifications";
+import type { KnownClassification } from "@/lib/types";
 import { STYLE_MAP } from "@/lib/style";
 import { themeNamesFromIds } from "@/lib/themes";
 import { useBill } from "@/lib/hooks/use-bill";
@@ -16,6 +17,7 @@ import { useTramitacoes } from "@/lib/hooks/use-tramitacoes";
 import { useVotacoes } from "@/lib/hooks/use-votacoes";
 import { BillMetadata } from "@/components/bill-metadata/bill-metadata";
 import { StatusCallout } from "@/components/status-callout/status-callout";
+import { ErrorBanner } from "@/components/error-banner";
 import { Timeline } from "@/components/timeline";
 import { Votacoes } from "@/components/votacoes";
 
@@ -29,18 +31,26 @@ export default function BillDetailPage({
   const { events, loading: tramitacoesLoading } = useTramitacoes(id);
   const { votacoes, loading: votacoesLoading } = useVotacoes(id);
 
-  if (loading || !bill) {
-    return loading ? (
+  if (loading) {
+    return (
       <div className="max-w-3xl mx-auto px-4 py-8 space-y-4">
         <Skeleton className="h-8 w-64" />
         <Skeleton className="h-48 w-full rounded-xl" />
         <Skeleton className="h-24 w-full rounded-xl" />
       </div>
-    ) : (
-      <div className="max-w-3xl mx-auto px-4 py-12 text-center">
-        <p className="text-muted-foreground mb-4">
-          {error || "Projeto de lei não encontrado."}
-        </p>
+    );
+  }
+
+  if (!bill) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 py-12 text-center space-y-4">
+        {error ? (
+          <ErrorBanner detail={error} className="mx-auto" />
+        ) : (
+          <p className="text-muted-foreground">
+            Projeto de lei não encontrado.
+          </p>
+        )}
         <Button
           variant="outline"
           render={<Link href="/bills">Voltar para a lista</Link>}
@@ -141,8 +151,9 @@ export default function BillDetailPage({
                   Análise de risco e impacto ecológico da proposta
                 </h2>
                 <p className="text-sm leading-relaxed">
-                  {CLASSIFICATION_DESCRIPTIONS[bill.classification] ??
-                    "Classificação não disponível."}
+                  {CLASSIFICATION_DESCRIPTIONS[
+                    bill.classification as KnownClassification
+                  ] ?? "Classificação não disponível."}
                 </p>
               </div>
             )}

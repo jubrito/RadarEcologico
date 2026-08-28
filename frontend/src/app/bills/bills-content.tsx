@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ErrorBanner } from "@/components/error-banner";
 import {
   getBills,
   getStats,
@@ -265,11 +266,7 @@ export function BillsContent() {
         />
       </section>
 
-      {error && (
-        <p role="alert" className="text-red-400 mb-4">
-          {error}
-        </p>
-      )}
+      {error && <ErrorBanner detail={error} className="mb-4" />}
 
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

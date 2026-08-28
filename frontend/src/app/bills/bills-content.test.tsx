@@ -92,4 +92,18 @@ describe("BillsContent", () => {
       ).toBeInTheDocument();
     });
   });
+
+  it("shows an error banner when fetching bills fails", async () => {
+    mockGetBills.mockRejectedValue(new Error("Network error"));
+
+    render(<BillsContent />);
+    await waitFor(() => {
+      expect(
+        screen.getByText(
+          "Não foi possível carregar essa página devido a um erro no servidor. Tente novamente mais tarde.",
+        ),
+      ).toBeInTheDocument();
+    });
+    expect(screen.getByText("Network error")).toBeInTheDocument();
+  });
 });
