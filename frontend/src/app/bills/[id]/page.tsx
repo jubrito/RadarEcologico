@@ -34,9 +34,9 @@ export default function BillDetailPage({
   if (loading) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-8 space-y-4">
-        <Skeleton className="h-8 w-64" />
-        <Skeleton className="h-48 w-full rounded-xl" />
-        <Skeleton className="h-24 w-full rounded-xl" />
+        <Skeleton className="h-8 w-64 bg-foreground/10" />
+        <Skeleton className="h-48 w-full rounded-xl bg-foreground/10" />
+        <Skeleton className="h-24 w-full rounded-xl bg-foreground/10" />
       </div>
     );
   }
@@ -166,13 +166,13 @@ export default function BillDetailPage({
             />
 
             {tramitacoesLoading ? (
-              <Skeleton className="h-32 w-full rounded-xl mt-7" />
+              <Skeleton className="h-32 w-full rounded-xl mt-7 bg-foreground/10" />
             ) : (
               <Timeline events={events} />
             )}
 
             {votacoesLoading ? (
-              <Skeleton className="h-24 w-full rounded-xl mt-7" />
+              <Skeleton className="h-24 w-full rounded-xl mt-7 bg-foreground/10" />
             ) : (
               <Votacoes votacoes={votacoes} />
             )}
