@@ -10,7 +10,7 @@ interface ErrorBannerProps {
 }
 
 const DEFAULT_MESSAGE =
-  "Não foi possível carregar essa página devido a um erro no servidor. Tente novamente mais tarde.";
+  "Não foi possível carregar os resultados dessa página devido a um erro no servidor. Por favor, tente novamente mais tarde.";
 
 export function ErrorBanner({
   message = DEFAULT_MESSAGE,
@@ -20,13 +20,13 @@ export function ErrorBanner({
   return (
     <div
       role="alert"
-      className={`flex w-fit items-start gap-3 rounded-lg bg-pink-950/70 p-3 text-foreground ${className}`}
+      className={`flex w-full items-start gap-5 rounded-lg bg-pink-950/50 p-4 px-5 text-foreground ${className}`}
     >
       <TriangleAlert aria-hidden="true" className="mt-0.5 size-5 shrink-0" />
       <div>
         <p>{message}</p>
         {detail && (
-          <p className="mt-1 text-sm text-foreground/80 italic">{detail}</p>
+          <p className="mt-2 text-sm text-foreground/80 italic">{detail}</p>
         )}
       </div>
     </div>

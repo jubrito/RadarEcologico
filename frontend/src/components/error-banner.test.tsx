@@ -4,7 +4,7 @@ import { ErrorBanner } from "./error-banner";
 import "@testing-library/jest-dom/vitest";
 
 const DEFAULT_MESSAGE =
-  "Não foi possível carregar essa página devido a um erro no servidor. Tente novamente mais tarde.";
+  "Não foi possível carregar os resultados dessa página devido a um erro no servidor. Por favor, tente novamente mais tarde.";
 
 describe("ErrorBanner", () => {
   it("renders the default message", () => {
