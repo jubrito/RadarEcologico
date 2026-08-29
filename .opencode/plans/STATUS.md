@@ -19,7 +19,7 @@
 
 ## Current phase
 
-**Sprint 2 — Bill details (in progress)**
+**Sprint 3 — Deploy (complete)** — next up: Sprint 4 (login/auth)
 
 ## Done
 
@@ -57,7 +57,7 @@
 - [x] Remove unnecessary comments
 - [x] Review AGENTS.md against current code
 
-## Sprint 2 — Bill details (in progress)
+## Sprint 2 — Bill details (complete)
 
 - [x] Author + party + UF in the metadata
 - [x] Filter counts: `Name (N)` in the classification/source/theme dropdowns
@@ -73,7 +73,12 @@
 
 ## Sprint 3 - Deploy
 
-- [ ] Deploy do projeto na plataforma do github para que seja acessivel lá (sem pagar nada). Documentar processo pra rodar e atualizar a pagina. Atualizar o github repo.
+- [x] Deploy do projeto na plataforma do github para que seja acessivel lá (sem pagar nada). Documentar processo pra rodar e atualizar a pagina. Atualizar o github repo.
+  - Static export (`frontend/next.config.ts`: `output: "export"` + `basePath`/`assetPrefix` configuráveis via `NEXT_PUBLIC_BASE_PATH`).
+  - `backend/export_static.py` exports the DB → `frontend/public/data/{bills,stats,tramitacoes,votacoes}.json`, pre-fetching tramitação/votações (thread pool, batched).
+  - `frontend/src/lib/api.ts` reads static JSON + client-side filter/search/sort/pagination (mirrors `GET /api/bills`); bill detail split into server page (`generateStaticParams`) + client `bill-detail.tsx`.
+  - `.github/workflows/deploy.yml`: GitHub Pages deploy (manual + daily cron + push). Push builds committed data (no re-scrape); schedule/manual refreshes data first.
+  - README documents the process. Next step (Sprint 6) consolidates the Supabase DB with this static pipeline.
 
 ## Sprint 4 – Login/Auth (enable admin page)
 

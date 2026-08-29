@@ -32,7 +32,7 @@ Verbos de negação ("revoga a proteção ambiental") e proibição ("proíbe a 
 **Classificação:** Ensemble (keywords + BERTimbau na fase 2), Hugging Face  
 **Frontend:** Next.js 16 (App Router), Tailwind v4, shadcn/ui v4  
 **Pipeline:** GitHub Actions (cron diário 2h BRT)  
-**Hospedagem:** Vercel (frontend), Fly.io (backend) — free tiers
+**Hospedagem:** GitHub Pages (frontend estático) + GitHub Actions (pipeline) — 100% gratuito
 
 ---
 
@@ -90,6 +90,46 @@ npm test                                # Vitest
 
 O pipeline roda diariamente às 2h BRT via GitHub Actions (`.github/workflows/daily-pipeline.yml`).
 Para testar manualmente: `python -m backend.pipeline` (da raiz, com venv ativa).
+
+---
+
+## Deploy (GitHub Pages)
+
+O site é um export estático servido gratuitamente no GitHub Pages em
+`https://jubrito.github.io/RadarEcologico/`.
+
+Como funciona:
+
+1. O workflow `.github/workflows/deploy.yml` roda o pipeline (scrape + classificação)
+   e exporta o banco para JSON em `frontend/public/data/` (via `python -m backend.export_static`).
+2. Constrói o frontend como site estático (`output: "export"`) e publica no GitHub Pages.
+
+Gatilhos:
+
+- **Automático**: diariamente às 3h BRT (após o pipeline de dados).
+- **Manual**: `gh workflow run "Deploy to GitHub Pages"`.
+- **Push para `main`**: reimplanta o site a partir dos dados já exportados
+  (não re-faz o scrape, para economizar energia).
+
+Atualizar/rodar localmente:
+
+```bash
+# 1. Gerar os dados (popula o SQLite e exporta o JSON)
+source backend/.venv/bin/activate
+python -m backend.pipeline
+python -m backend.export_static
+
+# 2. Rodar o frontend estático (ou servir o build)
+cd frontend
+npm run build            # gera o site em frontend/out
+npm run dev              # desenvolvimento
+```
+
+> O `frontend/public/data/*.json` é versionado no repo: um clone limpo já consegue
+> `npm run build` sem rodar o backend.
+
+Para ativar o GitHub Pages no repositório: **Settings → Pages → Source: GitHub Actions**
+(basta uma vez; o deploy passa a funcionar via o workflow).
 
 ---
 
