@@ -1,172 +1,91 @@
 # Radar Legislativo Ecológico
 
-Monitora automaticamente projetos de lei brasileiros relacionados à crise climática. Usa IA para classificar cada PL em três categorias:
+Monitora projetos de lei brasileiros relacionados à crise climática, classificando cada um:
 
 | Label          | Significado                                       |
 | -------------- | ------------------------------------------------- |
 | `favorable`    | Potencialmente ajuda a combater a crise climática |
-| `needs_review` | Requer análise humana detalhada                   |
+| `needs_review` | Requer revisão humana                             |
 | `unfavorable`  | Potencialmente intensifica a crise climática      |
+| `neutral`      | Reservado à revisão humana (não relacionado ao clima) |
 
-Fontes atuais: Câmara dos Deputados e Senado Federal (APIs públicas). Expansão para estados e municípios em fases futuras.
-
-Na página de detalhes de cada PL você vê a classificação, os temas, o autor e a **linha do tempo da tramitação** (com a situação atual destacada).
+Fontes: APIs públicas da Câmara dos Deputados e do Senado Federal.
 
 ---
 
-## Como a classificação funciona
+## Valores e green software
 
-O classificador usa palavras-chave em três níveis (além de padrões regex e verbos de negação/proibição):
+**Green software primeiro.** Toda decisão pesa "consome mais ou menos energia?". Onde aparece:
 
-- **Combate** (`FIGHTING_KEYWORDS`): ação climática genuína — proteção, restauração, renováveis, transição justa, povos indígenas e tradicionais. Empurra fortemente para `favorable`.
-- **Mercado** (`MARKET_KEYWORDS`): mecanismos de mercado propensos a greenwashing — crédito/mercado de carbono, hidrogênio verde, "baixo carbono", compensação de emissões. Empurra fracamente, então sozinhos caem em `needs_review` (não pioram, mas não resolvem).
-- **Intensifica** (`NEGATIVE_KEYWORDS`): termos que agravam a crise — flexibilização de licenciamento, mineração em terra indígena, subsídios a combustíveis fósseis. Empurra para `unfavorable`.
+- **Batch, não real-time** — o pipeline (scrape + classificação) roda **1×/dia às 2h BRT** (off-peak) via GitHub Actions, nunca a cada request.
+- **Pré-filtro na API** — a Câmara é filtrada por `codTema` (temas climáticos), reduzindo ~90% das requisições.
+- **Frontend estático** — export estático no GitHub Pages (sem servidor 24/7); os dados viram JSON versionado no repo.
+- **Classificação leve** — keyword-based (<1 ms/PL), sem modelo de IA carregado em runtime.
+- **Dark mode padrão** — economiza energia em OLED.
+- **Uma execução diária consolidada** — o deploy às 2h BRT faz scrape → classifica → exporta → publica (sem duplicar scrape).
 
-Verbos de negação ("revoga a proteção ambiental") e proibição ("proíbe a mineração") invertem o sinal do termo.
+Outros valores:
+
+- **Acessibilidade WCAG 2.1 AA** — HTML semântico, labels, navegação por teclado, contraste (sem `data-testid`).
+- **KISS** — sem abstração prematura; FastAPI + SQLAlchemy são suficientes.
+- **Open source** — GitHub Pages, GitHub Actions, Next.js, FastAPI, SQLite (100% gratuito).
+- **Testabilidade** — pytest (backend) + vitest (frontend) rodam no CI.
 
 ---
 
 ## Stack
 
-**Backend:** Python 3.12+, FastAPI, SQLAlchemy, PostgreSQL (Supabase free tier)  
-**Classificação:** Ensemble (keywords + BERTimbau na fase 2), Hugging Face  
-**Frontend:** Next.js 16 (App Router), Tailwind v4, shadcn/ui v4  
-**Pipeline:** GitHub Actions (cron diário 2h BRT)  
-**Hospedagem:** GitHub Pages (frontend estático) + GitHub Actions (pipeline) — 100% gratuito
+**Backend:** Python 3.12+, FastAPI, SQLAlchemy (SQLite hoje; PostgreSQL futuro) · **Scrapers:** Câmara + Senado  
+**Classificação:** keywords (fase 1); BERTimbau (fase 2)  
+**Frontend:** Next.js 16 (export estático), Tailwind v4, shadcn/ui v4  
+**CI/Deploy:** GitHub Actions — testes no push/PR; deploy diário às 2h BRT + push
 
 ---
 
-## Primeira vez — setup único
+## Como a classificação funciona
 
-> Requer **Python 3.12+**. O backend é um pacote (`backend.*`) — rode os comandos a partir da **raiz do projeto**.
+Palavras-chave em três níveis + padrões regex + verbos de negação/proibição:
 
-```bash
-# 1. Criar venv e instalar dependências
-cd backend
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+- **Combate** (`FIGHTING_KEYWORDS`) → `favorable`
+- **Mercado** (`MARKET_KEYWORDS`) — propenso a greenwashing → fracamente positivo → `needs_review`
+- **Intensifica** (`NEGATIVE_KEYWORDS`) → `unfavorable`
+- Sem sinal claro → `needs_review`, com sub-rótulo na página do PL (ajuda / neutro / atrapalha)
 
-# 2. Configurar banco local (SQLite — zero setup)
-echo 'DATABASE_URL=sqlite:///./radar.db' > .env
-cd ..
-
-# 3. Instalar dependências do frontend
-cd frontend
-npm install
-cd ..
-```
-
-> Tabelas são criadas automaticamente no primeiro startup do backend.
-> Para produção (PostgreSQL/Supabase): use `DATABASE_URL=postgresql://...` no `backend/.env`.
+`neutral` é atribuído pela revisão humana (futuro), não pela IA.
 
 ---
 
-## No dia a dia — rode sempre que desenvolver
+## Rodar localmente
 
 ```bash
-# Ativar venv (uma vez por terminal, a partir da raiz)
+# Backend (raiz do projeto)
 source backend/.venv/bin/activate
+pip install -r backend/requirements.txt
+uvicorn backend.main:app --reload        # API em http://localhost:8000
 
-# Backend
-uvicorn backend.main:app --reload       # API em http://localhost:8000
-python -m backend.pipeline              # Pipeline manual (classifica + popula)
-pytest backend/tests -v                 # Testes
+# Dados + JSON estático
+python -m backend.pipeline               # scrape + classifica (SQLite, zero config)
+python -m backend.export_static          # gera frontend/public/data/*.json
 
-# Frontend (outro terminal)
-cd frontend
-npm run dev                             # http://localhost:3000
-npm run build && npm start              # Produção
-npm run lint                            # ESLint
-npm test                                # Vitest
-
-# CI: rodar o deploy manualmente via GitHub
-# gh workflow run "Deploy to GitHub Pages"
+# Frontend
+cd frontend && npm install
+npm run dev                              # http://localhost:3000
+npm run build                            # site estático em frontend/out
+npm run lint && npm test
 ```
+
+> O `frontend/public/data/*.json` é versionado: um clone limpo já faz `npm run build`
+> sem rodar o backend.
 
 ---
 
-## Pipeline (CI)
+## CI / Deploy
 
-O pipeline de dados (scrape + classificação + deploy) roda diariamente às 2h BRT
-via GitHub Actions (`.github/workflows/deploy.yml`). Os testes rodam em todo `push`/PR
-via `.github/workflows/ci.yml`.
+- **CI** (`.github/workflows/ci.yml`) — testes backend + frontend em todo `push`/PR.
+- **Deploy** (`.github/workflows/deploy.yml`) — diário às **2h BRT**: scrape → classifica → exporta JSON → publica no GitHub Pages. No `push`, reimplanta os dados já versionados (sem re-scrape).
 
-Para testar o pipeline manualmente: `python -m backend.pipeline` (da raiz, com venv ativa).
-
----
-
-## Deploy (GitHub Pages)
-
-O site é um export estático servido gratuitamente no GitHub Pages em
-`https://jubrito.github.io/RadarEcologico/`.
-
-Como funciona:
-
-1. O workflow `.github/workflows/deploy.yml` roda o pipeline (scrape + classificação)
-   e exporta o banco para JSON em `frontend/public/data/` (via `python -m backend.export_static`).
-2. Constrói o frontend como site estático (`output: "export"`) e publica no GitHub Pages.
-
-Gatilhos:
-
-- **Automático**: diariamente às 2h BRT (off-peak de energia).
-- **Manual**: `gh workflow run "Deploy to GitHub Pages"`.
-- **Push para `main`**: reimplanta o site a partir dos dados já exportados
-  (não re-faz o scrape, para economizar energia).
-
-Atualizar/rodar localmente:
-
-```bash
-# 1. Gerar os dados (popula o SQLite e exporta o JSON)
-source backend/.venv/bin/activate
-python -m backend.pipeline
-python -m backend.export_static
-
-# 2. Rodar o frontend estático (ou servir o build)
-cd frontend
-npm run build            # gera o site em frontend/out
-npm run dev              # desenvolvimento
-```
-
-> O `frontend/public/data/*.json` é versionado no repo: um clone limpo já consegue
-> `npm run build` sem rodar o backend.
-
-Para ativar o GitHub Pages no repositório: **Settings → Pages → Source: GitHub Actions**
-(basta uma vez; o deploy passa a funcionar via o workflow).
+Site: https://jubrito.github.io/RadarEcologico/
 
 ---
 
-## Princípios do projeto
-
-- **Green software**: dark mode padrão, batch processing (não real-time), single process, modelos quantizados
-- **Acessibilidade WCAG 2.1 AA**: semântica HTML, navegação por teclado, contraste, labels, screen readers
-- **KISS**: sem abstração prematura, sem patterns desnecessários, código direto
-- **Testabilidade**: testes para classificador, scrapers e rotas (pytest + vitest)
-- **Open Source**: prioriza projetos, ferramentas e tecnologias de código livre
-
-Leia `AGENTS.md` para os princípios completos.
-
----
-
-## Estrutura
-
-```
-radar-ecologico/
-├── AGENTS.md                   # Princípios para IA
-├── README.md
-├── backend/                    # FastAPI + AI + scrapers
-│   ├── main.py                 # Entrypoint
-│   ├── api/routes.py           # /api/bills, /api/bills/{id}/tramitacoes, /api/stats, /api/classify
-│   ├── classifiers/            # keywords + ensemble (BERT na fase 2)
-│   ├── scrapers/               # Câmara + Senado
-│   ├── keywords/taxonomy.py    # Taxonomia de termos climáticos
-│   ├── database.py             # SQLAlchemy + SQLite/PostgreSQL
-│   ├── models.py               # ORM: Bill, BillSnapshot
-│   ├── pipeline.py             # Orquestrador diário
-│   └── tests/
-├── frontend/                   # Next.js + Tailwind + shadcn/ui
-│   └── src/app/                # Dashboard, lista, detalhe
-├── data/                       # PLs rotuladas (CSV)
-├── notebooks/                  # Fine-tuning BERT (Colab)
-└── .github/workflows/          # Cron diário
-```
+Leia `AGENTS.md` para o detalhamento (princípios, estrutura, gotchas).

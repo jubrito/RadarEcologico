@@ -122,7 +122,7 @@ Scope: Brazil. Current sources: Chamber of Deputies and Federal Senate APIs.
 # Backend — always activate the venv first (from the project root)
 source backend/.venv/bin/activate
 uvicorn backend.main:app --reload          # API at http://localhost:8000
-pytest backend/tests -v                    # Tests (90 passing)
+pytest backend/tests -v                    # Tests (125 passing)
 python -m backend.pipeline                 # Manual pipeline (classifies + populates database)
 
 # Frontend
@@ -130,7 +130,7 @@ cd frontend
 npm run dev                                # http://localhost:3000
 npm run build && npm start                 # Production
 npm run lint                               # ESLint
-npm test                                   # Vitest (146 passing)
+npm test                                   # Vitest (183 passing)
 
 # Local database (SQLite — zero setup)
 # Just configure backend/.env with: DATABASE_URL=sqlite:///./radar.db
@@ -164,22 +164,25 @@ radar-ecologico/
 │   ├── database.py               # SQLAlchemy engine + session
 │   ├── models.py                 # ORM: Bill, BillSnapshot
 │   ├── pipeline.py               # Daily orchestrator
+│   ├── export_static.py          # Exports DB → frontend/public/data/*.json
 │   ├── types.py                  # Shared Pydantic types (ScrapedBill, etc.)
 │   ├── pyproject.toml
 │   ├── requirements.txt
 │   └── tests/
-│       ├── test_api.py           # 30 tests (routes, filters, stats)
-│       ├── test_classifier.py    # 17 tests (parametrized)
+│       ├── test_api.py           # 35 tests (routes, filters, stats)
+│       ├── test_classifier.py    # 44 tests (parametrized)
 │       ├── test_pipeline.py      # 5 tests (backfill/idempotency)
-│       └── test_scrapers.py      # 17 tests (keyword + status extraction)
+│       ├── test_scrapers.py      # 37 tests (keyword + status extraction)
+│       └── test_export_static.py # 4 tests (JSON export)
 ├── frontend/
+│   ├── public/data/              # Generated JSON consumed by the static site
 │   ├── src/app/                  # Next.js App Router
 │   │   ├── page.tsx              # Dashboard (stats + recent bills)
 │   │   └── bills/                # List + detail [id]
 │   ├── src/components/           # BillCard, ClassificationBadge, StatCard, Header, MainNav, ui/
 │   ├── src/components/bill-metadata/    # Author/party/state/date metadata
 │   ├── src/components/status-callout/   # Tramitação status explanation
-│   ├── src/lib/api.ts            # TypeScript client (getBills, getStats, etc.)
+│   ├── src/lib/api.ts            # Static data layer (reads public/data/*.json + client-side filters)
 │   ├── src/lib/types.ts          # Classification types, source labels, query params
 │   ├── src/lib/content.ts        # Site copy + state names
 │   ├── src/lib/style.ts          # Per-classification Tailwind styles + labels
