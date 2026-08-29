@@ -19,7 +19,7 @@
 
 ## Current phase
 
-**Sprint 3 — Deploy (complete)** — next up: Sprint 4 (login/auth)
+**Sprint 5 — Review area (admin) (complete)** — next up: Sprint 6 (PostgreSQL/Supabase consolidation)
 
 ## Done
 
@@ -86,16 +86,16 @@ For the next sprint review admin page, we need to add support to login, authenti
 
 ## Sprint 5 — Review area (admin)
 
-Create the human-review interface:
+Human-review interface via Supabase Auth + `bill_reviews` table:
 
-1. List of `needs_review` bills
-2. Review form: confirm/change classification, i.e `favorable` / `unfavorable` / `needs_review` / `unrelated` (needs to be removed since it's not related to the climate emergency themes)
-3. Notes field
-4. Simple auth (shared password or magic link — no complex OAuth, but need to be a safe auth)
-5. `PATCH /api/bills/{id}/review` → `reviewer_classification`, `reviewer_notes`, `reviewed_by`, `reviewed_at`
-6. New `Bill` fields: `reviewer_classification`, `reviewer_notes`, `reviewed_by`, `reviewed_at`
-7. Add a label that indicates if a bill was already reviewed by a human and how many (in the summary of the main page we should show a number, but in each bill card and in the bill details page we should show a label or something)
-8. After classification, update the bill from "Classificação (estimada):" to "Classificação (revisada)"
+- [x] `/admin` route: login/register (Supabase Auth, per-user accounts) + list of `needs_review` bills
+- [x] Review form: 0–100 slider (derives `favorable`/`needs_review`/`unfavorable` via the same thresholds as the detail page) + "não se relaciona" toggle → `neutral` + notes
+- [x] Reviews upserted to Supabase `bill_reviews` (keyed by `(source, external_id)`, RLS: authenticated only)
+- [x] `export_static.py` merges reviews into `bills.json` (service-role key); stats include `reviewed`
+- [x] Public display: "Classificação (revisada)" on detail, "revisada" on bill cards, reviewed-count on the dashboard
+- [x] No custom backend needed — static site writes to Supabase directly; reviews ride the existing deploy pipeline
+
+Setup (one-time): run `supabase/schema.sql` in the Supabase SQL editor; set `NEXT_PUBLIC_SUPABASE_URL`/`ANON_KEY` (repo variables) + `SUPABASE_URL`/`SUPABASE_SERVICE_ROLE_KEY` (secrets).
 
 ## Sprint 6 — Infrastructure (PostgreSQL)
 
