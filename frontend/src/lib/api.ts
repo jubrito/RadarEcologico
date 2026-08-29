@@ -69,18 +69,9 @@ export interface VotacaoEvent {
   orientacoes: { partido: string; voto: string }[];
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
-async function fetchAPI<T>(path: string, params?: URLSearchParams): Promise<T> {
-  const url = params
-    ? `${API_BASE}/api${path}?${params.toString()}`
-    : `${API_BASE}/api${path}`;
-  const res = await fetch(url);
-  if (!res.ok) {
-    throw new Error(`API error: ${res.status} ${res.statusText}`);
-  }
-  return res.json() as Promise<T>;
-}
+// The static site is served from GitHub Pages (e.g. /RadarEcologico/). The
+// generated JSON lives under <basePath>/data/. Locally basePath is empty.
+const DATA_BASE = `${process.env.NEXT_PUBLIC_BASE_PATH || ""}/data`;
 
 const KNOWN_CLASSIFICATIONS: ReadonlySet<string> = new Set([
   CLASSIFICATION.favorable,
@@ -97,41 +88,170 @@ function normalizeBill(bill: Bill): Bill {
   return bill;
 }
 
+async function fetchJSON<T>(path: string): Promise<T> {
+  const res = await fetch(`${DATA_BASE}/${path}`);
+  if (!res.ok) {
+    throw new Error(`API error: ${res.status} ${res.statusText}`);
+  }
+  return res.json() as Promise<T>;
+}
+
+// In-memory caches so the JSON is fetched once per session instead of on every
+// navigation (the app is client-side; this avoids redundant network requests).
+let billsCache: Promise<Bill[]> | null = null;
+let statsCache: Promise<StatsResponse> | null = null;
+let tramitacoesCache: Promise<Record<string, TramitacaoEvent[]>> | null = null;
+let votacoesCache: Promise<Record<string, VotacaoEvent[]>> | null = null;
+
+function loadBills(): Promise<Bill[]> {
+  if (!billsCache) {
+    billsCache = fetchJSON<Bill[]>("bills.json")
+      .then((bills) => bills.map(normalizeBill))
+      .catch((err) => {
+        billsCache = null;
+        throw err;
+      });
+  }
+  return billsCache;
+}
+
+function loadStats(): Promise<StatsResponse> {
+  if (!statsCache) {
+    statsCache = fetchJSON<StatsResponse>("stats.json").catch((err) => {
+      statsCache = null;
+      throw err;
+    });
+  }
+  return statsCache;
+}
+
+function loadTramitacoes(): Promise<Record<string, TramitacaoEvent[]>> {
+  if (!tramitacoesCache) {
+    tramitacoesCache = fetchJSON<Record<string, TramitacaoEvent[]>>(
+      "tramitacoes.json",
+    ).catch((err) => {
+      tramitacoesCache = null;
+      throw err;
+    });
+  }
+  return tramitacoesCache;
+}
+
+function loadVotacoes(): Promise<Record<string, VotacaoEvent[]>> {
+  if (!votacoesCache) {
+    votacoesCache = fetchJSON<Record<string, VotacaoEvent[]>>(
+      "votacoes.json",
+    ).catch((err) => {
+      votacoesCache = null;
+      throw err;
+    });
+  }
+  return votacoesCache;
+}
+
+/** Reset the in-memory caches (exposed for tests). */
+export function resetStaticDataCache() {
+  billsCache = null;
+  statsCache = null;
+  tramitacoesCache = null;
+  votacoesCache = null;
+}
+
+/**
+ * Apply the query filters and default ordering to a list of bills.
+ * Mirrors the backend `GET /api/bills` semantics (client-side equivalent).
+ */
+export function filterBills(bills: Bill[], params: BillQueryParams): Bill[] {
+  let result = bills;
+
+  if (params.classification) {
+    result = result.filter((b) => b.classification === params.classification);
+  }
+  if (params.source) {
+    result = result.filter((b) => b.source === params.source);
+  }
+  if (params.year) {
+    result = result.filter((b) => b.year === params.year);
+  }
+  if (params.party) {
+    result = result.filter((b) => b.author_party === params.party);
+  }
+  if (params.search) {
+    const query = params.search.toLowerCase();
+    result = result.filter((b) =>
+      [b.ementa, b.bill_type, b.author, b.status, String(b.number)].some(
+        (value) => value != null && value.toLowerCase().includes(query),
+      ),
+    );
+  }
+  if (params.theme) {
+    const codes = params.theme
+      .split(",")
+      .map((c) => c.trim())
+      .filter(Boolean);
+    if (codes.length > 0) {
+      result = result.filter((b) =>
+        codes.some((code) => (b.theme_ids ?? "").includes(code)),
+      );
+    }
+  }
+
+  // Newest first, null dates last (stable across filter calls).
+  return result.slice().sort((a, b) => {
+    const dateA = a.presentation_date ?? "";
+    const dateB = b.presentation_date ?? "";
+    if (!dateA && !dateB) return 0;
+    if (!dateA) return 1;
+    if (!dateB) return -1;
+    return dateB.localeCompare(dateA);
+  });
+}
+
 export async function getBills(
   params?: BillQueryParams,
 ): Promise<BillsResponse> {
-  const searchParams = new URLSearchParams();
-  if (params?.page) searchParams.set("page", String(params.page));
-  if (params?.limit) searchParams.set("limit", String(params.limit));
-  if (params?.classification)
-    searchParams.set("classification", params.classification);
-  if (params?.source) searchParams.set("source", params.source);
-  if (params?.year) searchParams.set("year", String(params.year));
-  if (params?.search) searchParams.set("search", params.search);
-  if (params?.theme) searchParams.set("theme", params.theme);
-  if (params?.party) searchParams.set("party", params.party);
-  const data = await fetchAPI<BillsResponse>("/bills", searchParams);
-  data.items = data.items.map(normalizeBill);
-  return data;
+  const bills = await loadBills();
+  const page = params?.page ?? 1;
+  const limit = params?.limit ?? 20;
+  const filtered = filterBills(bills, params ?? {});
+  const start = (page - 1) * limit;
+  return {
+    items: filtered.slice(start, start + limit),
+    total: filtered.length,
+    page,
+    limit,
+  };
 }
 
 export async function getBill(id: string): Promise<Bill> {
-  const bill = await fetchAPI<Bill>(`/bills/${id}`);
-  return normalizeBill(bill);
+  const bills = await loadBills();
+  const bill = bills.find((b) => b.id === id);
+  if (!bill) {
+    throw new Error("API error: 404 Not Found");
+  }
+  return bill;
 }
 
 export async function getTramitacoes(id: string): Promise<TramitacaoEvent[]> {
-  return fetchAPI<TramitacaoEvent[]>(`/bills/${id}/tramitacoes`);
+  const map = await loadTramitacoes();
+  return map[id] ?? [];
 }
 
 export async function getVotacoes(id: string): Promise<VotacaoEvent[]> {
-  return fetchAPI<VotacaoEvent[]>(`/bills/${id}/votacoes`);
+  const map = await loadVotacoes();
+  return map[id] ?? [];
 }
 
 export async function getStats(): Promise<StatsResponse> {
-  return fetchAPI<StatsResponse>("/stats");
+  return loadStats();
 }
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+/**
+ * Classify a bill ementa on demand. Requires the live FastAPI backend
+ * (`POST /api/classify`), which is not part of the static GitHub Pages site.
+ */
 export async function classifyText(text: string): Promise<ClassifyResponse> {
   const res = await fetch(`${API_BASE}/api/classify`, {
     method: "POST",
