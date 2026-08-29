@@ -10,11 +10,13 @@ import type { Classification } from "@/lib/api";
 interface ClassificationBadgeProps extends VariantProps<typeof badgeVariants> {
   classification: Classification;
   score?: number | null;
+  reviewed?: boolean;
 }
 
 export function ClassificationBadge({
   classification,
   score,
+  reviewed = false,
   ...props
 }: ClassificationBadgeProps) {
   const style = STYLE_MAP[classification];
@@ -39,7 +41,10 @@ export function ClassificationBadge({
       )}
       {phrase && (
         <span className="text-sm text-muted-foreground">
-          <strong>Classificação (estimada):</strong> {phrase}
+          <strong>
+            {reviewed ? "Classificação (revisada):" : "Classificação (estimada):"}
+          </strong>{" "}
+          {phrase}
         </span>
       )}
     </span>

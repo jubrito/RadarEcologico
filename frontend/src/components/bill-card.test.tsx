@@ -49,6 +49,16 @@ describe("BillCard", () => {
     expect(screen.getByRole("link")).toHaveAttribute("href", "/bills/abc-123");
   });
 
+  it("shows a reviewed indicator when the bill was reviewed", () => {
+    render(<BillCard bill={createBill({ reviewed: true })} />);
+    expect(screen.getByText("revisada")).toBeInTheDocument();
+  });
+
+  it("does not show a reviewed indicator for estimated bills", () => {
+    render(<BillCard bill={createBill()} />);
+    expect(screen.queryByText("revisada")).not.toBeInTheDocument();
+  });
+
   it("renders the theme name from theme_ids", () => {
     render(<BillCard bill={FAVORABLE_BILL} />);
     expect(

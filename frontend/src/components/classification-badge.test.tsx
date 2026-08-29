@@ -80,6 +80,17 @@ describe("ClassificationBadge", () => {
     expect(screen.getByText("Classificação (estimada):")).toBeInTheDocument();
   });
 
+  it("labels the phrase as reviewed when reviewed is true", () => {
+    render(
+      <ClassificationBadge
+        classification="favorable"
+        score={0.15}
+        reviewed
+      />,
+    );
+    expect(screen.getByText("Classificação (revisada):")).toBeInTheDocument();
+  });
+
   it("shows score percentage when provided", () => {
     render(<ClassificationBadge classification="favorable" score={0.31} />);
     expect(screen.getByText(/31%/)).toBeInTheDocument();

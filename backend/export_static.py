@@ -18,6 +18,9 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from pathlib import Path
 import json
+import os
+
+import requests
 
 from backend.database import SessionLocal
 from backend.models import Bill
@@ -34,14 +37,19 @@ OUTPUT_DIR = REPO_ROOT / "frontend" / "public" / "data"
 # Keep the daily batch small and polite to the public APIs.
 MAX_WORKERS = 8
 
+# Optional: human reviews are read from Supabase and merged into the exported
+# bills. When these are unset (local dev without Supabase), reviews are skipped.
+SUPABASE_URL = os.getenv("SUPABASE_URL", "")
+SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+
 
 def _iso(value: datetime | None) -> str | None:
     return value.isoformat() if value else None
 
 
-def serialize_bill(bill: Bill) -> dict:
+def serialize_bill(bill: Bill, review: dict | None = None) -> dict:
     """Convert a Bill ORM row into the JSON shape the frontend expects."""
-    return {
+    data = {
         "id": bill.id,
         "external_id": bill.external_id,
         "source": bill.source,
@@ -64,10 +72,23 @@ def serialize_bill(bill: Bill) -> dict:
         "classified_at": _iso(bill.classified_at),
         "created_at": _iso(bill.created_at),
     }
+    if review:
+        data["reviewed"] = True
+        data["reviewed_classification"] = review.get("reviewer_classification")
+        data["reviewed_score"] = review.get("reviewer_score")
+        data["reviewed_by"] = review.get("reviewed_by")
+        data["reviewed_at"] = review.get("reviewed_at")
+    else:
+        data["reviewed"] = False
+    return data
 
 
-def compute_stats(bills: list[Bill]) -> dict:
+def compute_stats(
+    bills: list[Bill],
+    reviews: dict[tuple[str, str], dict] | None = None,
+) -> dict:
     """Compute dashboard stats, mirroring GET /api/stats."""
+    reviews = reviews or {}
     by_classification: dict[str, int] = {}
     by_source: dict[str, int] = {}
     by_year: dict[str, int] = {}
@@ -93,6 +114,11 @@ def compute_stats(bills: list[Bill]) -> dict:
 
     return {
         "total_bills": len(bills),
+        "reviewed": sum(
+            1
+            for bill in bills
+            if (bill.source, bill.external_id) in reviews
+        ),
         "by_classification": by_classification,
         "by_source": by_source,
         "by_year": by_year,
@@ -134,6 +160,37 @@ def fetch_events(bills: list[Bill]) -> tuple[dict[str, list], dict[str, list]]:
     return tramitacoes, votacoes
 
 
+def fetch_reviews() -> dict[tuple[str, str], dict]:
+    """Fetch human reviews from Supabase (REST + service role key).
+
+    Returns a map keyed by ``(source, external_id)``. Returns an empty map when
+    Supabase isn't configured (local dev without env vars).
+    """
+    if not SUPABASE_URL or not SUPABASE_SERVICE_ROLE_KEY:
+        return {}
+
+    try:
+        response = requests.get(
+            f"{SUPABASE_URL}/rest/v1/bill_reviews",
+            params={"select": "*"},
+            headers={
+                "apikey": SUPABASE_SERVICE_ROLE_KEY,
+                "Authorization": f"Bearer {SUPABASE_SERVICE_ROLE_KEY}",
+            },
+            timeout=15,
+        )
+        response.raise_for_status()
+        rows = response.json()
+    except requests.RequestException as e:
+        print(f"  [export] Supabase reviews error: {e}")
+        return {}
+
+    reviews: dict[tuple[str, str], dict] = {}
+    for row in rows:
+        reviews[(row.get("source"), row.get("external_id"))] = row
+    return reviews
+
+
 def _write_json(output_dir: Path, name: str, payload: object) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
     with (output_dir / name).open("w", encoding="utf-8") as handle:
@@ -148,16 +205,22 @@ def export_static(output_dir: Path = OUTPUT_DIR) -> dict:
     finally:
         session.close()
 
-    stats = compute_stats(bills)
+    reviews = fetch_reviews()
+
+    def bill_data(bill: Bill) -> dict:
+        return serialize_bill(bill, reviews.get((bill.source, bill.external_id)))
+
+    stats = compute_stats(bills, reviews)
     tramitacoes, votacoes = fetch_events(bills)
 
-    _write_json(output_dir, "bills.json", [serialize_bill(b) for b in bills])
+    _write_json(output_dir, "bills.json", [bill_data(b) for b in bills])
     _write_json(output_dir, "stats.json", stats)
     _write_json(output_dir, "tramitacoes.json", tramitacoes)
     _write_json(output_dir, "votacoes.json", votacoes)
 
     return {
         "bills": len(bills),
+        "reviews": len(reviews),
         "tramitacoes": sum(len(v) for v in tramitacoes.values()),
         "votacoes": sum(len(v) for v in votacoes.values()),
     }
@@ -166,7 +229,7 @@ def export_static(output_dir: Path = OUTPUT_DIR) -> dict:
 if __name__ == "__main__":
     summary = export_static()
     print(
-        f"[export] bills={summary['bills']} "
+        f"[export] bills={summary['bills']} reviews={summary['reviews']} "
         f"tramitacoes={summary['tramitacoes']} "
         f"votacoes={summary['votacoes']}"
     )

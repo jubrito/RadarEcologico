@@ -106,6 +106,12 @@ export default function DashboardPage() {
             )}
           </section>
 
+          {stats && (
+            <p className="text-sm text-muted-foreground mb-10">
+              {stats.reviewed} de {stats.total_bills} PLs revisados por humanos
+            </p>
+          )}
+
           <section aria-label="Projetos recentes">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-3xl font-semibold">

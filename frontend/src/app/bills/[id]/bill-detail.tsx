@@ -53,11 +53,22 @@ export function BillDetail({ id }: { id: string }) {
     );
   }
 
-  const classification = bill.classification ?? CLASSIFICATION.unknown;
+  const classification =
+    bill.reviewed && bill.reviewed_classification
+      ? bill.reviewed_classification
+      : (bill.classification ?? CLASSIFICATION.unknown);
   const style = STYLE_MAP[classification];
   const themes = themeNamesFromIds(bill.theme_ids);
   const pct =
-    bill.final_score != null ? Math.round(bill.final_score * 100) : null;
+    bill.reviewed && bill.reviewed_score != null
+      ? Math.round(bill.reviewed_score)
+      : bill.final_score != null
+        ? Math.round(bill.final_score * 100)
+        : null;
+  const badgeScore =
+    bill.reviewed && bill.reviewed_score != null
+      ? bill.reviewed_score / 100
+      : bill.final_score;
 
   return (
     <div className={`max-w-6xl mx-auto px-4 py-8 ${style.fadedBg}`}>
@@ -95,8 +106,9 @@ export function BillDetail({ id }: { id: string }) {
 
             <div className="mb-6">
               <ClassificationBadge
-                classification={bill.classification}
-                score={bill.final_score}
+                classification={classification}
+                score={badgeScore}
+                reviewed={bill.reviewed}
               />
               {pct != null && (
                 <div aria-hidden="true">
@@ -146,7 +158,7 @@ export function BillDetail({ id }: { id: string }) {
                 </h2>
                 <p className="text-sm leading-relaxed">
                   {CLASSIFICATION_DESCRIPTIONS[
-                    bill.classification as KnownClassification
+                    classification as KnownClassification
                   ] ?? "Classificação não disponível."}
                 </p>
               </div>

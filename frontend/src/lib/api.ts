@@ -29,6 +29,11 @@ export interface Bill {
   theme_names?: string | null;
   classified_at?: string | null;
   created_at?: string | null;
+  reviewed?: boolean;
+  reviewed_classification?: Classification | null;
+  reviewed_score?: number | null;
+  reviewed_by?: string | null;
+  reviewed_at?: string | null;
 }
 
 export interface BillsResponse {
@@ -40,6 +45,7 @@ export interface BillsResponse {
 
 export interface StatsResponse {
   total_bills: number;
+  reviewed: number;
   by_classification: Record<string, number>;
   by_source: Record<string, number>;
   by_year: Record<string, number>;

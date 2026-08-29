@@ -5,7 +5,11 @@ import { STYLE_MAP } from "@/lib/style";
 import { themeNamesFromIds } from "@/lib/themes";
 
 export function BillCard({ bill }: { bill: Bill }) {
-  const style = STYLE_MAP[bill.classification];
+  const classification =
+    bill.reviewed && bill.reviewed_classification
+      ? bill.reviewed_classification
+      : bill.classification;
+  const style = STYLE_MAP[classification];
   const themes = themeNamesFromIds(bill.theme_ids);
 
   return (
@@ -31,14 +35,19 @@ export function BillCard({ bill }: { bill: Bill }) {
                 {bill.bill_type} {bill.number}/{bill.year}
               </h3>
             </div>
-            <span
-              className={mergeStyles(
-                "shrink-0 rounded-full px-2 py-0.5 text-[13px] font-medium",
-                style.badge,
+            <div className="flex items-center gap-1.5 shrink-0">
+              {bill.reviewed && (
+                <span className="text-[11px] text-emerald-400">revisada</span>
               )}
-            >
-              {style.label}
-            </span>
+              <span
+                className={mergeStyles(
+                  "shrink-0 rounded-full px-2 py-0.5 text-[13px] font-medium",
+                  style.badge,
+                )}
+              >
+                {style.label}
+              </span>
+            </div>
           </div>
           <p className="text-sm text-muted-foreground group-hover:text-foreground line-clamp-3 leading-relaxed">
             {bill.ementa}

@@ -42,6 +42,7 @@ export function createBillsResponse(
 export function createStats(overrides: Partial<StatsResponse> = {}): StatsResponse {
   return {
     total_bills: 10,
+    reviewed: 2,
     by_classification: { favorable: 5, needs_review: 3, unfavorable: 2 },
     by_source: { camara: 7, senado: 3 },
     by_year: { "2026": 10 },

@@ -5,7 +5,12 @@ Tests for the static data exporter.
 from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 
-from backend.export_static import compute_stats, export_static, serialize_bill
+from backend.export_static import (
+    compute_stats,
+    export_static,
+    fetch_reviews,
+    serialize_bill,
+)
 from backend.models import Bill
 
 
@@ -99,3 +104,49 @@ def test_export_static_writes_files(tmp_path):
     assert summary["bills"] == 1
     for name in ("bills.json", "stats.json", "tramitacoes.json", "votacoes.json"):
         assert (tmp_path / name).exists()
+
+
+def test_serialize_bill_with_review():
+    review = {
+        "reviewer_classification": "neutral",
+        "reviewer_score": 50,
+        "reviewed_by": "ana@example.com",
+        "reviewed_at": "2026-08-28T00:00:00+00:00",
+    }
+    result = serialize_bill(_bill(), review)
+    assert result["reviewed"] is True
+    assert result["reviewed_classification"] == "neutral"
+    assert result["reviewed_score"] == 50
+    assert result["reviewed_by"] == "ana@example.com"
+    assert result["reviewed_at"] == "2026-08-28T00:00:00+00:00"
+
+
+def test_serialize_bill_without_review():
+    result = serialize_bill(_bill())
+    assert result["reviewed"] is False
+
+
+def test_fetch_reviews_unconfigured():
+    with patch("backend.export_static.SUPABASE_URL", ""):
+        assert fetch_reviews() == {}
+
+
+def test_fetch_reviews_parses_rows():
+    rows = [
+        {"source": "camara", "external_id": "12345", "reviewer_score": 80},
+        {"source": "senado", "external_id": "67890", "reviewer_score": 20},
+    ]
+    mock = MagicMock()
+    mock.json.return_value = rows
+    mock.raise_for_status.return_value = None
+
+    with (
+        patch("backend.export_static.SUPABASE_URL", "https://x.supabase.co"),
+        patch("backend.export_static.SUPABASE_SERVICE_ROLE_KEY", "key"),
+        patch("backend.export_static.requests.get", return_value=mock),
+    ):
+        reviews = fetch_reviews()
+
+    assert ("camara", "12345") in reviews
+    assert reviews[("camara", "12345")]["reviewer_score"] == 80
+    assert ("senado", "67890") in reviews
