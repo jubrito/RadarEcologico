@@ -16,10 +16,7 @@ from backend.models import Base
 
 load_dotenv()
 
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "sqlite:///./radar.db",
-)
+DATABASE_URL = os.getenv("DATABASE_URL") or "sqlite:///./radar.db"
 
 engine = create_engine(
     DATABASE_URL,

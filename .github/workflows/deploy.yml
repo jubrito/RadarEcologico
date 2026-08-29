@@ -26,6 +26,8 @@ jobs:
       # committed data so a code-only change never re-scrapes the source APIs.
       - name: Refresh data (schedule/manual only)
         if: github.event_name != 'push'
+        env:
+          DATABASE_URL: sqlite:///./radar.db
         run: |
           pip install -r backend/requirements.txt
           python -m backend.pipeline
@@ -57,6 +59,8 @@ jobs:
           NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
 
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
