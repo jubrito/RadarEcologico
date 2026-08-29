@@ -20,22 +20,54 @@ import { Input } from "@/components/ui/input";
 export default function AdminPage() {
   const [session, setSession] = useState<Session | null>(null);
   const [configured, setConfigured] = useState(false);
+  const [setupError, setSetupError] = useState<string | null>(null);
 
   useEffect(() => {
     let client: ReturnType<typeof getSupabase> | null = null;
     try {
       client = getSupabase();
-    } catch {
+    } catch (err) {
+      setSetupError(
+        err instanceof Error
+          ? err.message
+          : "Configuração do Supabase ausente.",
+      );
       return;
     }
     setConfigured(true);
 
-    client.auth.getSession().then(({ data }) => setSession(data.session));
-    const { data: sub } = client.auth.onAuthStateChange((_e, s) =>
-      setSession(s),
-    );
-    return () => sub.subscription.unsubscribe();
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data } = await client!.auth.getSession();
+        if (!cancelled) setSession(data.session);
+      } catch (err) {
+        console.error("[admin] getSession failed:", err);
+        if (!cancelled) {
+          setSetupError(
+            "Erro ao conectar com o Supabase. Verifique as variáveis de ambiente.",
+          );
+        }
+      }
+    })();
+
+    const { data: sub } = client.auth.onAuthStateChange((_e, s) => {
+      if (!cancelled) setSession(s);
+    });
+
+    return () => {
+      cancelled = true;
+      sub.subscription.unsubscribe();
+    };
   }, []);
+
+  if (setupError) {
+    return (
+      <div className="max-w-md mx-auto px-4 py-16">
+        <p className="text-muted-foreground">{setupError}</p>
+      </div>
+    );
+  }
 
   if (!configured) {
     return (
@@ -131,13 +163,23 @@ function ReviewDashboard() {
   useEffect(() => {
     (async () => {
       try {
-        const [data, revs] = await Promise.all([getBills(), fetchReviews()]);
+        const data = await getBills();
         setBills(data.items);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Erro ao carregar dados");
+        setLoading(false);
+        return;
+      }
+      try {
+        const revs = await fetchReviews();
         setReviews(
           new Map(revs.map((r) => [`${r.source}:${r.external_id}`, r])),
         );
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Erro ao carregar");
+        console.error("[admin] fetchReviews failed:", err);
+        setError(
+          "Erro ao carregar revisões — verifique se a tabela bill_reviews existe no Supabase.",
+        );
       } finally {
         setLoading(false);
       }
@@ -147,7 +189,11 @@ function ReviewDashboard() {
   const pending = bills.filter((b) => b.classification === "needs_review");
 
   async function logout() {
-    await getSupabase().auth.signOut();
+    try {
+      await getSupabase().auth.signOut();
+    } catch (err) {
+      console.error("[admin] signOut failed:", err);
+    }
   }
 
   if (error) return <p role="alert" className="text-red-400">{error}</p>;
@@ -203,11 +249,28 @@ function ReviewCard({
   review?: BillReview;
   onSaved: () => void;
 }) {
+  const draftKey = `review-draft:${bill.source}:${bill.external_id}`;
   const [score, setScore] = useState(review?.reviewer_score ?? 50);
   const [notRelated, setNotRelated] = useState(review?.not_related ?? false);
   const [notes, setNotes] = useState(review?.reviewer_notes ?? "");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Restore an unsaved draft (when a previous save failed), so work isn't lost.
+  useEffect(() => {
+    if (review) return;
+    try {
+      const raw = localStorage.getItem(draftKey);
+      if (raw) {
+        const draft = JSON.parse(raw);
+        if (typeof draft.score === "number") setScore(draft.score);
+        if (typeof draft.notRelated === "boolean") setNotRelated(draft.notRelated);
+        if (typeof draft.notes === "string") setNotes(draft.notes);
+      }
+} catch (err) {
+        console.warn(`[admin] corrupted review draft (${draftKey}):`, err);
+      }
+  }, [draftKey, review]);
 
   const classification = classifyFromReviewScore(score, notRelated);
   const style = STYLE_MAP[classification];
@@ -229,9 +292,27 @@ function ReviewCard({
         reviewer_notes: notes || null,
         not_related: notRelated,
       });
+      try {
+        localStorage.removeItem(draftKey);
+      } catch (err) {
+        console.warn("[admin] could not clear review draft:", err);
+      }
       onSaved();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao salvar");
+      console.error("[admin] save review failed:", err);
+      // Keep the draft locally so a transient Supabase failure doesn't lose the review.
+      try {
+        localStorage.setItem(
+          draftKey,
+          JSON.stringify({ score, notRelated, notes }),
+        );
+      } catch (storageErr) {
+        console.warn("[admin] could not persist review draft:", storageErr);
+      }
+      setError(
+        "Não foi possível salvar no Supabase. Sua revisão foi guardada " +
+          "localmente e será restaurada ao recarregar a página.",
+      );
     } finally {
       setSaving(false);
     }

@@ -108,7 +108,8 @@ export default function DashboardPage() {
 
           {stats && (
             <p className="text-sm text-muted-foreground mb-10">
-              {stats.reviewed} de {stats.total_bills} PLs revisados por humanos
+              {(stats.reviewed ?? 0)} de {stats.total_bills} PLs revisados por
+              humanos
             </p>
           )}
 
