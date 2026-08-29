@@ -20,6 +20,10 @@ describe("MainNav", () => {
     const temasLink = screen.getByText("Temas");
     expect(temasLink).toBeInTheDocument();
     expect(temasLink.closest("a")).toHaveAttribute("href", "/temas");
+
+    const adminLink = screen.getByText("Revisão");
+    expect(adminLink).toBeInTheDocument();
+    expect(adminLink.closest("a")).toHaveAttribute("href", "/admin");
   });
 
   it("renders the GitHub link with correct attributes", () => {

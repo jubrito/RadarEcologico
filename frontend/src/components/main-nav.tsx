@@ -8,6 +8,7 @@ const links = [
   { href: "/", label: "Início" },
   { href: "/bills", label: "Projetos de Lei" },
   { href: "/temas", label: "Temas" },
+  { href: "/admin", label: "Revisão" },
 ];
 
 export function MainNav() {
