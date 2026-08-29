@@ -80,16 +80,19 @@ npm run build && npm start              # Produção
 npm run lint                            # ESLint
 npm test                                # Vitest
 
-# CI: rodar pipeline manualmente via GitHub
-# gh workflow run "Daily Climate Radar Pipeline"
+# CI: rodar o deploy manualmente via GitHub
+# gh workflow run "Deploy to GitHub Pages"
 ```
 
 ---
 
 ## Pipeline (CI)
 
-O pipeline roda diariamente às 2h BRT via GitHub Actions (`.github/workflows/daily-pipeline.yml`).
-Para testar manualmente: `python -m backend.pipeline` (da raiz, com venv ativa).
+O pipeline de dados (scrape + classificação + deploy) roda diariamente às 2h BRT
+via GitHub Actions (`.github/workflows/deploy.yml`). Os testes rodam em todo `push`/PR
+via `.github/workflows/ci.yml`.
+
+Para testar o pipeline manualmente: `python -m backend.pipeline` (da raiz, com venv ativa).
 
 ---
 
@@ -106,7 +109,7 @@ Como funciona:
 
 Gatilhos:
 
-- **Automático**: diariamente às 3h BRT (após o pipeline de dados).
+- **Automático**: diariamente às 2h BRT (off-peak de energia).
 - **Manual**: `gh workflow run "Deploy to GitHub Pages"`.
 - **Push para `main`**: reimplanta o site a partir dos dados já exportados
   (não re-faz o scrape, para economizar energia).

@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
   schedule:
-    - cron: '0 6 * * *' # 3am BRT (6am UTC), after the daily data pipeline
+    - cron: '0 5 * * *' # 2am BRT (5am UTC) — off-peak energy
   workflow_dispatch:
 
 permissions:

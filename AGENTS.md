@@ -137,8 +137,9 @@ npm test                                   # Vitest (146 passing)
 # The radar.db file is created at the root automatically on first startup.
 
 # CI
-# Runs automatically at 2 AM BRT (5 AM UTC). Test manually:
-# gh workflow run "Daily Climate Radar Pipeline"
+# Tests run on every push/PR (`.github/workflows/ci.yml`).
+# Deploy runs daily at 2 AM BRT + on push (`.github/workflows/deploy.yml`). Test manually:
+# gh workflow run "Deploy to GitHub Pages"
 ```
 
 ---
@@ -194,7 +195,8 @@ radar-ecologico/
 ├── data/                         # Labeled bills (CSV) — still empty
 ├── notebooks/                    # BERT fine-tuning (phase 2) — still empty
 └── .github/workflows/
-    └── daily-pipeline.yml        # Cron 2 AM BRT + manual trigger
+    ├── ci.yml                     # Tests (backend + frontend) on push/PR
+    └── deploy.yml                 # GitHub Pages deploy: cron 2 AM BRT + push + manual
 ```
 
 ---
