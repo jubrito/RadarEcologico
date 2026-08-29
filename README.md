@@ -57,7 +57,7 @@ npm install
 cd ..
 ```
 
-> Pronto. Tabelas são criadas automaticamente no primeiro startup do backend.
+> Tabelas são criadas automaticamente no primeiro startup do backend.
 > Para produção (PostgreSQL/Supabase): use `DATABASE_URL=postgresql://...` no `backend/.env`.
 
 ---
