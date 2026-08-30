@@ -76,9 +76,8 @@ export default function AdminPage() {
     return (
       <div className="max-w-md mx-auto px-4 py-16">
         <p className="text-muted-foreground">
-          Supabase não configurado. Defina{" "}
-          <code>NEXT_PUBLIC_SUPABASE_URL</code> e{" "}
-          <code>NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY</code>.
+          Supabase não configurado. Defina <code>NEXT_PUBLIC_SUPABASE_URL</code>{" "}
+          e <code>NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY</code>.
         </p>
       </div>
     );
@@ -102,9 +101,7 @@ function LoginForm() {
     setError(null);
     const client = getSupabase();
     const fn =
-      mode === "login"
-        ? client.auth.signInWithPassword
-        : client.auth.signUp;
+      mode === "login" ? client.auth.signInWithPassword : client.auth.signUp;
     const { error } = await fn({ email, password });
     setLoading(false);
     if (error) {
@@ -115,44 +112,50 @@ function LoginForm() {
   }
 
   return (
-    <div className="max-w-md mx-auto px-4 py-16">
-      <h1 className="text-3xl font-bold mb-6">Área de revisão</h1>
-      <form onSubmit={submit} className="space-y-4">
-        <label className="block">
-          <span className="text-sm text-muted-foreground">Email</span>
-          <Input
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="mt-1"
-          />
-        </label>
-        <label className="block">
-          <span className="text-sm text-muted-foreground">Senha</span>
-          <Input
-            type="password"
-            required
-            minLength={6}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="mt-1"
-          />
-        </label>
-        {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
-        <Button type="submit" disabled={loading} className="w-full">
-          {mode === "login" ? "Entrar" : "Criar conta"}
-        </Button>
-      </form>
-      <p className="text-sm text-muted-foreground mt-4 text-center">
-        {mode === "login" ? "Ainda não tem conta?" : "Já tem conta?"}{" "}
-        <button
-          className="underline underline-offset-2"
-          onClick={() => setMode(mode === "login" ? "register" : "login")}
-        >
-          {mode === "login" ? "Criar conta" : "Entrar"}
-        </button>
-      </p>
+    <div className="max-w-6xl h-screen mx-auto px-4 py-8 bg-foreground/2">
+      <div className="max-w-lg mx-auto px-4 py-16">
+        <h1 className="text-4xl font-bold mb-6">Área de revisão</h1>
+        <form onSubmit={submit} className="space-y-4">
+          <label className="block">
+            <span className="text-sm text-muted-foreground">Email</span>
+            <Input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="mt-1"
+            />
+          </label>
+          <label className="block">
+            <span className="text-sm text-muted-foreground">Senha</span>
+            <Input
+              type="password"
+              required
+              minLength={6}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="mt-1"
+            />
+          </label>
+          {error && (
+            <p role="alert" className="text-sm text-red-400">
+              {error}
+            </p>
+          )}
+          <Button type="submit" disabled={loading} className="w-full">
+            {mode === "login" ? "Entrar" : "Criar conta"}
+          </Button>
+        </form>
+        <p className="text-sm text-muted-foreground mt-4 text-center">
+          {mode === "login" ? "Ainda não tem conta?" : "Já tem conta?"}{" "}
+          <button
+            className="underline underline-offset-2"
+            onClick={() => setMode(mode === "login" ? "register" : "login")}
+          >
+            {mode === "login" ? "Criar conta" : "Entrar"}
+          </button>
+        </p>
+      </div>
     </div>
   );
 }
@@ -199,7 +202,12 @@ function ReviewDashboard() {
     }
   }
 
-  if (error) return <p role="alert" className="text-red-400">{error}</p>;
+  if (error)
+    return (
+      <p role="alert" className="text-red-400">
+        {error}
+      </p>
+    );
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
@@ -211,8 +219,8 @@ function ReviewDashboard() {
       </div>
 
       <p className="text-muted-foreground mb-6">
-        {pending.length} projetos aguardando revisão ·{" "}
-        {reviews.size} já revisados
+        {pending.length} projetos aguardando revisão · {reviews.size} já
+        revisados
       </p>
 
       {loading ? (
@@ -231,7 +239,9 @@ function ReviewDashboard() {
               onSaved={() => {
                 fetchReviews().then((revs) =>
                   setReviews(
-                    new Map(revs.map((r) => [`${r.source}:${r.external_id}`, r])),
+                    new Map(
+                      revs.map((r) => [`${r.source}:${r.external_id}`, r]),
+                    ),
                   ),
                 );
               }}
@@ -267,12 +277,13 @@ function ReviewCard({
       if (raw) {
         const draft = JSON.parse(raw);
         if (typeof draft.score === "number") setScore(draft.score);
-        if (typeof draft.notRelated === "boolean") setNotRelated(draft.notRelated);
+        if (typeof draft.notRelated === "boolean")
+          setNotRelated(draft.notRelated);
         if (typeof draft.notes === "string") setNotes(draft.notes);
       }
-} catch (err) {
-        console.warn(`[admin] corrupted review draft (${draftKey}):`, err);
-      }
+    } catch (err) {
+      console.warn(`[admin] corrupted review draft (${draftKey}):`, err);
+    }
   }, [draftKey, review]);
 
   const classification = classifyFromReviewScore(score, notRelated);
@@ -379,7 +390,11 @@ function ReviewCard({
         />
       </label>
 
-      {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
+      {error && (
+        <p role="alert" className="text-sm text-red-400">
+          {error}
+        </p>
+      )}
       <Button onClick={save} disabled={saving}>
         {saving ? "Salvando…" : "Salvar revisão"}
       </Button>
