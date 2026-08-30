@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input";
 
 export default function AdminPage() {
   const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
   const [configured, setConfigured] = useState(false);
   const [setupError, setSetupError] = useState<string | null>(null);
 
@@ -48,6 +49,8 @@ export default function AdminPage() {
             "Erro ao conectar com o Supabase. Verifique as variáveis de ambiente.",
           );
         }
+      } finally {
+        if (!cancelled) setLoading(false);
       }
     })();
 
@@ -75,13 +78,13 @@ export default function AdminPage() {
         <p className="text-muted-foreground">
           Supabase não configurado. Defina{" "}
           <code>NEXT_PUBLIC_SUPABASE_URL</code> e{" "}
-          <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code>.
+          <code>NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY</code>.
         </p>
       </div>
     );
   }
 
-  if (session === null) return <Skeleton className="h-40 w-full rounded-xl" />;
+  if (loading) return <Skeleton className="h-40 w-full rounded-xl" />;
   return session ? <ReviewDashboard /> : <LoginForm />;
 }
 
