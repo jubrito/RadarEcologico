@@ -95,7 +95,7 @@ Human-review interface via Supabase Auth + `bill_reviews` table:
 - [x] Public display: "Classificação (revisada)" on detail, "revisada" on bill cards, reviewed-count on the dashboard
 - [x] No custom backend needed — static site writes to Supabase directly; reviews ride the existing deploy pipeline
 
-Setup (one-time): run `supabase/schema.sql` in the Supabase SQL editor; set `NEXT_PUBLIC_SUPABASE_URL`/`ANON_KEY` (repo variables) + `SUPABASE_URL`/`SUPABASE_SERVICE_ROLE_KEY` (secrets).
+Setup (one-time): run `supabase/schema.sql` in the Supabase SQL editor; set `NEXT_PUBLIC_SUPABASE_URL`/`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (repo variables) + `SUPABASE_URL`/`SUPABASE_SECRET_KEY` (secrets) — using Supabase's own key names.
 
 ## Sprint 6 — Infrastructure (PostgreSQL)
 

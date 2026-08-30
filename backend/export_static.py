@@ -40,7 +40,7 @@ MAX_WORKERS = 8
 # Optional: human reviews are read from Supabase and merged into the exported
 # bills. When these are unset (local dev without Supabase), reviews are skipped.
 SUPABASE_URL = os.getenv("SUPABASE_URL", "")
-SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+SUPABASE_SECRET_KEY = os.getenv("SUPABASE_SECRET_KEY", "")
 
 
 def _iso(value: datetime | None) -> str | None:
@@ -166,7 +166,7 @@ def fetch_reviews() -> dict[tuple[str, str], dict]:
     Returns a map keyed by ``(source, external_id)``. Returns an empty map when
     Supabase isn't configured (local dev without env vars).
     """
-    if not SUPABASE_URL or not SUPABASE_SERVICE_ROLE_KEY:
+    if not SUPABASE_URL or not SUPABASE_SECRET_KEY:
         return {}
 
     try:
@@ -174,8 +174,8 @@ def fetch_reviews() -> dict[tuple[str, str], dict]:
             f"{SUPABASE_URL}/rest/v1/bill_reviews",
             params={"select": "*"},
             headers={
-                "apikey": SUPABASE_SERVICE_ROLE_KEY,
-                "Authorization": f"Bearer {SUPABASE_SERVICE_ROLE_KEY}",
+                "apikey": SUPABASE_SECRET_KEY,
+                "Authorization": f"Bearer {SUPABASE_SECRET_KEY}",
             },
             timeout=15,
         )

@@ -142,7 +142,7 @@ def test_fetch_reviews_parses_rows():
 
     with (
         patch("backend.export_static.SUPABASE_URL", "https://x.supabase.co"),
-        patch("backend.export_static.SUPABASE_SERVICE_ROLE_KEY", "key"),
+        patch("backend.export_static.SUPABASE_SECRET_KEY", "key"),
         patch("backend.export_static.requests.get", return_value=mock),
     ):
         reviews = fetch_reviews()
