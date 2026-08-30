@@ -97,6 +97,19 @@ Human-review interface via Supabase Auth + `bill_reviews` table:
 
 Setup (one-time): run `supabase/schema.sql` in the Supabase SQL editor; set `NEXT_PUBLIC_SUPABASE_URL`/`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (repo variables) + `SUPABASE_URL`/`SUPABASE_SECRET_KEY` (secrets) — using Supabase's own key names.
 
+# CHECK IMPLEMENTATION -> HUMAN TEST ON REVIEW LOGIN/CREATE ACCOUNT
+
+- [ ] Add "Update your password" feature
+- [ ] Handle form accessibility
+- [ ] Handle form errors
+- [ ] Add tests
+
+## Sprint 7 - Error notification
+
+- [ ] Create notification toaster component to be reused across the repo
+- [ ] Add tests
+- [ ] Use the component on places where we should show a notification to the user to improve UX (communicating to the user on a user frientdly language what the user must know)
+
 ## Sprint 6 — Infrastructure (PostgreSQL)
 
 1. Create Supabase project (free tier)
