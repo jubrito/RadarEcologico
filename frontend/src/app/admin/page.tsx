@@ -142,7 +142,11 @@ function LoginForm() {
               {error}
             </p>
           )}
-          <Button type="submit" disabled={loading} className="w-full">
+          <Button
+            type="submit"
+            disabled={loading}
+            className="w-full mt-3 py-5 "
+          >
             {mode === "login" ? "Entrar" : "Criar conta"}
           </Button>
         </form>
