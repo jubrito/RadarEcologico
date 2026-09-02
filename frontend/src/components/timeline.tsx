@@ -13,26 +13,29 @@ export function Timeline({ events }: TimelineProps) {
   return (
     <section
       aria-label="Linha do tempo da tramitação"
-      className="rounded-lg border border-border p-4"
+      className="rounded-lg border border-border p-5"
     >
       <h2 className="text-xl font-bold mb-3">Tramitação</h2>
-      <ol className="overflow-auto max-h-40">
+      <ol className="flex items-start overflow-x-auto pb-4">
         {ordered.map((event, index) => {
           const isCurrent = index === 0;
           const isLast = index === ordered.length - 1;
           return (
-            <li key={`${event.date}-${index}`} className="flex gap-4">
-              <div aria-hidden="true" className="flex flex-col items-center">
+            <li
+              key={`${event.date}-${index}`}
+              className="min-w-[220px] flex-1 flex flex-col"
+            >
+              <div aria-hidden="true" className="flex items-center">
                 <span
-                  className={`mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full ${
+                  className={`h-2.5 w-2.5 shrink-0 rounded-full ${
                     isCurrent
                       ? "bg-foreground ring-4 ring-foreground/20"
                       : "bg-muted-foreground/50"
                   }`}
                 />
-                {!isLast && <span className="w-px flex-1 bg-border" />}
+                {!isLast && <span className="h-px flex-1 bg-border" />}
               </div>
-              <div className={isLast ? "" : "pb-6"}>
+              <div className="mt-3 pr-4">
                 {isCurrent && (
                   <p className="text-sm font-bold uppercase tracking-wide text-white mb-1">
                     Situação atual
