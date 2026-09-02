@@ -11,9 +11,12 @@ export function Timeline({ events }: TimelineProps) {
   const ordered = [...events].reverse();
 
   return (
-    <section aria-label="Linha do tempo da tramitação" className="mt-7">
-      <h2 className="text-xl font-bold mb-4">Tramitação</h2>
-      <ol>
+    <section
+      aria-label="Linha do tempo da tramitação"
+      className="rounded-lg border border-border p-4"
+    >
+      <h2 className="text-xl font-bold mb-3">Tramitação</h2>
+      <ol className="overflow-auto max-h-40">
         {ordered.map((event, index) => {
           const isCurrent = index === 0;
           const isLast = index === ordered.length - 1;
@@ -21,7 +24,7 @@ export function Timeline({ events }: TimelineProps) {
             <li key={`${event.date}-${index}`} className="flex gap-4">
               <div aria-hidden="true" className="flex flex-col items-center">
                 <span
-                  className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${
+                  className={`mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full ${
                     isCurrent
                       ? "bg-foreground ring-4 ring-foreground/20"
                       : "bg-muted-foreground/50"
@@ -31,13 +34,13 @@ export function Timeline({ events }: TimelineProps) {
               </div>
               <div className={isLast ? "" : "pb-6"}>
                 {isCurrent && (
-                  <p className="text-xs font-bold uppercase tracking-wide text-blue-400">
+                  <p className="text-sm font-bold uppercase tracking-wide text-white mb-1">
                     Situação atual
                   </p>
                 )}
                 <time
                   dateTime={event.date}
-                  className="block text-xs font-bold uppercase tracking-wide text-foreground"
+                  className="block text-xs font-bold uppercase tracking-wide text-muted-foreground"
                 >
                   {formatDate(event.date)}
                 </time>
