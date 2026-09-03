@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState, type ReactElement } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { getSupabase } from "@/lib/supabase";
 import { getBills, type Bill } from "@/lib/api";
@@ -84,37 +83,219 @@ export default function AdminPage() {
   }
 
   if (loading) return <Skeleton className="h-40 w-full rounded-xl" />;
-  return session ? <ReviewDashboard /> : <LoginForm />;
+  return session ? <ReviewDashboard reviewCard={ReviewCard} /> : <LoginForm />;
 }
 
+    function ReviewCard({
+      bill,
+      review,
+      onSaved,
+    }: {
+      bill: Bill;
+      review?: BillReview;
+      onSaved: () => void;
+    }) {
+      const draftKey = `review-draft:${bill.source}:${bill.external_id}`;
+      const [score, setScore] = useState(review?.reviewer_score ?? 50);
+      const [notRelated, setNotRelated] = useState(
+        review?.not_related ?? false,
+      );
+      const [notes, setNotes] = useState(review?.reviewer_notes ?? "");
+      const [saving, setSaving] = useState(false);
+      const [error, setError] = useState<string | null>(null);
+
+      useEffect(() => {
+        if (review) return;
+        try {
+          const raw = localStorage.getItem(draftKey);
+          if (!raw) return;
+          const draft = JSON.parse(raw);
+          if (typeof draft.score === "number") setScore(draft.score);
+          if (typeof draft.notRelated === "boolean")
+            setNotRelated(draft.notRelated);
+          if (typeof draft.notes === "string") setNotes(draft.notes);
+        } catch (err) {
+          console.warn(`[admin] corrupted review draft (${draftKey}):`, err);
+        }
+      }, [draftKey, review]);
+
+      const classification = classifyFromReviewScore(score, notRelated);
+      const style = STYLE_MAP[classification];
+      const phrase = getClassificationPhrase(classification, score / 100);
+
+      async function save() {
+        setSaving(true);
+        setError(null);
+        try {
+          const {
+            data: { user },
+          } = await getSupabase().auth.getUser();
+          await upsertReview({
+            source: bill.source,
+            external_id: bill.external_id,
+            reviewed_by: user?.email ?? "unknown",
+            reviewer_score: score,
+            reviewer_classification: classification,
+            reviewer_notes: notes || null,
+            not_related: notRelated,
+          });
+          try {
+            localStorage.removeItem(draftKey);
+          } catch (err) {
+            console.warn("[admin] could not clear review draft:", err);
+          }
+          onSaved();
+        } catch (err) {
+          console.error("[admin] save review failed:", err);
+          try {
+            localStorage.setItem(
+              draftKey,
+              JSON.stringify({ score, notRelated, notes }),
+            );
+          } catch (storageErr) {
+            console.warn("[admin] could not persist review draft:", storageErr);
+          }
+          setError(
+            "Não foi possível salvar no Supabase. Sua revisão foi guardada " +
+              "localmente e será restaurada ao recarregar a página.",
+          );
+        } finally {
+          setSaving(false);
+        }
+      }
+
+      return (
+        <li className="space-y-3 rounded-xl border border-border bg-card p-4">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="font-bold">
+                {bill.bill_type} {bill.number}/{bill.year}
+              </p>
+              <p className="line-clamp-2 text-sm text-muted-foreground">
+                {bill.ementa}
+              </p>
+            </div>
+            {review && (
+              <span className="shrink-0 text-xs text-emerald-400">
+                revisada
+              </span>
+            )}
+          </div>
+
+          <label className="block">
+            <span className="text-sm text-muted-foreground">
+              Potencial risco de agravar a crise climática
+            </span>
+            <input
+              type="range"
+              min={0}
+              max={100}
+              value={score}
+              onChange={(e) => setScore(Number(e.target.value))}
+              className="mt-2 w-full"
+              aria-label="Potencial risco de agravar a crise climática"
+            />
+            <span className="text-sm font-bold tabular-nums">{score}%</span>
+          </label>
+
+          <div
+            className={`rounded-lg border p-3 ${style.border} ${style.fadedBg}`}
+          >
+            <p className={`text-xs font-bold uppercase ${style.textAccent}`}>
+              {style.label}
+            </p>
+            {phrase && <p className="mt-1 text-sm">{phrase}</p>}
+          </div>
+
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={notRelated}
+              onChange={(e) => setNotRelated(e.target.checked)}
+            />
+            Não se relaciona com questões climáticas (neutral)
+          </label>
+
+          <label className="block">
+            <span className="text-sm text-muted-foreground">Notas</span>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={2}
+              className="mt-1 w-full rounded-md border border-border bg-background p-2 text-sm"
+              aria-label="Notas"
+            />
+          </label>
+
+          {error && (
+            <p role="alert" className="text-sm text-red-400">
+              {error}
+            </p>
+          )}
+          <Button onClick={save} disabled={saving}>
+            {saving ? "Salvando…" : "Salvar revisão"}
+          </Button>
+        </li>
+      );
+    }
+
 function LoginForm() {
-  const router = useRouter();
   const [mode, setMode] = useState<"login" | "register">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setSuccess(null);
     const client = getSupabase();
-    const fn =
-      mode === "login" ? client.auth.signInWithPassword : client.auth.signUp;
-    const { error } = await fn({ email, password });
+    if (mode === "login") {
+      const { error } = await client.auth.signInWithPassword({
+        email,
+        password,
+      });
+      setLoading(false);
+      if (error) setError(error.message);
+      return;
+    }
+    // Route the email confirmation link back to /admin so the auth callback
+    // (token/code in the URL) is picked up and the user is logged in automatically.
+    const emailRedirectTo = `${window.location.origin}/admin`;
+    const { error } = await client.auth.signUp({
+      email,
+      password,
+      options: { emailRedirectTo },
+    });
     setLoading(false);
     if (error) {
       setError(error.message);
-    } else if (mode === "register") {
-      router.refresh();
+      return;
     }
+    setSuccess(
+      `Conta criada! Enviamos um link de confirmação para ${email}. ` +
+        "Verifique sua caixa de entrada (e o spam) e confirme seu cadastro " +
+        "para poder entrar.",
+    );
+    setMode("login");
+    setPassword("");
   }
 
   return (
     <div className="max-w-6xl h-screen mx-auto px-4 py-8 bg-foreground/2">
       <div className="max-w-lg mx-auto px-4 py-16">
         <h1 className="text-4xl font-bold mb-6">Área de revisão</h1>
+        {success && (
+          <p
+            role="status"
+            className="text-sm text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-3 mb-4"
+          >
+            {success}
+          </p>
+        )}
         <form onSubmit={submit} className="space-y-4">
           <label className="block">
             <span className="text-sm text-muted-foreground">Email</span>
@@ -164,7 +345,15 @@ function LoginForm() {
   );
 }
 
-function ReviewDashboard() {
+function ReviewDashboard({
+  reviewCard: ReviewCardComponent,
+}: {
+  reviewCard: (props: {
+    bill: Bill;
+    review?: BillReview;
+    onSaved: () => void;
+  }) => ReactElement;
+}) {
   const [bills, setBills] = useState<Bill[]>([]);
   const [reviews, setReviews] = useState<Map<string, BillReview>>(new Map());
   const [loading, setLoading] = useState(true);
@@ -236,7 +425,7 @@ function ReviewDashboard() {
       ) : (
         <ul className="space-y-4">
           {pending.map((bill) => (
-            <ReviewCard
+            <ReviewCardComponent
               key={bill.id}
               bill={bill}
               review={reviews.get(`${bill.source}:${bill.external_id}`)}
@@ -254,154 +443,5 @@ function ReviewDashboard() {
         </ul>
       )}
     </div>
-  );
-}
-
-function ReviewCard({
-  bill,
-  review,
-  onSaved,
-}: {
-  bill: Bill;
-  review?: BillReview;
-  onSaved: () => void;
-}) {
-  const draftKey = `review-draft:${bill.source}:${bill.external_id}`;
-  const [score, setScore] = useState(review?.reviewer_score ?? 50);
-  const [notRelated, setNotRelated] = useState(review?.not_related ?? false);
-  const [notes, setNotes] = useState(review?.reviewer_notes ?? "");
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  // Restore an unsaved draft (when a previous save failed), so work isn't lost.
-  useEffect(() => {
-    if (review) return;
-    try {
-      const raw = localStorage.getItem(draftKey);
-      if (raw) {
-        const draft = JSON.parse(raw);
-        if (typeof draft.score === "number") setScore(draft.score);
-        if (typeof draft.notRelated === "boolean")
-          setNotRelated(draft.notRelated);
-        if (typeof draft.notes === "string") setNotes(draft.notes);
-      }
-    } catch (err) {
-      console.warn(`[admin] corrupted review draft (${draftKey}):`, err);
-    }
-  }, [draftKey, review]);
-
-  const classification = classifyFromReviewScore(score, notRelated);
-  const style = STYLE_MAP[classification];
-  const phrase = getClassificationPhrase(classification, score / 100);
-
-  async function save() {
-    setSaving(true);
-    setError(null);
-    try {
-      const {
-        data: { user },
-      } = await getSupabase().auth.getUser();
-      await upsertReview({
-        source: bill.source,
-        external_id: bill.external_id,
-        reviewed_by: user?.email ?? "unknown",
-        reviewer_score: score,
-        reviewer_classification: classification,
-        reviewer_notes: notes || null,
-        not_related: notRelated,
-      });
-      try {
-        localStorage.removeItem(draftKey);
-      } catch (err) {
-        console.warn("[admin] could not clear review draft:", err);
-      }
-      onSaved();
-    } catch (err) {
-      console.error("[admin] save review failed:", err);
-      // Keep the draft locally so a transient Supabase failure doesn't lose the review.
-      try {
-        localStorage.setItem(
-          draftKey,
-          JSON.stringify({ score, notRelated, notes }),
-        );
-      } catch (storageErr) {
-        console.warn("[admin] could not persist review draft:", storageErr);
-      }
-      setError(
-        "Não foi possível salvar no Supabase. Sua revisão foi guardada " +
-          "localmente e será restaurada ao recarregar a página.",
-      );
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  return (
-    <li className="rounded-xl border border-border bg-card p-4 space-y-3">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="font-bold">
-            {bill.bill_type} {bill.number}/{bill.year}
-          </p>
-          <p className="text-sm text-muted-foreground line-clamp-2">
-            {bill.ementa}
-          </p>
-        </div>
-        {review && (
-          <span className="text-xs text-emerald-400 shrink-0">revisada</span>
-        )}
-      </div>
-
-      <label className="block">
-        <span className="text-sm text-muted-foreground">
-          Potencial risco de agravar a crise climática
-        </span>
-        <input
-          type="range"
-          min={0}
-          max={100}
-          value={score}
-          onChange={(e) => setScore(Number(e.target.value))}
-          className="w-full mt-2"
-          aria-label="Potencial risco de agravar a crise climática"
-        />
-        <span className="text-sm font-bold tabular-nums">{score}%</span>
-      </label>
-
-      <div className={`rounded-lg p-3 border ${style.border} ${style.fadedBg}`}>
-        <p className={`text-xs font-bold uppercase ${style.textAccent}`}>
-          {style.label}
-        </p>
-        {phrase && <p className="text-sm mt-1">{phrase}</p>}
-      </div>
-
-      <label className="flex items-center gap-2 text-sm">
-        <input
-          type="checkbox"
-          checked={notRelated}
-          onChange={(e) => setNotRelated(e.target.checked)}
-        />
-        Não se relaciona com questões climáticas (neutral)
-      </label>
-
-      <label className="block">
-        <span className="text-sm text-muted-foreground">Notas</span>
-        <textarea
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          rows={2}
-          className="mt-1 w-full rounded-md border border-border bg-background p-2 text-sm"
-        />
-      </label>
-
-      {error && (
-        <p role="alert" className="text-sm text-red-400">
-          {error}
-        </p>
-      )}
-      <Button onClick={save} disabled={saving}>
-        {saving ? "Salvando…" : "Salvar revisão"}
-      </Button>
-    </li>
   );
 }
