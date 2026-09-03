@@ -48,6 +48,21 @@ describe("Timeline", () => {
     expect(items[1]).toHaveTextContent("Evento antigo");
   });
 
+  it("renders the timeline heading and current-state marker", () => {
+    render(
+      <Timeline
+        events={[
+          { date: "2026-02-02", description: "Evento antigo" },
+          { date: "2026-03-10", description: "Evento recente" },
+        ]}
+      />,
+    );
+
+    expect(screen.getByText("Tramitação")).toBeInTheDocument();
+    expect(screen.getByText(/Caminho que a proposta percorre/)).toBeInTheDocument();
+    expect(screen.getByText("Situação atual")).toBeInTheDocument();
+  });
+
   it("renders nothing when there are no events", () => {
     const { container } = render(<Timeline events={[]} />);
     expect(container).toBeEmptyDOMElement();

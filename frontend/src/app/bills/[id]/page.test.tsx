@@ -36,7 +36,7 @@ describe("BillDetail", () => {
     render(<BillDetail id="abc-123" />);
 
     await waitFor(() => {
-      expect(screen.getByText("Combate a crise climática")).toBeInTheDocument();
+      expect(screen.getAllByText("Combate a crise climática")).toHaveLength(2);
     });
   });
 
@@ -100,5 +100,42 @@ describe("BillDetail", () => {
         screen.getByText("Meio Ambiente e Desenvolvimento Sustentável"),
       ).toBeInTheDocument();
     });
+  });
+
+  it("renders tramitation and voting timelines with loaded events", async () => {
+    mockGetBill.mockResolvedValue(FAVORABLE_BILL);
+    mockGetTramitacoes.mockResolvedValue([
+      { date: "2026-02-02", description: "Apresentação" },
+    ]);
+    mockGetVotacoes.mockResolvedValue([
+      {
+        date: "2026-03-10",
+        description: "Aprovação em plenário",
+        aprovado: true,
+        orientacoes: [],
+      },
+    ]);
+    render(<BillDetail id="abc-123" />);
+
+    expect(await screen.findByText("Aprovação em plenário")).toBeInTheDocument();
+    expect(screen.getAllByText("Apresentação")).toHaveLength(2);
+    expect(screen.getByText("Tramitação")).toBeInTheDocument();
+    expect(screen.getByText("Votações")).toBeInTheDocument();
+  });
+
+  it("uses the reviewed score and classification", async () => {
+    mockGetBill.mockResolvedValue(
+      createBill({
+        reviewed: true,
+        reviewed_score: 75,
+        reviewed_classification: "unfavorable",
+        final_score: 0.12,
+      }),
+    );
+    render(<BillDetail id="abc-123" />);
+
+    expect(await screen.findByText("75%")).toBeInTheDocument();
+    expect(screen.getAllByText("Intensifica a crise climática")).toHaveLength(2);
+    expect(screen.getByText(/Alto potencial de dano climático/)).toBeInTheDocument();
   });
 });

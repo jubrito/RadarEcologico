@@ -47,6 +47,44 @@ describe("Votacoes", () => {
     expect(screen.getByText("Rejeitado")).toBeInTheDocument();
   });
 
+  it("renders multiple votations newest first in the timeline", () => {
+    render(
+      <Votacoes
+        votacoes={[
+          {
+            date: "2025-01-10",
+            description: "Votação antiga",
+            aprovado: false,
+            orientacoes: [],
+          },
+          {
+            date: "2025-03-27",
+            description: "Votação recente",
+            aprovado: true,
+            orientacoes: [],
+          },
+        ]}
+      />,
+    );
+
+    const items = screen.getAllByRole("listitem");
+    expect(items[0]).toHaveTextContent("Votação recente");
+    expect(items[1]).toHaveTextContent("Votação antiga");
+    expect(screen.getByText("2 votações")).toBeInTheDocument();
+  });
+
+  it("renders a compact item without optional details", () => {
+    render(
+      <Votacoes
+        votacoes={[{ date: "2025-03-27", aprovado: true, orientacoes: [] }]}
+      />,
+    );
+
+    expect(screen.getByText("1 votação")).toBeInTheDocument();
+    expect(screen.getByRole("article", { name: "Aprovado" })).toBeInTheDocument();
+    expect(screen.queryByText("Orientação por partido")).not.toBeInTheDocument();
+  });
+
   it("renders nothing when there are no votations", () => {
     const { container } = render(<Votacoes votacoes={[]} />);
     expect(container).toBeEmptyDOMElement();

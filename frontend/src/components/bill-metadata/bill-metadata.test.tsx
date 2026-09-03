@@ -24,14 +24,10 @@ describe("BillMetadata", () => {
     expect(screen.getByText("Câmara dos Deputados")).toBeInTheDocument();
   });
 
-  it("renders status row when provided", () => {
-    render(
-      <BillMetadata
-        bill={FAVORABLE_BILL}
-        statusRow={<div>Em tramitação</div>}
-      />,
-    );
-    expect(screen.getByText("Em tramitação")).toBeInTheDocument();
+  it("renders the bill status callout", () => {
+    render(<BillMetadata bill={FAVORABLE_BILL} />);
+    expect(screen.getByText("Tramitando")).toBeInTheDocument();
+    expect(screen.getByText("Status do projeto")).toBeInTheDocument();
   });
 
   it("renders without status row", () => {

@@ -3,31 +3,29 @@ import { render, screen } from "@testing-library/react";
 import { RiskClassificationBadge } from "./classification-badge";
 
 describe("RiskClassificationBadge", () => {
-  it("renders favorable label", () => {
+  it("does not render a phrase when score is absent", () => {
     render(<RiskClassificationBadge classification="favorable" />);
-    expect(screen.getByText("Combate a crise climática")).toBeInTheDocument();
+    expect(screen.queryByText(/Classificação/)).not.toBeInTheDocument();
   });
 
-  it("renders needs_review label", () => {
+  it("does not render a phrase for needs_review without a score", () => {
     render(<RiskClassificationBadge classification="needs_review" />);
-    expect(screen.getByText("Requer revisão humana")).toBeInTheDocument();
+    expect(screen.queryByText(/Classificação/)).not.toBeInTheDocument();
   });
 
-  it("renders unfavorable label", () => {
+  it("does not render a phrase for unfavorable without a score", () => {
     render(<RiskClassificationBadge classification="unfavorable" />);
-    expect(
-      screen.getByText("Intensifica a crise climática"),
-    ).toBeInTheDocument();
+    expect(screen.queryByText(/Classificação/)).not.toBeInTheDocument();
   });
 
-  it("renders unknown label", () => {
+  it("does not render a phrase for unknown classification", () => {
     render(<RiskClassificationBadge classification="unknown" />);
-    expect(screen.getByText("Não classificado")).toBeInTheDocument();
+    expect(screen.queryByText(/Classificação/)).not.toBeInTheDocument();
   });
 
-  it("renders neutral label", () => {
+  it("does not render a phrase for neutral classification", () => {
     render(<RiskClassificationBadge classification="neutral" />);
-    expect(screen.getByText("Neutro")).toBeInTheDocument();
+    expect(screen.queryByText(/Classificação/)).not.toBeInTheDocument();
   });
 
   it("shows the phrase for a favorable bill", () => {
