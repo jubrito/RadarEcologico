@@ -200,7 +200,7 @@ export function BillDetail({ id }: { id: string }) {
         >
           <div className={`h-1.5 w-full ${style.bgSolid}`} />
 
-          <div className="p-6 sm:p-10 bg-background flex flex-col gap-7">
+          <div className="p-6 sm:p-10 bg-background flex flex-col gap-6">
             <Header bill={bill} />
 
             <Ementa bill={bill} classification={classification} />
@@ -209,9 +209,7 @@ export function BillDetail({ id }: { id: string }) {
 
             <BillMetadata
               bill={bill}
-              statusRow={
-                bill.status ? <StatusCallout status={bill.status} /> : null
-              }
+              statusRow={<StatusCallout status={bill.status} />}
             />
 
             {tramitacoesLoading && (

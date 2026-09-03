@@ -63,7 +63,7 @@ function MetadataGrid({ items }: { items: MetadataItem[] }) {
   return (
     <>
       {pairs.map(([a, b], i) => (
-        <div key={i} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div key={i} className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <MetadataRow icon={a.icon} label={a.label}>
             {a.content}
           </MetadataRow>
@@ -93,7 +93,7 @@ export function BillMetadata({ bill, statusRow }: BillMetadataProps) {
   const items = buildItems(bill);
 
   return (
-    <section className="space-y-3">
+    <section className="space-y-6">
       {statusRow}
       <MetadataGrid items={items} />
     </section>
