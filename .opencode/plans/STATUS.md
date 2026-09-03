@@ -15,7 +15,7 @@
 
 ## Last updated
 
-2026-08-27
+2026-09-03
 
 ## Current phase
 
@@ -97,20 +97,33 @@ Human-review interface via Supabase Auth + `bill_reviews` table:
 
 Setup (one-time): run `supabase/schema.sql` in the Supabase SQL editor; set `NEXT_PUBLIC_SUPABASE_URL`/`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (repo variables) + `SUPABASE_URL`/`SUPABASE_SECRET_KEY` (secrets) — using Supabase's own key names.
 
-# CHECK IMPLEMENTATION -> HUMAN TEST ON REVIEW LOGIN/CREATE ACCOUNT
+## Sprint 7 – Labels and architecture improvements
+
+## Sprint 8 – Admin improvements
+
+### Refactored admin page
+
+### Other improvements
 
 - [ ] Add "Update your password" feature
 - [ ] Handle form accessibility
-- [ ] Handle form errors
+- [ ] Handle form errors (user already exist, minimum security requirement password, etc)
+- [ ] When you're logged-in:
+  - [ ] Instead of calling the nav "Revisão", it should only be "Log in" if you're logged out (seeing the log in form) and "Log out" if you're logged in (it should be in the right side, like the github icon)
+  - Instead of having the "revision tab" (which is not scalable, as to see/filter bills we'd have to replicate the features to this tabs instead of taking advantage of the existing tables/lists), I want to edit the existing pages (bills list, bills details page) so we can use the existing data but, if we're logged in, we can click on a pencil and see features in the screens that allow us to do stuff. Examples to inspire you:
+    - [ ] we should use the same "Projetos de lei" tab, but we should show an icon with a pencil on the top-right side of the bill card (on the right of the labels, e.g "requer revisão humana")
+    - [ ] when we open the bill details page, we should se an "edit <pencil_icon>" button right on the right side of the "Ver fonte original", when clicking on it, we should see the colored border of the top of the bill details page (e.g the orange one) expand slowly in an animated way, inside of this expanded colored section, we should show a "Revisão atual" title and below it show the "Notas" field like you added in the current "Revisão" section. We should say: "(i) Classifique esse projeto de lei utilizando a barra de progresso abaixo" text
 - [ ] Add tests
 
-## Sprint 7 - Error notification
+## Sprint 9 - Error notification
 
-- [ ] Create notification toaster component to be reused across the repo
-- [ ] Add tests
-- [ ] Use the component on places where we should show a notification to the user to improve UX (communicating to the user on a user frientdly language what the user must know)
+- [x] Create notification toaster component to be reused across the repo
+- [x] Add tests
+- [x] Use the component on places where we should show a notification to the user to improve UX (communicating to the user on a user frientdly language what the user must know)
 
-## Sprint 6 — Infrastructure (PostgreSQL)
+## Sprint 10 — Infrastructure (PostgreSQL)
+
+- [ ] Review the steps below to se if we're doing everything correctly or if we should improve something
 
 1. Create Supabase project (free tier)
 2. Get `DATABASE_URL`
@@ -118,12 +131,32 @@ Setup (one-time): run `supabase/schema.sql` in the Supabase SQL editor; set `NEX
 4. Tables auto-created via `Base.metadata.create_all`
 5. Run the pipeline to populate
 
-## Sprint 7 — Party dashboard
+### Code review notes (2026-09-03) — findings
+
+The steps are essentially right, but there are 4 real gaps to fix while working this sprint:
+
+1. **Pipeline never creates tables (main gap).** `create_tables()` is only called on FastAPI startup (`backend/main.py:26`). `python -m backend.pipeline` only imports engine/session, so on a fresh Supabase the first query fails with `relation "bills" does not exist`. Fix: call `create_tables()` at the top of `run_pipeline()` (or run `python -c "from backend.database import create_tables; create_tables()"` before step 5).
+
+2. **Use the Session pooler (port 5432) connection string** from the Supabase dashboard (works with psycopg2/SQLAlchemy's default `postgresql://` dialect). Keep the URL-encoded password as-is. `pool_size=5, max_overflow=0, pool_pre_ping=True` is fine.
+
+3. **The GitHub Actions cron still uses SQLite**, so Supabase stays empty unless the pipeline is run manually. In `.github/workflows/deploy.yml:30` the refresh job sets `DATABASE_URL: sqlite:///./radar.db`. Change it to `DATABASE_URL: ${{ secrets.DATABASE_URL }}` and add that GitHub secret.
+
+4. **Model nits for Postgres:**
+   - `BillSnapshot.snapshot_date` uses `server_default=func.current_date()` on a DateTime column → PG stores midnight (`date` → `timestamp` implicit cast). Use `func.current_timestamp()`/`func.now()` (the Python default returns `.date()`, not a datetime).
+   - `bill_snapshots.bill_id` has no ForeignKey — add one for prod integrity.
+
+### Other considerations
+
+- `create_all` won't alter tables later — migration trap on a persistent DB. Configure Alembic before the next schema change.
+- Add `connect_args={"connect_timeout": 10}` to the engine so the cron fails fast instead of hanging on a paused free-tier project.
+- After populating, run the pipeline twice to confirm `UniqueConstraint` idempotency holds on PG.
+
+## Sprint 11 — Party dashboard
 
 - [ ] Show parties and compare how each votes
 - [ ] Analyses to extract the data
 
-## Sprint 8 — AI improvements
+## Sprint 12 — AI improvements
 
 - [ ] **Word-boundary matching**: `kw in text` is substring matching and can false-positive on short terms (a keyword matching inside a longer word). Switch to word-boundary/tokenized matching.
 - [ ] **Score calibration**: the scoring constants (`base_score = 0.35`, per-pattern `+0.20`, per-keyword `±0.04`, etc.) are hand-tuned guesses. Validate and tune them against labeled data (see "Calibration plan" below).
@@ -139,7 +172,7 @@ Setup (one-time): run `supabase/schema.sql` in the Supabase SQL editor; set `NEX
 5. Anti-duplication: one vote per fingerprint per bill
 6. UI with 3 vote buttons + proportion bars
 
-## Sprint 10 - Calibration plan (AI)
+## Sprint 13 - Calibration plan (AI)
 
 - **When**: Sprint 6 (or sooner, once `data/` has labeled bills).
 - **Why**: the scoring constants are unvalidated guesses; without a labeled eval we can't measure precision/recall or tune the thresholds.
@@ -150,7 +183,68 @@ Setup (one-time): run `supabase/schema.sql` in the Supabase SQL editor; set `NEX
   4. Sweep the scoring constants (base score, per-pattern/per-keyword weights) and the thresholds (`FAVORABLE_MAX`, `UNFAVORABLE_MIN`) to maximize F1.
   5. Add a repeatable script (`backend/scripts/evaluate.py`) or a notebook.
 
-## Sprint 11 - Improvements
+## Sprint 15 — Taxonomy + inline review (in progress)
+
+Replace the `/admin` review dashboard with inline review on the existing bills pages, and split the
+classification into a reviewer-derived fine taxonomy. Iterative; each step = one cohesive commit with
+tests.
+
+### Taxonomy (score is the single source of truth)
+
+- `reviewer_score` (0–100) + `not_related` checkbox are the only stored review inputs. Everything else
+  (stance, coarse label, phrase, colors) is **derived at render** by `deriveStance(score, notRelated)`.
+- `reviewer_classification` is still written as a coarse roll-up (favorable/neutral/unfavorable) for
+  backward-compat with the static export — the frontend never reads it for display.
+- **Fine stances (reviewed, even 20-pt bands):**
+  | Score | Stance | Phrase | Color |
+  |---|---|---|---|
+  | 0–19 | Combate a crise | Ativamente combate as causas da catástrofe climática… | deep emerald |
+  | 20–39 | Ajuda a luta | Ajuda de alguma forma (mesmo que não significativamente)… | soft green/teal |
+  | 40–59 | Nem ajuda nem atrapalha | Nem ajuda nem atrapalha significativamente… | amber |
+  | 60–79 | Atrapalha a luta | Atrapalha de alguma forma (mesmo que não significativamente)… | orange |
+  | 80–100 | Intensifica a crise | Intensifica diretamente as causas da catástrofe climática… | deep red |
+  | (checkbox) | Sem relação climática | Não se relaciona com questões climáticas. | slate |
+- **Coarse (unreviewed / machine):** `<35` favorable · `35–65` requer revisão · `>65` unfavorable
+  (thresholds changed from 30/60 → 35/65 to center the uncertainty band). The AI stays coarse; the
+  machine label never becomes a fine stance. **Reviewed bills never show `needs_review`** — the review
+  middle band (40–59) rolls up to `neutral`.
+- **Dropdown groups (selectable at both levels):** Favoráveis à luta climática [Combate a crise ·
+  Ajuda a luta] · Ambivalentes [Nem ajuda nem atrapalha · Sem relação climática] · Desfavoráveis à luta
+  climática [Atrapalha a luta · Intensifica a crise] · Requer revisão humana · Neutro.
+  - Colors vary by gravity (deep vs soft emerald, orange vs red) so intensity is visible at a glance.
+
+### Steps
+
+- [ ] **1. Taxonomy core (frontend lib):** `deriveStance(score, notRelated)` + `STANCE_MAP`
+      (per-stance `ClassificationStyle`), band constants, `classifyFromReviewScore` → never
+      `needs_review`, `getClassificationPhrase` aligned to the fine bands, `filterBills` stance/group
+      filters, tests.
+- [ ] **2. Backend thresholds:** `FAVORABLE_MAX` 0.30 → 0.35, `UNFAVORABLE_MIN` 0.60 → 0.65
+      (`backend/types.py`, mirror in `frontend/src/lib/types.ts` + `reviews.ts`), update keyword/route
+      tests.
+- [ ] **3. Grouped dropdown:** replace the flat classification `Select` in `bills-content.tsx` with a
+      selectable group + subitem control (Favoráveis/Ambivalentes/Desfavoráveis/Requer revisão/Neutro);
+      `filterBills` understands group + stance values; tests.
+- [ ] **4. Shared auth:** `SessionProvider` + `useSession` (`src/lib/session.tsx`), wrapped in
+      `layout.tsx`; handles Supabase-not-configured (→ logged out); tests.
+- [ ] **5. Nav:** remove "Revisão"; add `Entrar` (→ `/login`) / `Sair` on the right, before the GitHub
+      icon; tests.
+- [ ] **6. Login page:** move `LoginForm` from `/admin` to new `/login` (`emailRedirectTo` → `/login`);
+      delete `/admin` + dashboard tests; re-home login/register tests; tests.
+- [ ] **7. Bill card:** pencil (`aria-label="Revisar projeto"`, → `/bills/[id]?edit=1`, logged-in only)
+      top-right + `BadgeCheck` "Revisada" indicator + stance badge/color by gravity; tests.
+- [ ] **8. Bill detail:** pencil next to "Ver fonte original"; animated expanding colored section
+      (grid-rows expand) with "Revisão atual", helper "(i) Classifique esse projeto de lei utilizando a
+      barra de progresso abaixo", **editable slider** (live % / phrase / page colors via
+      `deriveStance`), `Notas`, `Salvar revisão`, "Revisado por {email} em {date}"; `?edit=1`
+      auto-opens (Suspense-wrapped for `useSearchParams`); muted-text policy (non-editable headings →
+      `text-muted-foreground`, ementa + risk block stay foreground); tests.
+- [ ] **9. Prototype mock page (carousel):** render bill-detail mock with each edit-mode option so the
+      look can be chosen before finalizing; simulated save.
+- [ ] **10. Reviewed indicators (bonus):** consistent emerald check iconography on card + detail;
+      "Revisado por {email} em {date}".
+
+## Sprint 14 - Improvements
 
 - [ ] Improve accessibility scores
 - [ ] Review "neutral" logic and the sublabels on bill details pages to ensure that reviewers can categorize bills as neutral while seeing the three types of sublabels on the % block
