@@ -1,9 +1,8 @@
 "use client";
 
 import { type VariantProps } from "class-variance-authority";
-import { Badge, badgeVariants } from "@/components/ui/badge";
+import { badgeVariants } from "@/components/ui/badge";
 import { getScoreColor } from "@/lib/utils/utils";
-import { STYLE_MAP } from "@/lib/style";
 import { getClassificationPhrase } from "@/lib/utils/classifications";
 import type { Classification } from "@/lib/api";
 
@@ -13,25 +12,18 @@ interface ClassificationBadgeProps extends VariantProps<typeof badgeVariants> {
   reviewed?: boolean;
 }
 
-export function ClassificationBadge({
+export function RiskClassificationBadge({
   classification,
   score,
   reviewed = false,
-  ...props
 }: ClassificationBadgeProps) {
-  const style = STYLE_MAP[classification];
   const phrase = getClassificationPhrase(classification, score);
 
   return (
     <span className="flex flex-col gap-2">
-      <span>
-        <Badge className={style.badge} {...props}>
-          {style.label}
-        </Badge>
-      </span>
       {score != null && (
         <span
-          className={`text-sm font-mono tabular-nums ${getScoreColor(score)}`}
+          className={`text-md font-mono tabular-nums ${getScoreColor(score)}`}
         >
           Potencial risco de agravar a crise climática:
           <span className="font-extrabold ml-1">
@@ -42,7 +34,9 @@ export function ClassificationBadge({
       {phrase && (
         <span className="text-sm text-muted-foreground">
           <strong>
-            {reviewed ? "Classificação (revisada):" : "Classificação (estimada):"}
+            {reviewed
+              ? "Classificação (revisada):"
+              : "Classificação (estimada):"}
           </strong>{" "}
           {phrase}
         </span>
