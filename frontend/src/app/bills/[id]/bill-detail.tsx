@@ -30,7 +30,7 @@ const Header = ({ bill }: { bill: Bill }) => {
       <Button
         variant="outline"
         size="sm"
-        className="flex-shrink-0"
+        className="flex-shrink-0 order-first sm:order-none"
         render={
           <a href={bill.link} target="_blank" rel="noopener noreferrer">
             Ver fonte original ↗
