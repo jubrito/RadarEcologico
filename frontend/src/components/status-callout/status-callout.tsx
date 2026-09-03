@@ -70,7 +70,7 @@ export function StatusCallout({ status }: StatusCalloutProps) {
         </div>
       </div>
       <div>
-        <div className="my-3 flex items-center gap-1 text-sm text-muted-foreground">
+        <div className="my-3 flex items-center gap-1 text-sm text-muted-foreground pb-2 md:pb-0 overflow-x-auto scroll-smooth scrollbar-thumb-muted-foreground scrollbar-track-transparent scrollbar-thin">
           {PHASES.map((p, i) => (
             <span key={p.key} className="flex items-center gap-1">
               <PhaseChip
