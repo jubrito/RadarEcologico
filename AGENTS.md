@@ -1,7 +1,6 @@
 # AGENTS.md — Ecological Legislative Radar
 
 > Instructions for AI agents (OpenCode, Cursor, Copilot, etc.).
-> Read before making any changes. Additional context in `.opencode/plans/`.
 
 ---
 
@@ -17,31 +16,22 @@ Automatically classify Brazilian Bills related to the climate crisis:
 
 - **Green software principles**: Always prioritize following green software principles (carbon efficiency, energy efficiency, carbon awareness, hardware efficiency).
 - **Efficient AI**: minimize token usage, be objective in responses, use tokens strategically to spend less energy/time.
-- Batch > real-time: pipeline runs 1x/day via cron, not on every request.
-- Use Chamber API pre-filters (`codTema=<climate theme codes>`) to reduce requests by ~90%.
-- Single process: the Python FastAPI backend serves API, classification, and scraping.
 - Dark mode as default (saves energy on OLED).
-- ISR in Next.js: revalidate pages only when data changes.
-- Quantized models (int8 BERT, phase 2).
-- GitHub Actions cron at 2 AM BRT (5 AM UTC, off-peak).
-- **Ask yourself before every decision**: "does this consume less or more energy?" Focus on consuming less.
+- **Ask yourself before every decision**: "does this consume less or more energy than necessary?" Focus on consuming less.
+- Try to improve performance by adhering to green software principles
 
-### 2. Simplicity (KISS)
+### 2. Good practices
 
-- If an `if` solves it, don't use design patterns.
-- No premature abstraction. No Celery, Redis, RabbitMQ.
-- FastAPI + SQLAlchemy are sufficient.
-- TypeScript `strict: true`, no unnecessarily complex generics.
+- Always focus on simplicity over complexity
+- Robust code over complex code
+- KISS
+- DRY
+- SOLID
+- Maintainability and reusability (try to create reusable code to make the code less fragile)
 
 ### 3. Testability
 
 - **Changes must update tests**: When making a change or adding a feature, don't forger to update the existing tests or create new ones
-- **Every classification function must have tests** (keyword classifier, ensemble, BERT wrapper).
-- **Every scraper must have tests** with mocks of external APIs (pytest + httpx).
-- **Every API route must have tests** (FastAPI TestClient + pytest-asyncio).
-- **Frontend**: tests with vitest + testing-library (configured; query by role/label).
-- Desired coverage: 80%. Doesn't block PR, but write tests for new features.
-- Use `pytest.mark.parametrize` to test multiple bill-summary variations.
 
 ### 4. Accessibility (WCAG 2.1 AA)
 
@@ -56,9 +46,6 @@ Automatically classify Brazilian Bills related to the climate crisis:
 ### 5. Scalability (from day 1)
 
 - **Pagination on every list**: never return more than 100 items without pagination.
-- **PostgreSQL indexes**: create indexes for columns used in filters and sorting (`classification`, `year`, `source`, `final_score`).
-- **Idempotency in scrapers**: running the pipeline twice in a row must not duplicate data. Enforced by `UniqueConstraint(source, external_id)` plus an existence check in the pipeline.
-- **Connection pooling**: use the SQLAlchemy pool (default 5 connections, sufficient)
 
 ### 6. Maintainability
 
@@ -66,9 +53,9 @@ Automatically classify Brazilian Bills related to the climate crisis:
 - Clear names: `classify_bill_keywords()`, not `process()` or `handle()`. If the code isn't clear, extract constants/variables/functions with meaningful names.
 - No commented-out code — delete it, git keeps history.
 - Docstrings on public functions (what it does, parameters, return).
-- Updated README: whenever you add a new feature, check that the README is still correct.
+- Updated README: whenever you add a new feature, check that the README and other doc files are still correct.
 - In the frontend, prefer camelCase; in the backend, prefer snake_case.
-- Functions, constants, and variables must have meaningful names.
+- Functions, constants, and variables must have meaningful names; extract them when necessary as a way to document the code without having to add more comments
 
 ---
 
@@ -89,11 +76,3 @@ Automatically classify Brazilian Bills related to the climate crisis:
 - Climate Observatory: "Destruction Package" (~70 bills)
 - CIPÓ Platform: Socio-environmental Legislative Radar
 - Format: CSV (`external_id, source, ementa, manual_classification`)
-
----
-
-## Pipeline
-
-The current ensemble (phase 1) uses 100% keyword classifier. Phase 2 will add BERTimbau with weights: keyword 0.40 + BERT 0.60.
-
-Pipeline order: scrape APIs → filter by climate keywords → deduplicate against DB (`UniqueConstraint(source, external_id)` + existence check) → classify → save.
