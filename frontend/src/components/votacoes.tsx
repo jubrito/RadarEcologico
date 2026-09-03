@@ -27,7 +27,7 @@ export function Votacoes({ votacoes }: VotacoesProps) {
     >
       <header className="flex items-center justify-between gap-4 border-b border-border bg-card px-4 py-3">
         <div className="flex items-center gap-3">
-          <span className="flex h-8 w-8 items-center justify-center rounded-md bg-foreground/10 text-foreground">
+          <span className="flex h-10 w-10 items-center justify-center rounded-md bg-foreground/10 text-foreground">
             <LandmarkIcon size={16} aria-hidden="true" />
           </span>
           <div>
@@ -50,54 +50,52 @@ export function Votacoes({ votacoes }: VotacoesProps) {
 
           return (
             <li key={`${votacao.date}-${index}`}>
-              <article className="rounded-md border border-border/80 bg-background/30 px-3 py-2.5">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="flex items-center gap-2">
-                    {votacao.aprovado ? (
-                      <CheckCircle2Icon
-                        size={17}
-                        className={statusTextColor}
-                        aria-hidden="true"
-                      />
-                    ) : (
-                      <XCircleIcon
-                        size={17}
-                        className={statusTextColor}
-                        aria-hidden="true"
-                      />
-                    )}
-                    <span className={`text-sm font-bold ${statusTextColor}`}>
-                      {votacao.aprovado ? "Aprovado" : "Rejeitado"}
-                    </span>
-                  </div>
-
-                  <time
-                    dateTime={votacao.date}
-                    className="flex items-center gap-1 text-[11px] font-semibold text-muted-foreground"
-                  >
-                    <CalendarDaysIcon size={13} aria-hidden="true" />
-                    {formatDate(votacao.date)}
-                  </time>
+              <article className="flex min-w-0 items-center overflow-hidden rounded-md border border-border/80 bg-background/30 px-3 py-2">
+                <div className="flex shrink-0 items-center gap-2 pr-3">
+                  {votacao.aprovado ? (
+                    <CheckCircle2Icon
+                      size={17}
+                      className={statusTextColor}
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    <XCircleIcon
+                      size={17}
+                      className={statusTextColor}
+                      aria-hidden="true"
+                    />
+                  )}
+                  <span className={`text-sm font-bold ${statusTextColor}`}>
+                    {votacao.aprovado ? "Aprovado" : "Rejeitado"}
+                  </span>
                 </div>
 
+                <time
+                  dateTime={votacao.date}
+                  className="flex shrink-0 items-center gap-1 border-l border-border/70 px-3 text-[11px] font-semibold text-muted-foreground"
+                >
+                  <CalendarDaysIcon size={13} aria-hidden="true" />
+                  {formatDate(votacao.date)}
+                </time>
+
                 {(votacao.orgao || votacao.description) && (
-                  <div className="mt-2 border-t border-border/70 pt-2">
+                  <div className="flex min-w-0 flex-1 items-center gap-2 border-l border-border/70 px-3">
                     {votacao.orgao && (
-                      <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                      <span className="max-w-[30%] shrink-0 truncate text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                         {votacao.orgao}
-                      </p>
+                      </span>
                     )}
                     {votacao.description && (
-                      <p className="mt-1 text-xs leading-relaxed text-foreground/80">
+                      <span className="min-w-0 truncate text-xs text-foreground/80">
                         {votacao.description}
-                      </p>
+                      </span>
                     )}
                   </div>
                 )}
 
                 {votacao.orientacoes.length > 0 && (
                   <ul
-                    className="mt-2 flex flex-wrap gap-1.5 border-t border-border/70 pt-2"
+                    className="ml-3 flex shrink-0 items-center gap-1.5 border-l border-border/70 pl-3"
                     aria-label="Orientação por partido"
                   >
                     {votacao.orientacoes.map((o) => (
