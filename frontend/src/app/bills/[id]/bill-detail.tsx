@@ -15,7 +15,6 @@ import { useBill } from "@/lib/hooks/use-bill";
 import { useTramitacoes } from "@/lib/hooks/use-tramitacoes";
 import { useVotacoes } from "@/lib/hooks/use-votacoes";
 import { BillMetadata } from "@/components/bill-metadata/bill-metadata";
-import { StatusCallout } from "@/components/status-callout/status-callout";
 import { ErrorBanner } from "@/components/error-banner";
 import { Timeline } from "@/components/timeline";
 import { Votacoes } from "@/components/votacoes";
@@ -117,9 +116,10 @@ const RiskAnalysis = ({
               style={{ width: `${pct}%` }}
             />
           </div>
-          <div className="flex justify-between text-sm text-muted-foreground mt-1">
-            <span>Favorável</span>
-            <span>Prejudicial</span>
+          <div className="flex justify-between gap-10 text-sm text-muted-foreground mt-1">
+            <span>Combate a crise climática</span>
+            <span>Nem combate nem intensifica</span>
+            <span>Intensifica a crise climática</span>
           </div>
         </div>
       )}
@@ -207,10 +207,7 @@ export function BillDetail({ id }: { id: string }) {
 
             <RiskAnalysis bill={bill} classification={classification} />
 
-            <BillMetadata
-              bill={bill}
-              statusRow={<StatusCallout status={bill.status} />}
-            />
+            <BillMetadata bill={bill} />
 
             {tramitacoesLoading && (
               <Skeleton className="h-32 w-full rounded-xl" />

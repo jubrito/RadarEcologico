@@ -4,6 +4,7 @@ import { parseAuthor } from "@/lib/bill-helpers";
 import { stateLabel } from "@/lib/state-label";
 import type { Bill } from "@/lib/api";
 import { User, Building2, Landmark, Calendar } from "lucide-react";
+import { StatusCallout } from "../status-callout/status-callout";
 
 interface MetadataItem {
   icon: ComponentType<{ className?: string }>;
@@ -86,15 +87,14 @@ function MetadataGrid({ items }: { items: MetadataItem[] }) {
 
 interface BillMetadataProps {
   bill: Bill;
-  statusRow?: React.ReactNode;
 }
 
-export function BillMetadata({ bill, statusRow }: BillMetadataProps) {
+export function BillMetadata({ bill }: BillMetadataProps) {
   const items = buildItems(bill);
 
   return (
-    <section className="space-y-6">
-      {statusRow}
+    <section className="space-y-3 border border-border rounded-lg p-4">
+      <StatusCallout status={bill.status} />
       <MetadataGrid items={items} />
     </section>
   );
