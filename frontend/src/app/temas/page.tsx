@@ -1,7 +1,19 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { THEME_DESCRIPTIONS, sortedThemeEntries } from "@/lib/themes";
+import { getStats, type StatsResponse } from "@/lib/api";
 
 export default function TemasPage() {
+  const [stats, setStats] = useState<StatsResponse | null>(null);
+
+  useEffect(() => {
+    getStats().then(setStats).catch((error) => {
+      console.error("Erro ao carregar contagens dos temas:", error);
+    });
+  }, []);
+
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       <h1 className="text-5xl font-bold">Temas climáticos</h1>
@@ -21,7 +33,13 @@ export default function TemasPage() {
             href={`/bills?theme=${id}`}
             className="group rounded-xl border bg-card p-5 transition-all hover:shadow-lg hover:-translate-y-0.5 border-2 border-transparent hover:border-foreground"
           >
-            <h2 className="font-bold mb-2 group-hover:text-primary">{name}</h2>
+            <div className="mb-2 flex items-start justify-between gap-3">
+              <h2 className="font-bold group-hover:text-primary">{name}</h2>
+              <span className="shrink-0 rounded-full border border-border px-2 py-0.5 text-xs font-semibold text-muted-foreground">
+                {stats?.by_theme[id] ?? 0}{" "}
+                {stats?.by_theme[id] === 1 ? "projeto" : "projetos"}
+              </span>
+            </div>
             <p className="text-sm text-muted-foreground">
               {THEME_DESCRIPTIONS[id] ?? "Sem descrição."}
             </p>
