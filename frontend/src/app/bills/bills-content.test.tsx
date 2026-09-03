@@ -113,4 +113,14 @@ describe("BillsContent", () => {
     });
     expect(screen.getByText("Network error")).toBeInTheDocument();
   });
+
+  it("shows a temporary notification when optional statistics fail", async () => {
+    mockGetStats.mockRejectedValue(new Error("Stats unavailable"));
+
+    renderPage();
+
+    expect(
+      await screen.findByText("As estatísticas não puderam ser carregadas."),
+    ).toBeInTheDocument();
+  });
 });

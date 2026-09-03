@@ -26,6 +26,29 @@ describe("NotificationToaster", () => {
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
+  it("announces non-error notifications as status", () => {
+    function InfoTrigger() {
+      const { notify } = useNotification();
+      return (
+        <button
+          onClick={() => notify({ message: "Informação disponível.", kind: "info" })}
+        >
+          Mostrar informação
+        </button>
+      );
+    }
+
+    render(
+      <NotificationToaster>
+        <InfoTrigger />
+      </NotificationToaster>,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Mostrar informação" }));
+
+    expect(screen.getByRole("status")).toHaveTextContent("Informação disponível.");
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
   it("automatically dismisses notifications", () => {
     vi.useFakeTimers();
     render(
@@ -104,5 +127,6 @@ describe("NotificationToaster", () => {
     expect(screen.getByLabelText("Notificações")).not.toHaveClass(
       "-translate-y-1/2",
     );
+    expect(screen.getByLabelText("Notificações")).toHaveClass("overflow-y-auto");
   });
 });
