@@ -12,7 +12,8 @@ export const SITE_DESCRIPTION =
 /** Versão curta usada no footer e meta tags */
 export const SITE_TAGLINE =
   "Monitor de projetos de lei brasileiros para identificar propostas que combatem ou agravam a crise climática no Brasil. " +
-  "Dados das APIs públicas da Câmara dos Deputados e Senado Federal.";
+  "Dados das APIs públicas da Câmara dos Deputados e Senado Federal. " +
+  "Criado por: Juliana Witzke de Brito.";
 
 export const STATE_NAMES: Record<string, string> = {
   AC: "Acre",
