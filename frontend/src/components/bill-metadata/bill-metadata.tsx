@@ -31,7 +31,7 @@ function MetadataRow({
       <Icon className="w-5 h-5 flex-shrink-0 mt-0.5 text-muted-foreground" />
       <div>
         <h2 className="font-bold uppercase text-sm">{label}</h2>
-        <div className="text-sm mt-0.5">{children}</div>
+        <div className="text-sm mt-0.5 text-muted-foreground">{children}</div>
       </div>
     </div>
   );
@@ -87,7 +87,7 @@ export function BillMetadata({ bill, statusRow }: BillMetadataProps) {
   const items = buildItems(bill);
 
   return (
-    <section className="mt-7 space-y-3">
+    <section className="space-y-3">
       {statusRow}
       <MetadataGrid items={items} />
     </section>
