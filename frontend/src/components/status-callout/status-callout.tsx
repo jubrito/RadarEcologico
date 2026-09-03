@@ -47,21 +47,30 @@ function PhaseChip({
 }
 
 interface StatusCalloutProps {
-  status: string;
+  status: string | null | undefined;
 }
 
 export function StatusCallout({ status }: StatusCalloutProps) {
   const info = getStatusInfo(status);
   const currentIdx = info ? phaseIndex(info.phase) : -1;
 
+  if (!status) return null;
   return (
-    <div className="flex gap-3 p-4 rounded-l-lg rounded-lg bg-card/50">
-      <RefreshCw className="w-5 h-5 mt-0.5 text-muted-foreground shrink-0" />
-      <div className="w-full">
-        <h2 className="font-bold uppercase text-sm">Status do projeto</h2>
-        <p className="text-sm mt-0.5 text-muted-foreground">{status}</p>
-
-        <div className="my-3 mb-4 flex items-center gap-1 text-sm text-muted-foreground">
+    <div className="p-4 rounded-l-lg rounded-lg bg-card/50">
+      <div className="flex gap-3">
+        <span className="flex h-10 w-10 items-center justify-center rounded-md bg-foreground/10 text-foreground">
+          <RefreshCw
+            className="w-5 h-5 mt-0.5 text-muted-foreground shrink-0"
+            aria-hidden="true"
+          />
+        </span>
+        <div className="w-full">
+          <h2 className="font-bold uppercase text-sm">Status do projeto</h2>
+          <p className="text-sm mt-0.5 text-muted-foreground">{status}</p>
+        </div>
+      </div>
+      <div>
+        <div className="my-3 flex items-center gap-1 text-sm text-muted-foreground">
           {PHASES.map((p, i) => (
             <span key={p.key} className="flex items-center gap-1">
               <PhaseChip

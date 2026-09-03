@@ -28,7 +28,13 @@ function MetadataRow({
         highlight ? "border border-foreground" : "bg-card"
       }`}
     >
-      <Icon className="w-5 h-5 flex-shrink-0 mt-0.5 text-muted-foreground" />
+      <span className="flex h-10 w-10 items-center justify-center rounded-md bg-foreground/10 text-foreground">
+        <Icon
+          className="w-5 h-5 flex-shrink-0 mt-0.5 text-muted-foreground"
+          aria-hidden="true"
+        />
+      </span>
+
       <div>
         <h2 className="font-bold uppercase text-sm">{label}</h2>
         <div className="text-sm mt-0.5 text-muted-foreground">{children}</div>
