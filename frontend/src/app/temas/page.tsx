@@ -11,16 +11,24 @@ export default function TemasPage() {
   const { notify } = useNotification();
 
   useEffect(() => {
+    let cancelled = false;
     getStats()
-      .then(setStats)
+      .then((data) => {
+        if (!cancelled) setStats(data);
+      })
       .catch((error) => {
         console.error("Erro ao carregar contagens dos temas:", error);
-        notify({
-          kind: "error",
-          persistence: "temporary",
-          message: "Não foi possível carregar as contagens dos temas.",
-        });
+        if (!cancelled) {
+          notify({
+            kind: "error",
+            persistence: "temporary",
+            message: "Não foi possível carregar as contagens dos temas.",
+          });
+        }
       });
+    return () => {
+      cancelled = true;
+    };
   }, [notify]);
 
   return (

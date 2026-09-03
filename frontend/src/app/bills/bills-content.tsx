@@ -101,11 +101,13 @@ export function BillsContent() {
         if (!cancelled) setStats(statsData);
       } catch (err) {
         console.error("Erro ao carregar estatísticas:", err);
-        notify({
-          kind: "error",
-          persistence: "temporary",
-          message: "As estatísticas não puderam ser carregadas.",
-        });
+        if (!cancelled) {
+          notify({
+            kind: "error",
+            persistence: "temporary",
+            message: "As estatísticas não puderam ser carregadas.",
+          });
+        }
       }
 
       try {

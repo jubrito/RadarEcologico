@@ -5,13 +5,13 @@ import { ErrorBanner } from "./error-banner";
 
 interface TimelineProps {
   events: TramitacaoEvent[];
-  tramitacoesError: string | null;
+  tramitacoesError?: string | null;
 }
 
 export function Timeline({
   events,
-  tramitacoesError,
-}: TimelineProps & { tramitacoesError: string | null }) {
+  tramitacoesError = null,
+}: TimelineProps) {
   if (events.length === 0 && !tramitacoesError) return null;
 
   const ordered = [...events].reverse();

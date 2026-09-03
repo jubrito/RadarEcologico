@@ -51,7 +51,7 @@ export function NotificationToaster({ children }: { children: ReactNode }) {
       {children}
       <div
         aria-label="Notificações"
-        className="fixed top-4 right-1/2 left-1/2 z-50 flex w-[min(30rem,calc(100%-2rem))] flex-col gap-3 -translate-x-1/2"
+        className="fixed top-4 right-1/2 left-1/2 z-50 flex max-h-[calc(100vh-2rem)] w-[min(30rem,calc(100%-2rem))] -translate-x-1/2 flex-col gap-3 overflow-y-auto"
       >
         {notifications.map((notification) => (
           <NotificationItem

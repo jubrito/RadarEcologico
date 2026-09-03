@@ -16,10 +16,13 @@ function voteStyle(voto: string): string {
 
 interface VotacoesProps {
   votacoes: VotacaoEvent[];
-  votacoesError: string | null;
+  votacoesError?: string | null;
 }
 
-export function Votacoes({ votacoes, votacoesError }: VotacoesProps) {
+export function Votacoes({
+  votacoes,
+  votacoesError = null,
+}: VotacoesProps) {
   if (votacoes.length === 0 && !votacoesError) return null;
   const ordered = [...votacoes].reverse();
   return (
