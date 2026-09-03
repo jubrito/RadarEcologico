@@ -19,11 +19,11 @@ interface VotacoesProps {
 
 export function Votacoes({ votacoes }: VotacoesProps) {
   if (votacoes.length === 0) return null;
-
+  const ordered = [...votacoes].reverse();
   return (
     <section
       aria-label="Votações"
-      className="overflow-hidden rounded-xl border border-border bg-card/40"
+      className="overflow-hidden rounded-xl border border-border"
     >
       <header className="flex items-center justify-between gap-4 border-b border-border bg-card px-4 py-3">
         <div className="flex items-center gap-3">
@@ -42,60 +42,62 @@ export function Votacoes({ votacoes }: VotacoesProps) {
         </span>
       </header>
 
-      <ul className="space-y-2 p-3">
-        {[votacoes[0], votacoes[0]].map((votacao, index) => {
-          const statusTextColor = votacao.aprovado
-            ? "text-foreground"
-            : "text-muted-foreground";
+      <ul className="flex items-start overflow-x-auto p-4 pl-3 pb-5">
+        {ordered.map((votacao, index) => {
+          const isLast = index === votacoes.length - 1;
 
           return (
-            <li key={`${votacao.date}-${index}`}>
-              <article className="flex min-w-0 items-center overflow-hidden rounded-md border border-border/80 bg-background/30 px-3 py-2">
-                <div className="flex shrink-0 items-center gap-2 pr-3">
-                  {votacao.aprovado ? (
-                    <CheckCircle2Icon
-                      size={17}
-                      className={statusTextColor}
-                      aria-hidden="true"
-                    />
-                  ) : (
-                    <XCircleIcon
-                      size={17}
-                      className={statusTextColor}
-                      aria-hidden="true"
-                    />
+            <li
+              key={`${votacao.date}-${index}`}
+              className="flex max-w-fit min-w-fit flex-1 flex-col"
+            >
+              <div aria-hidden="true" className="flex items-center">
+                <span
+                  className={`flex h-8 w-8 shrink-0 items-center justify-around rounded-full bg-background text-muted-foreground"}`}
+                >
+                  {votacao.aprovado && (
+                    <CheckCircle2Icon size={17} aria-hidden="true" />
                   )}
-                  <span className={`text-sm font-bold ${statusTextColor}`}>
-                    {votacao.aprovado ? "Aprovado" : "Rejeitado"}
-                  </span>
-                </div>
+                  {!votacao.aprovado && (
+                    <XCircleIcon size={17} aria-hidden="true" />
+                  )}
+                </span>
+                <span className="text-sm">
+                  {votacao.aprovado ? "Aprovado" : "Rejeitado"}
+                </span>
+                {!isLast && <span className="h-px flex-1 bg-border" />}
+              </div>
 
+              <article
+                className="pr-10 ml-3"
+                aria-label={votacao.aprovado ? "Aprovado" : "Rejeitado"}
+              >
                 <time
                   dateTime={votacao.date}
-                  className="flex shrink-0 items-center gap-1 border-l border-border/70 px-3 text-[11px] font-semibold text-muted-foreground"
+                  className="flex items-center gap-1 text-[11px] font-semibold text-muted-foreground"
                 >
                   <CalendarDaysIcon size={13} aria-hidden="true" />
                   {formatDate(votacao.date)}
                 </time>
 
                 {(votacao.orgao || votacao.description) && (
-                  <div className="flex min-w-0 flex-1 items-center gap-2 border-l border-border/70 px-3">
+                  <div className="mt-2 space-y-1">
                     {votacao.orgao && (
-                      <span className="max-w-[30%] shrink-0 truncate text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                      <p className="truncate text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                         {votacao.orgao}
-                      </span>
+                      </p>
                     )}
                     {votacao.description && (
-                      <span className="min-w-0 truncate text-xs text-foreground/80">
+                      <p className="text-xs leading-relaxed text-foreground/80">
                         {votacao.description}
-                      </span>
+                      </p>
                     )}
                   </div>
                 )}
 
                 {votacao.orientacoes.length > 0 && (
                   <ul
-                    className="ml-3 flex shrink-0 items-center gap-1.5 border-l border-border/70 pl-3"
+                    className="mt-3 flex flex-wrap gap-1.5"
                     aria-label="Orientação por partido"
                   >
                     {votacao.orientacoes.map((o) => (
