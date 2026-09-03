@@ -3,14 +3,10 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { RiskClassificationBadge } from "@/components/classification-badge";
 import {
   CLASSIFICATION,
-  CLASSIFICATION_DESCRIPTIONS,
 } from "@/lib/utils/classifications";
-import type { Classification, KnownClassification } from "@/lib/types";
 import { STYLE_MAP } from "@/lib/style";
-import { themeNamesFromIds } from "@/lib/themes";
 import { useBill } from "@/lib/hooks/use-bill";
 import { useTramitacoes } from "@/lib/hooks/use-tramitacoes";
 import { useVotacoes } from "@/lib/hooks/use-votacoes";
@@ -18,131 +14,9 @@ import { BillMetadata } from "@/components/bill-metadata/bill-metadata";
 import { ErrorBanner } from "@/components/error-banner";
 import { Timeline } from "@/components/timeline";
 import { Votacoes } from "@/components/votacoes";
-import { Badge } from "@/components/ui/badge";
-import { Bill } from "@/lib/api";
-
-const Header = ({ bill }: { bill: Bill }) => {
-  return (
-    <header className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-      <h1 className="text-2xl font-bold">
-        {bill.bill_type} {bill.number}/{bill.year}
-      </h1>
-      <Button
-        variant="outline"
-        size="sm"
-        className="flex-shrink-0 order-first sm:order-none"
-        render={
-          <a href={bill.link} target="_blank" rel="noopener noreferrer">
-            Ver fonte original ↗
-          </a>
-        }
-      />
-    </header>
-  );
-};
-
-const Ementa = ({
-  bill,
-  classification,
-}: {
-  bill: Bill;
-  classification: Classification;
-}) => {
-  const style = STYLE_MAP[classification];
-  const themes = themeNamesFromIds(bill.theme_ids);
-
-  return (
-    <section aria-labelledby="ementa-heading">
-      <div className="flex items-center gap-3">
-        <h2 id="ementa-heading" className="text-xl font-bold mb-3">
-          Ementa
-        </h2>
-        <Badge className={style.badge}>{style.label}</Badge>
-      </div>
-
-      <div className={`border-l-4 ${style.border} pl-4`}>
-        <p className="text-md text-foreground leading-relaxed">{bill.ementa}</p>
-      </div>
-
-      <div>
-        {themes.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-3">
-            {themes.map((name) => (
-              <span
-                key={name}
-                className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground"
-              >
-                {name}
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
-    </section>
-  );
-};
-
-const RiskAnalysis = ({
-  bill,
-  classification,
-}: {
-  classification: Classification;
-  bill: Bill;
-}) => {
-  const style = STYLE_MAP[classification];
-  const pct =
-    bill.reviewed && bill.reviewed_score != null
-      ? Math.round(bill.reviewed_score)
-      : bill.final_score != null
-        ? Math.round(bill.final_score * 100)
-        : null;
-  const badgeScore =
-    bill.reviewed && bill.reviewed_score != null
-      ? bill.reviewed_score / 100
-      : bill.final_score;
-
-  return (
-    <section className={`p-4 rounded-lg border ${style.border} bg-background`}>
-      <RiskClassificationBadge
-        classification={classification}
-        score={badgeScore}
-        reviewed={bill.reviewed}
-      />
-      {pct != null && (
-        <div aria-hidden="true">
-          <div className="h-2 rounded-full bg-muted overflow-hidden mt-4">
-            <div
-              className={`h-full rounded-full ${style.bgSolid}`}
-              style={{ width: `${pct}%` }}
-            />
-          </div>
-          <div className="flex justify-between gap-10 text-sm text-muted-foreground mt-1">
-            <span>Combate a crise climática</span>
-            <span>Nem combate nem intensifica</span>
-            <span>Intensifica a crise climática</span>
-          </div>
-        </div>
-      )}
-
-      {pct != null && (
-        <div
-          className={`mt-5 rounded-lg ${style.fadedBg} border ${style.border} p-4`}
-        >
-          <h2
-            className={`text-xs font-bold uppercase tracking-wider ${style.textAccent} mb-2`}
-          >
-            Análise de risco e impacto ecológico da proposta
-          </h2>
-          <p className="text-sm leading-relaxed">
-            {CLASSIFICATION_DESCRIPTIONS[
-              classification as KnownClassification
-            ] ?? "Classificação não disponível."}
-          </p>
-        </div>
-      )}
-    </section>
-  );
-};
+import { BillHeader } from "@/components/bill-detail/bill-header";
+import { BillEmenta } from "@/components/bill-detail/bill-ementa";
+import { RiskAnalysis } from "@/components/bill-detail/risk-analysis";
 
 export function BillDetail({ id }: { id: string }) {
   const { bill, loading, error } = useBill(id);
@@ -201,9 +75,9 @@ export function BillDetail({ id }: { id: string }) {
           <div className={`h-1.5 w-full ${style.bgSolid}`} />
 
           <div className="p-6 sm:p-10 bg-background flex flex-col gap-6">
-            <Header bill={bill} />
+            <BillHeader bill={bill} />
 
-            <Ementa bill={bill} classification={classification} />
+            <BillEmenta bill={bill} classification={classification} />
 
             <RiskAnalysis bill={bill} classification={classification} />
 
