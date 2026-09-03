@@ -19,7 +19,7 @@
 
 ## Current phase
 
-**Sprint 5 — Review area (admin) (complete)** — next up: Sprint 6 (PostgreSQL/Supabase consolidation)
+**Sprint 7 — Taxonomy + inline review (in progress)** — steps 1–2 done; next up: step 3 (grouped dropdown).
 
 ## Done
 
@@ -97,13 +97,113 @@ Human-review interface via Supabase Auth + `bill_reviews` table:
 
 Setup (one-time): run `supabase/schema.sql` in the Supabase SQL editor; set `NEXT_PUBLIC_SUPABASE_URL`/`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (repo variables) + `SUPABASE_URL`/`SUPABASE_SECRET_KEY` (secrets) — using Supabase's own key names.
 
-## Sprint 7 – Labels and architecture improvements
+## Sprint 6 - Calibration plan (AI)
 
-## Sprint 8 – Admin improvements
+> The old title also mentioned "Labels, login and architecture improvements" —
+> that work is now Sprint 7 (Taxonomy + inline review): labels = the fine stance
+> taxonomy, login = auth nav (steps 4–6), architecture = inline review instead
+> of the separate `/admin` dashboard.
 
-### Refactored admin page
+- **When**: once `data/` has labeled bills (no blocker for Sprint 7).
+- **Why**: the scoring constants are unvalidated guesses; without a labeled eval we can't measure precision/recall or tune the thresholds.
+- **How**:
+  1. Load labeled CSVs into `data/` (`external_id, source, ementa, manual_classification`).
+  2. Run `classify_keywords()` over each labeled ementa and compare to `manual_classification`.
+  3. Build a confusion matrix and precision/recall/F1 per label.
+  4. Sweep the scoring constants (base score, per-pattern/per-keyword weights) and the thresholds (`FAVORABLE_MAX`, `UNFAVORABLE_MIN`) to maximize F1.
+  5. Add a repeatable script (`backend/scripts/evaluate.py`) or a notebook.
+- **Note**: thresholds were already moved 30/60 → 35/65 in Sprint 7 step 2; the sweep should treat
+  `FAVORABLE_MAX`/`UNFAVORABLE_MIN` as tunable and keep the "market alone can't reach favorable"
+  invariant.
+  - [ ] In the bill details page, we have "Potencial risco de agravar a crise climática: X%". I think thre's room for improvement regarding how we can communicate this, thinking about the UX perspective. Give me ideas on how to improve this communication (it can be dynamic based on the % if you think it's better or a phrase that can be used regardless of the %)
+  - [ ] Check if everything from sprint 6 was executed correctly
 
-### Other improvements
+## Sprint 7 — Taxonomy + inline review (in progress)
+
+Replace the `/admin` review dashboard with inline review on the existing bills pages, and split the
+classification into a reviewer-derived fine taxonomy. Iterative; each step = one cohesive commit with
+tests.
+
+### Taxonomy (score is the single source of truth)
+
+- `reviewer_score` (0–100) + `not_related` checkbox are the only stored review inputs. Everything else
+  (stance, coarse label, phrase, colors) is **derived at render** by `deriveStance(score, notRelated)`.
+- `reviewer_classification` is still written as a coarse roll-up (favorable/neutral/unfavorable) for
+  backward-compat with the static export — the frontend never reads it for display.
+- **Fine stances (reviewed, even 20-pt bands):**
+  | Score | Stance | Phrase | Color |
+  |---|---|---|---|
+  | 0–19 | Combate a crise | Ativamente combate as causas da catástrofe climática… | deep emerald |
+  | 20–39 | Ajuda a luta | Ajuda de alguma forma (mesmo que não significativamente)… | soft green/teal |
+  | 40–59 | Nem ajuda nem atrapalha | Nem ajuda nem atrapalha significativamente… | amber |
+  | 60–79 | Atrapalha a luta | Atrapalha de alguma forma (mesmo que não significativamente)… | orange |
+  | 80–100 | Intensifica a crise | Intensifica diretamente as causas da catástrofe climática… | deep red |
+  | (checkbox) | Sem relação climática | Não se relaciona com questões climáticas. | slate |
+- **Coarse (unreviewed / machine):** `<35` favorable · `35–65` requer revisão · `>65` unfavorable
+  (thresholds changed from 30/60 → 35/65 to center the uncertainty band). The AI stays coarse; the
+  machine label never becomes a fine stance. **Reviewed bills never show `needs_review`** — the review
+  middle band (40–59) rolls up to `neutral`.
+- **Dropdown groups (selectable at both levels):** Favoráveis à luta climática [Combate a crise ·
+  Ajuda a luta] · Ambivalentes [Nem ajuda nem atrapalha · Sem relação climática] · Desfavoráveis à luta
+  climática [Atrapalha a luta · Intensifica a crise] · Requer revisão humana · Neutro.
+  - Colors vary by gravity (deep vs soft emerald, orange vs red) so intensity is visible at a glance.
+
+### Steps
+
+- [x] **1. Taxonomy core (frontend lib):**
+  - `deriveStance(score, notRelated)` → `{ stance, group, label, phrase }` with even 20-pt bands
+    (`REVIEW_BANDS`), `STANCE_MAP` (per-stance style/colors by gravity), `STANCE_ORDER`,
+    `STANCE_GROUP_LABELS`, `STANCE_GROUPS_ORDER` in `src/lib/utils/classifications.ts`.
+  - `classifyFromReviewScore` never returns `needs_review`: favorable <40 / neutral 40–59 /
+    unfavorable ≥60 (matches `REVIEW_BANDS`).
+  - `getClassificationPhrase` derives entirely from `deriveStance(score)` (single source of truth) —
+    a reviewed ambivalent bill (40–59) shows "Nem ajuda nem atrapalha…" even though its coarse
+    roll-up is `neutral`; `notRelated` (checkbox) distinguishes "Sem relação climática".
+  - `reviewed_not_related` threaded through `export_static.py` → `Bill` type →
+    `RiskClassificationBadge`/`RiskAnalysis` so the phrase survives the static export.
+  - **Display classification centralized in `deriveBillClassification(bill)`** (`lib/bill-helpers.ts`):
+    the card and detail page derive the classification from the score (single source of truth) instead
+    of reading the stored `classification` field — fixes stale/divergent colors (e.g. an unreviewed
+    bill whose stored `needs_review` came from the old 0.30/0.60 thresholds now shows the correct
+    green). The `%` text color in `RiskClassificationBadge` uses `STYLE_MAP[classification].textAccent`
+    (removed the separate `getScoreColor` helper that used the machine thresholds for reviewed bills).
+  - Added `fetchReview(source, externalId)` in `lib/reviews.ts` (single-row lookup).
+  - Tests: new `stances.test.ts`, `deriveBillClassification` cases in `bill-helpers.test.ts`, updated
+    `reviews.test.ts`, `classifications.test.ts`, `utils.test.ts`, `classification-badge.test.tsx`,
+    `UNKNOWN_BILL` fixture (now score-less), backend `test_export_static.py`.
+- [x] **2. Backend thresholds:** `FAVORABLE_MAX` 0.30 → 0.35, `UNFAVORABLE_MIN` 0.60 → 0.65
+      (`backend/types.py`, mirrored in `frontend/src/lib/types.ts` + `reviews.ts`), updated keyword/route
+      tests.
+  - Market-only bills no longer subtract from the score (kept at the 0.35 uncertainty center), so the
+    "market alone can't reach favorable" invariant holds under the new threshold.
+- [ ] **3. Grouped dropdown:** replace the flat classification `Select` in `bills-content.tsx` with a
+      selectable group + subitem control (Favoráveis/Ambivalentes/Desfavoráveis/Requer revisão/Neutro);
+      `filterBills` understands group + stance values; tests.
+- [ ] **3b. Dashboard display refactor (plan later, must be a sprint step):** the stats "blocks"
+      (combate/revisão/agravamento/neutro) only cover the old 4 coarse labels; with the new taxonomy
+      there are 6 stances across 4 groups. Redesign the dashboard to show the groups (with subgroups
+      inside) or each subgroup as a separate block — decision pending, but tracked here so it's not
+      forgotten in this refactor sprint.
+- [ ] **4. Shared auth:** `SessionProvider` + `useSession` (`src/lib/session.tsx`), wrapped in
+      `layout.tsx`; handles Supabase-not-configured (→ logged out); tests.
+- [ ] **5. Nav:** remove "Revisão"; add `Entrar` (→ `/login`) / `Sair` on the right, before the GitHub
+      icon; tests.
+- [ ] **6. Login page:** move `LoginForm` from `/admin` to new `/login` (`emailRedirectTo` → `/login`);
+      delete `/admin` + dashboard tests; re-home login/register tests; tests.
+- [ ] **7. Bill card:** pencil (`aria-label="Revisar projeto"`, → `/bills/[id]?edit=1`, logged-in only)
+      top-right + `BadgeCheck` "Revisada" indicator + stance badge/color by gravity; tests.
+- [ ] **8. Bill detail:** pencil next to "Ver fonte original"; animated expanding colored section
+      (grid-rows expand) with "Revisão atual", helper "(i) Classifique esse projeto de lei utilizando a
+      barra de progresso abaixo", **editable slider** (live % / phrase / page colors via
+      `deriveStance`), `Notas`, `Salvar revisão`, "Revisado por {email} em {date}"; `?edit=1`
+      auto-opens (Suspense-wrapped for `useSearchParams`); muted-text policy (non-editable headings →
+      `text-muted-foreground`, ementa + risk block stay foreground); tests.
+- [ ] **9. Prototype mock page (carousel):** render bill-detail mock with each edit-mode option so the
+      look can be chosen before finalizing; simulated save.
+- [ ] **10. Reviewed indicators (bonus):** consistent emerald check iconography on card + detail;
+      "Revisado por {email} em {date}".
+
+### Sprint 8 – TODO: check (possible items / ther improvements)
 
 - [ ] Add "Update your password" feature
 - [ ] Handle form accessibility
@@ -163,7 +263,7 @@ The steps are essentially right, but there are 4 real gaps to fix while working 
 - [ ] **Pre-filter misses pattern-only bills**: `ementa_matches_climate()` only checks keywords, not regex patterns, so bills that match a pattern but contain no keyword are dropped at scrape time. Make the pre-filter pattern-aware or accept the conservative filter.
 - [ ] **Classification summary**: a short phrase (3–5 words) explaining why a bill got its classification, based on the matched keywords/patterns.
 
-## Sprint 9 — Collaborative review (public voting)
+## Sprint 13 — Collaborative review (public voting)
 
 1. Vote per bill (agree/disagree with the classification)
 2. Vote counters per category (e.g. "12 favorable, 3 unfavorable, 5 review")
@@ -171,78 +271,6 @@ The steps are essentially right, but there are 4 real gaps to fix while working 
 4. `BillVote` model: `bill_id`, `vote`, `voted_at`, `fingerprint` (IP+user-agent hash)
 5. Anti-duplication: one vote per fingerprint per bill
 6. UI with 3 vote buttons + proportion bars
-
-## Sprint 13 - Calibration plan (AI)
-
-- **When**: Sprint 6 (or sooner, once `data/` has labeled bills).
-- **Why**: the scoring constants are unvalidated guesses; without a labeled eval we can't measure precision/recall or tune the thresholds.
-- **How**:
-  1. Load labeled CSVs into `data/` (`external_id, source, ementa, manual_classification`).
-  2. Run `classify_keywords()` over each labeled ementa and compare to `manual_classification`.
-  3. Build a confusion matrix and precision/recall/F1 per label.
-  4. Sweep the scoring constants (base score, per-pattern/per-keyword weights) and the thresholds (`FAVORABLE_MAX`, `UNFAVORABLE_MIN`) to maximize F1.
-  5. Add a repeatable script (`backend/scripts/evaluate.py`) or a notebook.
-
-## Sprint 15 — Taxonomy + inline review (in progress)
-
-Replace the `/admin` review dashboard with inline review on the existing bills pages, and split the
-classification into a reviewer-derived fine taxonomy. Iterative; each step = one cohesive commit with
-tests.
-
-### Taxonomy (score is the single source of truth)
-
-- `reviewer_score` (0–100) + `not_related` checkbox are the only stored review inputs. Everything else
-  (stance, coarse label, phrase, colors) is **derived at render** by `deriveStance(score, notRelated)`.
-- `reviewer_classification` is still written as a coarse roll-up (favorable/neutral/unfavorable) for
-  backward-compat with the static export — the frontend never reads it for display.
-- **Fine stances (reviewed, even 20-pt bands):**
-  | Score | Stance | Phrase | Color |
-  |---|---|---|---|
-  | 0–19 | Combate a crise | Ativamente combate as causas da catástrofe climática… | deep emerald |
-  | 20–39 | Ajuda a luta | Ajuda de alguma forma (mesmo que não significativamente)… | soft green/teal |
-  | 40–59 | Nem ajuda nem atrapalha | Nem ajuda nem atrapalha significativamente… | amber |
-  | 60–79 | Atrapalha a luta | Atrapalha de alguma forma (mesmo que não significativamente)… | orange |
-  | 80–100 | Intensifica a crise | Intensifica diretamente as causas da catástrofe climática… | deep red |
-  | (checkbox) | Sem relação climática | Não se relaciona com questões climáticas. | slate |
-- **Coarse (unreviewed / machine):** `<35` favorable · `35–65` requer revisão · `>65` unfavorable
-  (thresholds changed from 30/60 → 35/65 to center the uncertainty band). The AI stays coarse; the
-  machine label never becomes a fine stance. **Reviewed bills never show `needs_review`** — the review
-  middle band (40–59) rolls up to `neutral`.
-- **Dropdown groups (selectable at both levels):** Favoráveis à luta climática [Combate a crise ·
-  Ajuda a luta] · Ambivalentes [Nem ajuda nem atrapalha · Sem relação climática] · Desfavoráveis à luta
-  climática [Atrapalha a luta · Intensifica a crise] · Requer revisão humana · Neutro.
-  - Colors vary by gravity (deep vs soft emerald, orange vs red) so intensity is visible at a glance.
-
-### Steps
-
-- [ ] **1. Taxonomy core (frontend lib):** `deriveStance(score, notRelated)` + `STANCE_MAP`
-      (per-stance `ClassificationStyle`), band constants, `classifyFromReviewScore` → never
-      `needs_review`, `getClassificationPhrase` aligned to the fine bands, `filterBills` stance/group
-      filters, tests.
-- [ ] **2. Backend thresholds:** `FAVORABLE_MAX` 0.30 → 0.35, `UNFAVORABLE_MIN` 0.60 → 0.65
-      (`backend/types.py`, mirror in `frontend/src/lib/types.ts` + `reviews.ts`), update keyword/route
-      tests.
-- [ ] **3. Grouped dropdown:** replace the flat classification `Select` in `bills-content.tsx` with a
-      selectable group + subitem control (Favoráveis/Ambivalentes/Desfavoráveis/Requer revisão/Neutro);
-      `filterBills` understands group + stance values; tests.
-- [ ] **4. Shared auth:** `SessionProvider` + `useSession` (`src/lib/session.tsx`), wrapped in
-      `layout.tsx`; handles Supabase-not-configured (→ logged out); tests.
-- [ ] **5. Nav:** remove "Revisão"; add `Entrar` (→ `/login`) / `Sair` on the right, before the GitHub
-      icon; tests.
-- [ ] **6. Login page:** move `LoginForm` from `/admin` to new `/login` (`emailRedirectTo` → `/login`);
-      delete `/admin` + dashboard tests; re-home login/register tests; tests.
-- [ ] **7. Bill card:** pencil (`aria-label="Revisar projeto"`, → `/bills/[id]?edit=1`, logged-in only)
-      top-right + `BadgeCheck` "Revisada" indicator + stance badge/color by gravity; tests.
-- [ ] **8. Bill detail:** pencil next to "Ver fonte original"; animated expanding colored section
-      (grid-rows expand) with "Revisão atual", helper "(i) Classifique esse projeto de lei utilizando a
-      barra de progresso abaixo", **editable slider** (live % / phrase / page colors via
-      `deriveStance`), `Notas`, `Salvar revisão`, "Revisado por {email} em {date}"; `?edit=1`
-      auto-opens (Suspense-wrapped for `useSearchParams`); muted-text policy (non-editable headings →
-      `text-muted-foreground`, ementa + risk block stay foreground); tests.
-- [ ] **9. Prototype mock page (carousel):** render bill-detail mock with each edit-mode option so the
-      look can be chosen before finalizing; simulated save.
-- [ ] **10. Reviewed indicators (bonus):** consistent emerald check iconography on card + detail;
-      "Revisado por {email} em {date}".
 
 ## Sprint 14 - Improvements
 
