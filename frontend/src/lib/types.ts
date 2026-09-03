@@ -43,9 +43,34 @@ export type ClassifyComponents = {
 };
 
 export const CLASSIFICATION_THRESHOLDS = {
-  FAVORABLE_MAX: 0.3,
-  UNFAVORABLE_MIN: 0.6,
+  FAVORABLE_MAX: 0.35,
+  UNFAVORABLE_MIN: 0.65,
 } as const;
+
+/**
+ * Fine-grained stances derived from a reviewer's 0–100 score.
+ * The AI/machine stays coarse (favorable/needs_review/unfavorable); these fine
+ * stances only exist for human-reviewed bills.
+ */
+export const STANCE = {
+  combate: "combate",
+  ajuda: "ajuda",
+  ambivalente: "ambivalente",
+  atrapalha: "atrapalha",
+  intensifica: "intensifica",
+  sem_relacao: "sem_relacao",
+} as const;
+
+export type Stance = (typeof STANCE)[keyof typeof STANCE];
+
+export type StanceGroup = "favoraveis" | "ambivalentes" | "desfavoraveis";
+
+export type StanceInfo = {
+  stance: Stance;
+  group: StanceGroup;
+  label: string;
+  phrase: string | null;
+};
 
 export const SOURCE_LABELS: Record<
   "camara" | "senado" | "alesp" | "camara-sp",

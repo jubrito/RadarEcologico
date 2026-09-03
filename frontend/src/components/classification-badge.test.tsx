@@ -65,14 +65,14 @@ describe("RiskClassificationBadge", () => {
     );
     expect(
       screen.getByText(
-        "Neutro (nem ajuda nem atrapalha significativamente o combate às causas da catástrofe climática ou a minimização de suas consequências)",
+        "Nem ajuda nem atrapalha significativamente o combate às causas da catástrofe climática ou a minimização de suas consequências.",
       ),
     ).toBeInTheDocument();
   });
 
   it("shows the phrase for a needs_review bill leaning negative", () => {
     render(
-      <RiskClassificationBadge classification="needs_review" score={0.55} />,
+      <RiskClassificationBadge classification="needs_review" score={0.6} />,
     );
     expect(
       screen.getByText(

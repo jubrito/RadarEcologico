@@ -126,7 +126,7 @@ export default function AdminPage() {
 
       const classification = classifyFromReviewScore(score, notRelated);
       const style = STYLE_MAP[classification];
-      const phrase = getClassificationPhrase(classification, score / 100);
+      const phrase = getClassificationPhrase(classification, score / 100, notRelated);
 
       async function save() {
         setSaving(true);
