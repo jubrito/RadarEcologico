@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ClassificationBadge } from "@/components/classification-badge";
+import { RiskClassificationBadge } from "@/components/classification-badge";
 import {
   CLASSIFICATION,
   CLASSIFICATION_DESCRIPTIONS,
@@ -104,7 +104,7 @@ const RiskAnalysis = ({
 
   return (
     <section className={`p-4 rounded-lg border ${style.border} bg-background`}>
-      <ClassificationBadge
+      <RiskClassificationBadge
         classification={classification}
         score={badgeScore}
         reviewed={bill.reviewed}
