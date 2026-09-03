@@ -432,7 +432,7 @@ class TestClassify:
         assert response.status_code == 200
         data = response.json()
         assert data["classification"] == "needs_review"
-        assert 0.30 <= data["final_score"] < 0.60
+        assert 0.35 <= data["final_score"] < 0.65
 
     def test_rejects_short_text(self):
         client = TestClient(app)

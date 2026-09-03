@@ -51,7 +51,7 @@ def test_no_climate_signal_is_review():
         "Institui o Dia Nacional da Abobrinha."
     )
     assert result.classification == "needs_review"
-    assert 0.30 <= result.score < 0.60
+    assert 0.35 <= result.score < 0.65
 
 
 def test_revokes_forest_code_is_unfavorable():
@@ -214,7 +214,7 @@ def test_ensemble_confidence_levels():
 def test_empty_ementa_is_neutral():
     result = classify_keywords("")
     assert result.classification == "needs_review"
-    assert 0.30 <= result.score < 0.60
+    assert 0.35 <= result.score < 0.65
     assert result.positive_hits == 0
     assert result.negative_hits == 0
 

@@ -45,8 +45,9 @@ def classify_keywords(ementa: str) -> ClassificationResult:
     Scoring logic:
       - Fighting keywords / positive patterns push score DOWN strongly (genuine
         action against the climate crisis).
-      - Market keywords push score DOWN weakly (green-economy mechanisms prone
-        to greenwashing — "not making it worse, but not solving").
+      - Market keywords (green-economy mechanisms prone to greenwashing — "not
+        making it worse, but not solving") keep the score at the uncertainty
+        center (0.35): they can't reach "favorable" on their own.
       - Negative keywords / patterns push score UP (toward 1).
       - A signal preceded by a negating verb (e.g. "revoga a proteção
         ambiental") is flipped to the opposite stance, and likewise a
@@ -54,9 +55,9 @@ def classify_keywords(ementa: str) -> ClassificationResult:
         mineração em terra indígena").
 
     Classification thresholds:
-      score < 0.30  → favorable
-      0.30 ≤ score < 0.60 → needs_review
-      score ≥ 0.60 → unfavorable
+      score < 0.35  → favorable
+      0.35 ≤ score < 0.65 → needs_review
+      score ≥ 0.65 → unfavorable
     """
     text = ementa.lower()
 
@@ -173,7 +174,8 @@ def _compute_score(
     Compute a score 0.0–1.0 where higher = more harmful to climate.
 
     Fighting keywords lower the score strongly (toward "favorable"); market
-    keywords lower it only weakly (they can't reach "favorable" on their own).
+    keywords alone keep the bill at the uncertainty center (they can't reach
+    "favorable" on their own).
     """
     positive_hits = fighting_hits + market_hits
 
@@ -206,8 +208,10 @@ def _compute_score(
     elif fighting_hits >= 1:
         base_score -= fighting_hits * 0.06
 
-    # Weak positive signals (market / greenwashing-prone) lower score only slightly
-    if market_hits >= 1:
-        base_score -= min(0.04, market_hits * 0.02)
+    # Weak positive signals (market / greenwashing-prone) alone keep the bill
+    # at the uncertainty center (0.35 = needs_review): they must never push the
+    # score below the favorable boundary, so they can't reach "favorable" on
+    # their own. Genuine fighting signals do the score lowering.
+    # (market_hits intentionally not subtracted here)
 
     return max(0.0, min(1.0, round(base_score, 3)))

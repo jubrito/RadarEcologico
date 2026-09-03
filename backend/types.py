@@ -13,8 +13,8 @@ ClassificationLabelWithUnknown = Literal[
     "favorable", "needs_review", "unfavorable", "neutral", "unknown"
 ]
 
-FAVORABLE_MAX = 0.30
-UNFAVORABLE_MIN = 0.60
+FAVORABLE_MAX = 0.35
+UNFAVORABLE_MIN = 0.65
 NEUTRAL_DEFAULT = 0.45
 
 CONFIDENCE_HIGH_THRESHOLD = 0.30
