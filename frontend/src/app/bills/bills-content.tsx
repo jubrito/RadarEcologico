@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorBanner } from "@/components/error-banner";
+import { useNotification } from "@/components/notification-toaster";
 import {
   getBills,
   getStats,
@@ -76,6 +77,7 @@ export function BillsContent() {
   const [stats, setStats] = useState<StatsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { notify } = useNotification();
   const [searchInput, setSearchInput] = useState(search);
 
   useEffect(() => {
@@ -97,8 +99,13 @@ export function BillsContent() {
       try {
         const [statsData] = await Promise.all([getStats()]);
         if (!cancelled) setStats(statsData);
-      } catch {
-        // stats are optional — don't block the page
+      } catch (err) {
+        console.error("Erro ao carregar estatísticas:", err);
+        notify({
+          kind: "error",
+          persistence: "temporary",
+          message: "As estatísticas não puderam ser carregadas.",
+        });
       }
 
       try {
@@ -127,7 +134,7 @@ export function BillsContent() {
     return () => {
       cancelled = true;
     };
-  }, [page, classification, source, themeParam, party, search]);
+  }, [page, classification, source, themeParam, party, search, notify]);
 
   const updateParam = (key: string, value: string | null) => {
     const params = new URLSearchParams(searchParams.toString());

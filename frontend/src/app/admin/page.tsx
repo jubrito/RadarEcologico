@@ -15,6 +15,8 @@ import { STYLE_MAP } from "@/lib/style";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useNotification } from "@/components/notification-toaster";
+import { ErrorBanner } from "@/components/error-banner";
 
 export default function AdminPage() {
   const [session, setSession] = useState<Session | null>(null);
@@ -66,7 +68,10 @@ export default function AdminPage() {
   if (setupError) {
     return (
       <div className="max-w-md mx-auto px-4 py-16">
-        <p className="text-muted-foreground">{setupError}</p>
+        <ErrorBanner
+          message="A área de revisão não está disponível."
+          detail={setupError}
+        />
       </div>
     );
   }
@@ -227,11 +232,7 @@ export default function AdminPage() {
             />
           </label>
 
-          {error && (
-            <p role="alert" className="text-sm text-red-400">
-              {error}
-            </p>
-          )}
+          {error && <ErrorBanner message="Não foi possível salvar a revisão." detail={error} />}
           <Button onClick={save} disabled={saving}>
             {saving ? "Salvando…" : "Salvar revisão"}
           </Button>
@@ -318,11 +319,7 @@ function LoginForm() {
               className="mt-1"
             />
           </label>
-          {error && (
-            <p role="alert" className="text-sm text-red-400">
-              {error}
-            </p>
-          )}
+          {error && <ErrorBanner message="Não foi possível concluir o acesso." detail={error} />}
           <Button
             type="submit"
             disabled={loading}
@@ -354,6 +351,7 @@ function ReviewDashboard({
     onSaved: () => void;
   }) => ReactElement;
 }) {
+  const { notify } = useNotification();
   const [bills, setBills] = useState<Bill[]>([]);
   const [reviews, setReviews] = useState<Map<string, BillReview>>(new Map());
   const [loading, setLoading] = useState(true);
@@ -392,15 +390,24 @@ function ReviewDashboard({
       await getSupabase().auth.signOut();
     } catch (err) {
       console.error("[admin] signOut failed:", err);
+      notify({
+        kind: "error",
+        persistence: "temporary",
+        message: "Não foi possível sair da área de revisão. Tente novamente.",
+      });
     }
   }
 
-  if (error)
+  if (error) {
     return (
-      <p role="alert" className="text-red-400">
-        {error}
-      </p>
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <ErrorBanner
+          message="Não foi possível carregar a área de revisão."
+          detail={error}
+        />
+      </div>
     );
+  }
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">

@@ -1,13 +1,18 @@
 import type { TramitacaoEvent } from "@/lib/api";
 import { formatDate } from "@/lib/utils/utils";
 import { RotateCcwClockIcon } from "lucide-react";
+import { ErrorBanner } from "./error-banner";
 
 interface TimelineProps {
   events: TramitacaoEvent[];
+  tramitacoesError: string | null;
 }
 
-export function Timeline({ events }: TimelineProps) {
-  if (events.length === 0) return null;
+export function Timeline({
+  events,
+  tramitacoesError,
+}: TimelineProps & { tramitacoesError: string | null }) {
+  if (events.length === 0 && !tramitacoesError) return null;
 
   const ordered = [...events].reverse();
 
@@ -31,50 +36,59 @@ export function Timeline({ events }: TimelineProps) {
         </div>
       </header>
 
-      <ol className="flex items-start overflow-x-auto p-5 scroll-smooth scrollbar-thumb-muted-foreground scrollbar-track-transparent scrollbar-thin ">
-        {ordered.map((event, index) => {
-          const isCurrent = index === 0;
-          const isLast = index === ordered.length - 1;
-          return (
-            <li
-              key={`${event.date}-${index}`}
-              className="min-w-[220px] flex-1 flex flex-col"
-            >
-              <div aria-hidden="true" className="flex items-center">
-                <span
-                  className={`h-2.5 w-2.5 shrink-0 rounded-full ${
-                    isCurrent
-                      ? "bg-foreground ring-4 ring-foreground/20"
-                      : "bg-muted-foreground/50"
-                  }`}
-                />
-                {!isLast && <span className="h-px flex-1 bg-border" />}
-              </div>
-              <div className="mt-3 pr-4">
-                {isCurrent && (
-                  <p className="text-sm font-bold uppercase tracking-wide text-white mb-1">
-                    Situação atual
+      <div className="p-5">
+        <ol className="flex items-start overflow-x-auto scroll-smooth scrollbar-thumb-muted-foreground scrollbar-track-transparent scrollbar-thin">
+          {ordered.map((event, index) => {
+            const isCurrent = index === 0;
+            const isLast = index === ordered.length - 1;
+            return (
+              <li
+                key={`${event.date}-${index}`}
+                className="min-w-[220px] flex-1 flex flex-col"
+              >
+                <div aria-hidden="true" className="flex items-center">
+                  <span
+                    className={`h-2.5 w-2.5 shrink-0 rounded-full ${
+                      isCurrent
+                        ? "bg-foreground ring-4 ring-foreground/20"
+                        : "bg-muted-foreground/50"
+                    }`}
+                  />
+                  {!isLast && <span className="h-px flex-1 bg-border" />}
+                </div>
+                <div className="mt-3 pr-4">
+                  {isCurrent && (
+                    <p className="text-sm font-bold uppercase tracking-wide text-white mb-1">
+                      Situação atual
+                    </p>
+                  )}
+                  <time
+                    dateTime={event.date}
+                    className="block text-xs font-bold uppercase tracking-wide text-muted-foreground"
+                  >
+                    {formatDate(event.date)}
+                  </time>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {event.description}
                   </p>
-                )}
-                <time
-                  dateTime={event.date}
-                  className="block text-xs font-bold uppercase tracking-wide text-muted-foreground"
-                >
-                  {formatDate(event.date)}
-                </time>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {event.description}
-                </p>
-                {event.orgao && (
-                  <p className="text-xs text-muted-foreground/70 mt-0.5">
-                    {event.orgao}
-                  </p>
-                )}
-              </div>
-            </li>
-          );
-        })}
-      </ol>
+                  {event.orgao && (
+                    <p className="text-xs text-muted-foreground/70 mt-0.5">
+                      {event.orgao}
+                    </p>
+                  )}
+                </div>
+              </li>
+            );
+          })}
+        </ol>
+
+        {tramitacoesError && (
+          <ErrorBanner
+            message="Não foi possível carregar o histórico de tramitação."
+            detail={tramitacoesError}
+          />
+        )}
+      </div>
     </section>
   );
 }

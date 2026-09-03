@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import TemasPage from "./page";
+import { NotificationToaster } from "@/components/notification-toaster";
 
 vi.mock("@/lib/api", () => ({
   getStats: vi.fn().mockResolvedValue({
@@ -9,8 +10,16 @@ vi.mock("@/lib/api", () => ({
 }));
 
 describe("TemasPage", () => {
+  function renderPage() {
+    return render(
+      <NotificationToaster>
+        <TemasPage />
+      </NotificationToaster>,
+    );
+  }
+
   it("renders every theme with its description", async () => {
-    render(<TemasPage />);
+    renderPage();
 
     expect(screen.getByText("Economia")).toBeInTheDocument();
     expect(
@@ -24,7 +33,7 @@ describe("TemasPage", () => {
   });
 
   it("links each theme to the bills filter", async () => {
-    render(<TemasPage />);
+    renderPage();
 
     const economia = screen.getByText("Economia");
     expect(economia.closest("a")).toHaveAttribute("href", "/bills?theme=40");
@@ -40,7 +49,7 @@ describe("TemasPage", () => {
   });
 
   it("shows the bill count for each theme", async () => {
-    render(<TemasPage />);
+    renderPage();
 
     expect(await screen.findByText("7 projetos")).toBeInTheDocument();
     expect(await screen.findByText("1 projeto")).toBeInTheDocument();

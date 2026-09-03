@@ -123,6 +123,24 @@ describe("BillDetail", () => {
     expect(screen.getByText("Votações")).toBeInTheDocument();
   });
 
+  it("shows persistent errors when timelines fail to load", async () => {
+    mockGetBill.mockResolvedValue(FAVORABLE_BILL);
+    mockGetTramitacoes.mockRejectedValue(new Error("Tramitation unavailable"));
+    mockGetVotacoes.mockRejectedValue(new Error("Voting unavailable"));
+    render(<BillDetail id="abc-123" />);
+
+    expect(
+      await screen.findByText(
+        "Não foi possível carregar o histórico de tramitação.",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Não foi possível carregar as votações deste projeto."),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Tramitation unavailable")).toBeInTheDocument();
+    expect(screen.getByText("Voting unavailable")).toBeInTheDocument();
+  });
+
   it("uses the reviewed score and classification", async () => {
     mockGetBill.mockResolvedValue(
       createBill({

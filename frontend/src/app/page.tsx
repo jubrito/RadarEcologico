@@ -35,23 +35,6 @@ export default function DashboardPage() {
     load();
   }, []);
 
-  // if (error) {
-  //   return (
-  //     <div className="max-w-6xl mx-auto px-4 py-12">
-  //       <section className="text-center">
-  //         <Header size="sm" />
-  //         <p className="text-muted-foreground mb-4 mt-6">
-  //           Backend não disponível. Inicie o servidor com{" "}
-  //           <code className="bg-muted px-1 rounded">
-  //             uvicorn backend.main:app --reload
-  //           </code>
-  //         </p>
-  //         <p className="text-sm text-muted-foreground">{error}</p>
-  //       </section>
-  //     </div>
-  //   );
-  // }
-
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       <Header size="lg" className="mb-10" />
@@ -108,7 +91,7 @@ export default function DashboardPage() {
 
           {stats && (
             <p className="text-sm text-muted-foreground mb-10">
-              {(stats.reviewed ?? 0)} de {stats.total_bills} PLs revisados por
+              {stats.reviewed ?? 0} de {stats.total_bills} PLs revisados por
               humanos
             </p>
           )}

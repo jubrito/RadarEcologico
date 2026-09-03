@@ -3,9 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  CLASSIFICATION,
-} from "@/lib/utils/classifications";
+import { CLASSIFICATION } from "@/lib/utils/classifications";
 import { STYLE_MAP } from "@/lib/style";
 import { useBill } from "@/lib/hooks/use-bill";
 import { useTramitacoes } from "@/lib/hooks/use-tramitacoes";
@@ -20,8 +18,16 @@ import { RiskAnalysis } from "@/components/bill-detail/risk-analysis";
 
 export function BillDetail({ id }: { id: string }) {
   const { bill, loading, error } = useBill(id);
-  const { events, loading: tramitacoesLoading } = useTramitacoes(id);
-  const { votacoes, loading: votacoesLoading } = useVotacoes(id);
+  const {
+    events,
+    loading: tramitacoesLoading,
+    error: tramitacoesError,
+  } = useTramitacoes(id);
+  const {
+    votacoes,
+    loading: votacoesLoading,
+    error: votacoesError,
+  } = useVotacoes(id);
 
   if (loading) {
     return (
@@ -86,10 +92,14 @@ export function BillDetail({ id }: { id: string }) {
             {tramitacoesLoading && (
               <Skeleton className="h-32 w-full rounded-xl" />
             )}
-            {!tramitacoesLoading && <Timeline events={events} />}
+            {!tramitacoesLoading && (
+              <Timeline events={events} tramitacoesError={tramitacoesError} />
+            )}
 
             {votacoesLoading && <Skeleton className="h-32 w-full rounded-xl" />}
-            {!votacoesLoading && <Votacoes votacoes={votacoes} />}
+            {!votacoesLoading && (
+              <Votacoes votacoes={votacoes} votacoesError={votacoesError} />
+            )}
           </div>
         </article>
       </div>

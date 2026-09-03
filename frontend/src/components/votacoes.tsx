@@ -6,6 +6,7 @@ import {
   LandmarkIcon,
   XCircleIcon,
 } from "lucide-react";
+import { ErrorBanner } from "./error-banner";
 
 function voteStyle(voto: string): string {
   if (voto === "Sim") return "text-foreground";
@@ -15,10 +16,11 @@ function voteStyle(voto: string): string {
 
 interface VotacoesProps {
   votacoes: VotacaoEvent[];
+  votacoesError: string | null;
 }
 
-export function Votacoes({ votacoes }: VotacoesProps) {
-  if (votacoes.length === 0) return null;
+export function Votacoes({ votacoes, votacoesError }: VotacoesProps) {
+  if (votacoes.length === 0 && !votacoesError) return null;
   const ordered = [...votacoes].reverse();
   return (
     <section
@@ -42,82 +44,90 @@ export function Votacoes({ votacoes }: VotacoesProps) {
         </span>
       </header>
 
-      <ul className="flex items-start overflow-x-auto p-4 pl-3 pb-5">
-        {ordered.map((votacao, index) => {
-          const isLast = index === votacoes.length - 1;
+      <div className="p-5">
+        <ul className="flex items-start overflow-x-auto scroll-smooth scrollbar-thumb-muted-foreground scrollbar-track-transparent scrollbar-thin pl-3">
+          {ordered.map((votacao, index) => {
+            const isLast = index === votacoes.length - 1;
 
-          return (
-            <li
-              key={`${votacao.date}-${index}`}
-              className="flex max-w-fit min-w-fit flex-1 flex-col"
-            >
-              <div aria-hidden="true" className="flex items-center">
-                <span
-                  className={`flex h-8 w-8 shrink-0 items-center justify-around rounded-full bg-background text-muted-foreground"}`}
-                >
-                  {votacao.aprovado && (
-                    <CheckCircle2Icon size={17} aria-hidden="true" />
-                  )}
-                  {!votacao.aprovado && (
-                    <XCircleIcon size={17} aria-hidden="true" />
-                  )}
-                </span>
-                <span className="text-sm">
-                  {votacao.aprovado ? "Aprovado" : "Rejeitado"}
-                </span>
-                {!isLast && <span className="h-px flex-1 bg-border" />}
-              </div>
-
-              <article
-                className="pr-10 ml-3"
-                aria-label={votacao.aprovado ? "Aprovado" : "Rejeitado"}
+            return (
+              <li
+                key={`${votacao.date}-${index}`}
+                className="flex max-w-fit min-w-fit flex-1 flex-col"
               >
-                <time
-                  dateTime={votacao.date}
-                  className="flex items-center gap-1 text-[11px] font-semibold text-muted-foreground"
-                >
-                  <CalendarDaysIcon size={13} aria-hidden="true" />
-                  {formatDate(votacao.date)}
-                </time>
-
-                {(votacao.orgao || votacao.description) && (
-                  <div className="mt-2 space-y-1">
-                    {votacao.orgao && (
-                      <p className="truncate text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-                        {votacao.orgao}
-                      </p>
-                    )}
-                    {votacao.description && (
-                      <p className="text-xs leading-relaxed text-foreground/80">
-                        {votacao.description}
-                      </p>
-                    )}
-                  </div>
-                )}
-
-                {votacao.orientacoes.length > 0 && (
-                  <ul
-                    className="mt-3 flex flex-wrap gap-1.5"
-                    aria-label="Orientação por partido"
+                <div aria-hidden="true" className="flex items-center">
+                  <span
+                    className={`flex h-8 w-8 shrink-0 items-center justify-around rounded-full bg-background text-muted-foreground"}`}
                   >
-                    {votacao.orientacoes.map((o) => (
-                      <li
-                        key={o.partido}
-                        className="rounded border border-border bg-background/50 px-2 py-0.5 text-[11px]"
-                      >
-                        <span className="font-bold">{o.partido}</span>
-                        <span className={`ml-1.5 ${voteStyle(o.voto)}`}>
-                          {o.voto}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </article>
-            </li>
-          );
-        })}
-      </ul>
+                    {votacao.aprovado && (
+                      <CheckCircle2Icon size={17} aria-hidden="true" />
+                    )}
+                    {!votacao.aprovado && (
+                      <XCircleIcon size={17} aria-hidden="true" />
+                    )}
+                  </span>
+                  <span className="text-sm">
+                    {votacao.aprovado ? "Aprovado" : "Rejeitado"}
+                  </span>
+                  {!isLast && <span className="h-px flex-1 bg-border" />}
+                </div>
+
+                <article
+                  className="pr-10 ml-3"
+                  aria-label={votacao.aprovado ? "Aprovado" : "Rejeitado"}
+                >
+                  <time
+                    dateTime={votacao.date}
+                    className="flex items-center gap-1 text-[11px] font-semibold text-muted-foreground"
+                  >
+                    <CalendarDaysIcon size={13} aria-hidden="true" />
+                    {formatDate(votacao.date)}
+                  </time>
+
+                  {(votacao.orgao || votacao.description) && (
+                    <div className="mt-2 space-y-1">
+                      {votacao.orgao && (
+                        <p className="truncate text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                          {votacao.orgao}
+                        </p>
+                      )}
+                      {votacao.description && (
+                        <p className="text-xs leading-relaxed text-foreground/80">
+                          {votacao.description}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {votacao.orientacoes.length > 0 && (
+                    <ul
+                      className="mt-3 flex flex-wrap gap-1.5"
+                      aria-label="Orientação por partido"
+                    >
+                      {votacao.orientacoes.map((o) => (
+                        <li
+                          key={o.partido}
+                          className="rounded border border-border bg-background/50 px-2 py-0.5 text-[11px]"
+                        >
+                          <span className="font-bold">{o.partido}</span>
+                          <span className={`ml-1.5 ${voteStyle(o.voto)}`}>
+                            {o.voto}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </article>
+              </li>
+            );
+          })}
+        </ul>
+        {votacoesError && (
+          <ErrorBanner
+            message="Não foi possível carregar as votações deste projeto."
+            detail={votacoesError}
+          />
+        )}
+      </div>
     </section>
   );
 }

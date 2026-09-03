@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import { BillsContent } from "./bills-content";
+import { NotificationToaster } from "@/components/notification-toaster";
 import { createBillsResponse, createStats } from "@/test-fixtures/bills";
 import "@testing-library/jest-dom/vitest";
 
@@ -21,36 +22,44 @@ beforeEach(() => {
 });
 
 describe("BillsContent", () => {
+  function renderPage() {
+    return render(
+      <NotificationToaster>
+        <BillsContent />
+      </NotificationToaster>,
+    );
+  }
+
   it("renders search input", () => {
-    render(<BillsContent />);
+    renderPage();
     expect(
       screen.getByPlaceholderText("Buscar PL (título, ementa, tipo, autor...)"),
     ).toBeInTheDocument();
   });
 
   it("renders classification filter", async () => {
-    render(<BillsContent />);
+    renderPage();
     await waitFor(() => {
       expect(screen.getByLabelText("Classificação")).toBeInTheDocument();
     });
   });
 
   it("renders source filter", async () => {
-    render(<BillsContent />);
+    renderPage();
     await waitFor(() => {
       expect(screen.getByLabelText("Fonte")).toBeInTheDocument();
     });
   });
 
   it("renders party filter", async () => {
-    render(<BillsContent />);
+    renderPage();
     await waitFor(() => {
       expect(screen.getByLabelText("Partido")).toBeInTheDocument();
     });
   });
 
   it("renders multiselect theme filter", async () => {
-    render(<BillsContent />);
+    renderPage();
     await waitFor(() => {
       expect(
         screen.getByRole("combobox", { name: "Tema" }),
@@ -59,7 +68,7 @@ describe("BillsContent", () => {
   });
 
   it("renders bill cards after load", async () => {
-    render(<BillsContent />);
+    renderPage();
     await waitFor(() => {
       expect(screen.getByText(/combate ao desmatamento/)).toBeInTheDocument();
     });
@@ -71,7 +80,7 @@ describe("BillsContent", () => {
       createBillsResponse({ items: [], total: 50 }),
     );
 
-    render(<BillsContent />);
+    renderPage();
     await waitFor(() => {
       expect(screen.getByText(/Página 1 de 3/)).toBeInTheDocument();
     });
@@ -83,7 +92,7 @@ describe("BillsContent", () => {
       createBillsResponse({ items: [], total: 0 }),
     );
 
-    render(<BillsContent />);
+    renderPage();
     await waitFor(() => {
       expect(
         screen.getByText("Nenhum projeto encontrado."),
@@ -94,7 +103,7 @@ describe("BillsContent", () => {
   it("shows an error banner when fetching bills fails", async () => {
     mockGetBills.mockRejectedValue(new Error("Network error"));
 
-    render(<BillsContent />);
+    renderPage();
     await waitFor(() => {
       expect(
         screen.getByText(

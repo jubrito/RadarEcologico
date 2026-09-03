@@ -4,15 +4,24 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { THEME_DESCRIPTIONS, sortedThemeEntries } from "@/lib/themes";
 import { getStats, type StatsResponse } from "@/lib/api";
+import { useNotification } from "@/components/notification-toaster";
 
 export default function TemasPage() {
   const [stats, setStats] = useState<StatsResponse | null>(null);
+  const { notify } = useNotification();
 
   useEffect(() => {
-    getStats().then(setStats).catch((error) => {
-      console.error("Erro ao carregar contagens dos temas:", error);
-    });
-  }, []);
+    getStats()
+      .then(setStats)
+      .catch((error) => {
+        console.error("Erro ao carregar contagens dos temas:", error);
+        notify({
+          kind: "error",
+          persistence: "temporary",
+          message: "Não foi possível carregar as contagens dos temas.",
+        });
+      });
+  }, [notify]);
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
