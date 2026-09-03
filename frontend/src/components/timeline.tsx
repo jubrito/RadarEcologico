@@ -1,5 +1,6 @@
 import type { TramitacaoEvent } from "@/lib/api";
 import { formatDate } from "@/lib/utils/utils";
+import { RotateCcwClockIcon } from "lucide-react";
 
 interface TimelineProps {
   events: TramitacaoEvent[];
@@ -13,10 +14,24 @@ export function Timeline({ events }: TimelineProps) {
   return (
     <section
       aria-label="Linha do tempo da tramitação"
-      className="rounded-lg border border-border p-5"
+      className="rounded-lg border border-border"
     >
-      <h2 className="text-xl font-bold mb-3">Tramitação</h2>
-      <ol className="flex items-start overflow-x-auto pb-4">
+      <header className="flex items-center justify-between gap-4 border-b border-border bg-card px-4 py-3">
+        <div className="flex items-center gap-3">
+          <span className="flex h-10 w-10 items-center justify-center rounded-md bg-foreground/10 text-foreground">
+            <RotateCcwClockIcon size={16} aria-hidden="true" />
+          </span>
+          <div>
+            <h2 className="text-base font-bold leading-tight">Tramitação</h2>
+            <p className="mt-0.5 text-[11px] text-muted-foreground">
+              Caminho que a proposta percorre dentro do poder legislativo até
+              virar lei ou ser arquivada.
+            </p>
+          </div>
+        </div>
+      </header>
+
+      <ol className="flex items-start overflow-x-auto p-5 scroll-smooth scrollbar-thumb-muted-foreground scrollbar-track-transparent scrollbar-thin ">
         {ordered.map((event, index) => {
           const isCurrent = index === 0;
           const isLast = index === ordered.length - 1;
