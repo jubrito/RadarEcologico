@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CLASSIFICATION } from "@/lib/utils/classifications";
 import { STYLE_MAP } from "@/lib/style";
 import { useBill } from "@/lib/hooks/use-bill";
 import { useTramitacoes } from "@/lib/hooks/use-tramitacoes";
@@ -15,6 +14,7 @@ import { Votacoes } from "@/components/votacoes";
 import { BillHeader } from "@/components/bill-detail/bill-header";
 import { BillEmenta } from "@/components/bill-detail/bill-ementa";
 import { RiskAnalysis } from "@/components/bill-detail/risk-analysis";
+import { deriveBillClassification } from "@/lib/bill-helpers";
 
 export function BillDetail({ id }: { id: string }) {
   const { bill, loading, error } = useBill(id);
@@ -57,10 +57,7 @@ export function BillDetail({ id }: { id: string }) {
     );
   }
 
-  const classification =
-    bill.reviewed && bill.reviewed_classification
-      ? bill.reviewed_classification
-      : (bill.classification ?? CLASSIFICATION.unknown);
+  const classification = deriveBillClassification(bill);
   const style = STYLE_MAP[classification];
 
   return (

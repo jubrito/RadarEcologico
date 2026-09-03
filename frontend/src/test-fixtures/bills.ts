@@ -63,4 +63,8 @@ export const UNFAVORABLE_BILL = createBill({
   final_score: 0.85,
   keyword_score: 0.85,
 });
-export const UNKNOWN_BILL = createBill({ classification: "unknown" });
+export const UNKNOWN_BILL = createBill({
+  classification: "unknown",
+  final_score: null,
+  keyword_score: null,
+});

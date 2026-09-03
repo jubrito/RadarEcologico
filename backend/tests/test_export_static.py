@@ -112,6 +112,7 @@ def test_serialize_bill_with_review():
         "reviewer_score": 50,
         "reviewed_by": "ana@example.com",
         "reviewed_at": "2026-08-28T00:00:00+00:00",
+        "not_related": True,
     }
     result = serialize_bill(_bill(), review)
     assert result["reviewed"] is True
@@ -119,6 +120,7 @@ def test_serialize_bill_with_review():
     assert result["reviewed_score"] == 50
     assert result["reviewed_by"] == "ana@example.com"
     assert result["reviewed_at"] == "2026-08-28T00:00:00+00:00"
+    assert result["reviewed_not_related"] is True
 
 
 def test_serialize_bill_without_review():

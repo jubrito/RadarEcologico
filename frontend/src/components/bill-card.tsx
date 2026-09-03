@@ -3,12 +3,10 @@ import { Bill } from "@/lib/api";
 import { mergeStyles, formatSource, formatDate } from "@/lib/utils/utils";
 import { STYLE_MAP } from "@/lib/style";
 import { themeNamesFromIds } from "@/lib/themes";
+import { deriveBillClassification } from "@/lib/bill-helpers";
 
 export function BillCard({ bill }: { bill: Bill }) {
-  const classification =
-    bill.reviewed && bill.reviewed_classification
-      ? bill.reviewed_classification
-      : bill.classification;
+  const classification = deriveBillClassification(bill);
   const style = STYLE_MAP[classification];
   const themes = themeNamesFromIds(bill.theme_ids);
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { mergeStyles, getScoreColor, formatDate, formatSource } from "./utils";
+import { mergeStyles, formatDate, formatSource } from "./utils";
 
 describe("mergeStyles", () => {
   it("merges class names", () => {
@@ -16,26 +16,6 @@ describe("mergeStyles", () => {
 
   it("handles empty input", () => {
     expect(mergeStyles()).toBe("");
-  });
-});
-
-describe("getScoreColor", () => {
-  it("returns emerald for favorable scores", () => {
-    expect(getScoreColor(0)).toContain("emerald");
-    expect(getScoreColor(0.1)).toContain("emerald");
-    expect(getScoreColor(0.29)).toContain("emerald");
-  });
-
-  it("returns red for unfavorable scores", () => {
-    expect(getScoreColor(0.6)).toContain("red");
-    expect(getScoreColor(0.8)).toContain("red");
-    expect(getScoreColor(1)).toContain("red");
-  });
-
-  it("returns amber for needs_review scores", () => {
-    expect(getScoreColor(0.3)).toContain("amber");
-    expect(getScoreColor(0.45)).toContain("amber");
-    expect(getScoreColor(0.59)).toContain("amber");
   });
 });
 

@@ -34,6 +34,7 @@ export interface Bill {
   reviewed_score?: number | null;
   reviewed_by?: string | null;
   reviewed_at?: string | null;
+  reviewed_not_related?: boolean | null;
 }
 
 export interface BillsResponse {

@@ -29,6 +29,7 @@ export function RiskAnalysis({
         classification={classification}
         score={badgeScore}
         reviewed={bill.reviewed}
+        notRelated={bill.reviewed_not_related ?? false}
       />
       {pct != null && (
         <div aria-hidden="true">

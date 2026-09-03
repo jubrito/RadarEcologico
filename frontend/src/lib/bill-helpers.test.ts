@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { parseAuthor } from "./bill-helpers";
+import { parseAuthor, deriveBillClassification } from "./bill-helpers";
 import type { Bill } from "./api";
 
 function bill(overrides: Partial<Bill> = {}): Bill {
@@ -52,5 +52,47 @@ describe("parseAuthor", () => {
     expect(result.name).toBe("Comissão de Meio Ambiente");
     expect(result.party).toBeNull();
     expect(result.state).toBeNull();
+  });
+});
+
+describe("deriveBillClassification", () => {
+  it("derives from score, ignoring a stale stored classification", () => {
+    const result = deriveBillClassification(
+      bill({ classification: "needs_review", final_score: 0.31 }),
+    );
+    expect(result).toBe("favorable");
+  });
+
+  it("uses the reviewer roll-up for reviewed bills", () => {
+    expect(
+      deriveBillClassification(
+        bill({ reviewed: true, reviewed_score: 45, final_score: 0.12 }),
+      ),
+    ).toBe("neutral");
+    expect(
+      deriveBillClassification(
+        bill({ reviewed: true, reviewed_score: 70, final_score: 0.12 }),
+      ),
+    ).toBe("unfavorable");
+  });
+
+  it("maps the not-related flag to neutral", () => {
+    expect(
+      deriveBillClassification(
+        bill({
+          reviewed: true,
+          reviewed_score: 10,
+          reviewed_not_related: true,
+        }),
+      ),
+    ).toBe("neutral");
+  });
+
+  it("falls back to the stored classification when there is no score", () => {
+    expect(
+      deriveBillClassification(
+        bill({ classification: "unknown", final_score: null }),
+      ),
+    ).toBe("unknown");
   });
 });

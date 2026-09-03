@@ -1,16 +1,9 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { CLASSIFICATION_THRESHOLDS, SOURCE_LABELS } from "../types";
+import { SOURCE_LABELS } from "../types";
 
 export function mergeStyles(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
-}
-
-export function getScoreColor(score: number): string {
-  if (score < CLASSIFICATION_THRESHOLDS.FAVORABLE_MAX)
-    return "text-emerald-500";
-  if (score >= CLASSIFICATION_THRESHOLDS.UNFAVORABLE_MIN) return "text-red-500";
-  return "text-amber-500";
 }
 
 export function formatDate(dateStr?: string | null): string {

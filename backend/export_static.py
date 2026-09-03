@@ -78,6 +78,7 @@ def serialize_bill(bill: Bill, review: dict | None = None) -> dict:
         data["reviewed_score"] = review.get("reviewer_score")
         data["reviewed_by"] = review.get("reviewed_by")
         data["reviewed_at"] = review.get("reviewed_at")
+        data["reviewed_not_related"] = review.get("not_related")
     else:
         data["reviewed"] = False
     return data
