@@ -16,8 +16,8 @@ export function BillEmenta({
 
   return (
     <section aria-labelledby="ementa-heading">
-      <div className="flex items-center gap-3">
-        <h2 id="ementa-heading" className="mb-3 text-xl font-bold">
+      <div className="mb-2 flex items-center gap-3">
+        <h2 id="ementa-heading" className="text-xl font-bold">
           Ementa
         </h2>
         <Badge className={style.badge}>{style.label}</Badge>
